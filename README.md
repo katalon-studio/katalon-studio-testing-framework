@@ -1,5 +1,5 @@
 Katalon Studio's Built-In Keywords
-=========================
+==================================
 
 ## Contributing Guidelines
 
