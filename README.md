@@ -1,4 +1,4 @@
-Katalon Built-In Keywords
+Katalon Studio's Built-In Keywords
 =========================
 
 ## Contributing Guidelines
