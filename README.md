@@ -20,6 +20,8 @@ You can use this project for two purposes:
 
 ## How to contribute a new Keywords
 
+This project requires Katalon Studio 5.8.6.
+
 1. Fork this repository.
 2. Open this project with Katalon Studio.
 3. Add a new Keyword with at least one Test Case to verify.
