@@ -20,14 +20,15 @@ You can use this project for two purposes:
 
 ## How to contribute a new Keywords
 
-1. Fork this repository
-2. Open this project with Katalon Studio
+1. Fork this repository.
+2. Open this project with Katalon Studio.
 3. Add a new Keyword with at least one Test Case to verify.
+4. Create a pull request.
 
 The following files demonstrate how to contribute a new keyword:
-* `Include/scripts/groovy/com/kms/katalon/core/webui/keyword/WebUiBuiltInKeywords.groovy`
-* `Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy`
-* `Test Cases/HelloWorldFromWebUiTestCase`
+* [Include/scripts/groovy/com/kms/katalon/core/webui/keyword/WebUiBuiltInKeywords.groovy](Include/scripts/groovy/com/kms/katalon/core/webui/keyword/WebUiBuiltInKeywords.groovy).
+* [Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy](Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy).
+* Test Cases/HelloWorldFromWebUiTestCase (opened using Katalon Studio).
 
 ## Troubleshooting
 
