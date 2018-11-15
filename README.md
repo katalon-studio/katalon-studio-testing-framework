@@ -9,12 +9,12 @@ You can use this project for two purposes:
 
 ## What can be contributed
 
-**For existing Keywords**
+### For existing Keywords
 * Enhance or fix bugs.
 * Write better documents or samples at https://docs.katalon.com.
 * Write Test Cases for existing Keywords.
 
-**For new Keywords**
+### For new Keywords
 * Develop new Keywords, including ones for working with a particular framework such as React or Angular.
 * Write Test Cases for these new Keywords.
 
