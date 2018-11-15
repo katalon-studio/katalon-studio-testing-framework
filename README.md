@@ -35,4 +35,5 @@ The following files demonstrate how to contribute a new keyword:
 ## License
 
 Copyright (c) Katalon LLC. All rights reserved.
+
 Licensed under the LICENSE AGREEMENT FOR KATALON AUTOMATION FRAMEWORK.
