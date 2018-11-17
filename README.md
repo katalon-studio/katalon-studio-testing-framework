@@ -1,5 +1,5 @@
-Katalon Studio's Built-in Keywords
-==================================
+Katalon Studio's Open Source Built-in Keywords
+==============================================
 
 ## What is it for
 
