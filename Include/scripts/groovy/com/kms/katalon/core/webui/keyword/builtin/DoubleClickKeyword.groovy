@@ -75,7 +75,7 @@ public class DoubleClickKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_DOUBLE_CLICK_ON_OBJ, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_DOUBLE_CLICK_ON_OBJ, to.getObjectId()))
                 Actions action = new Actions(DriverFactory.getWebDriver())
                 action.doubleClick(webElement).build().perform()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_IS_DOUBLE_CLICKED_ON, to.getObjectId()))

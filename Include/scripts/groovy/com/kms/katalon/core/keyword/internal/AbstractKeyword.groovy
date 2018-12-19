@@ -10,7 +10,7 @@ import com.kms.katalon.core.testobject.TestObject
 
 public abstract class AbstractKeyword implements IKeyword {
 
-    protected static KeywordLogger logger = KeywordLogger.getInstance()
+    protected final KeywordLogger logger = KeywordLogger.getInstance(this.getClass());
 
     protected TestObject getTestObject(Object param) {
         if (param instanceof TestObject) {

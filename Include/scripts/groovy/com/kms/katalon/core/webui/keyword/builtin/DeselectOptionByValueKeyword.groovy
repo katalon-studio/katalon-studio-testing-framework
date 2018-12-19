@@ -79,7 +79,7 @@ public class DeselectOptionByValueKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_VAL_PARAM)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_VAL_PARAM)
                 if (value == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_VAL_IS_NULL)
                 }

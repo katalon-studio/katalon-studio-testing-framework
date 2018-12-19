@@ -75,7 +75,7 @@ public class RightClickKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_RIGHT_CLICKING_ON_OBJ, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_RIGHT_CLICKING_ON_OBJ, to.getObjectId()))
                 Actions action = new Actions(DriverFactory.getWebDriver())
                 action.contextClick(webElement).build().perform()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_IS_RIGHT_CLICKED_ON, to.getObjectId()))

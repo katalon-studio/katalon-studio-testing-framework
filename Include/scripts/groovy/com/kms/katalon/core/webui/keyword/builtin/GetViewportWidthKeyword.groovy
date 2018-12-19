@@ -71,7 +71,7 @@ public class GetViewportWidthKeyword extends WebUIAbstractKeyword {
         return WebUIKeywordMain.runKeywordAndReturnInt({
             int viewportWidth = 0
             viewportWidth = WebUiCommonHelper.getViewportWidth(DriverFactory.getWebDriver())
-            KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_WIDTH_X, viewportWidth.toString()))
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_WIDTH_X, viewportWidth.toString()))
             return viewportWidth
         }, flowControl, false, StringConstants.KW_MSG_CANNOT_GET_VIEWPORT_WIDTH)
     }

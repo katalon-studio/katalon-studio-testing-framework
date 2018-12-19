@@ -75,7 +75,7 @@ public class FocusKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement element = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_FOCUSING_ON_OBJ, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_FOCUSING_ON_OBJ, to.getObjectId()))
                 if ("input".equals(element.getTagName())) {
                     element.sendKeys("")
                 } else {

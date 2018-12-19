@@ -80,7 +80,7 @@ public class VerifyElementNotPresentKeyword extends WebUIAbstractKeyword {
                 final By locator = WebUiCommonHelper.buildLocator(to)
                 try {
                     if (locator != null) {
-                        logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_FINDING_WEB_ELEMENT_W_ID, to.getObjectId(), locator.toString(), timeOut))
+                        logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_FINDING_WEB_ELEMENT_W_ID, to.getObjectId(), locator.toString(), timeOut))
                         elementNotFound = new FluentWait<WebDriver>(DriverFactory.getWebDriver())
                                 .pollingEvery(500, TimeUnit.MILLISECONDS).withTimeout(timeOut, TimeUnit.SECONDS)
                                 .until(new Function<WebDriver, Boolean>() {

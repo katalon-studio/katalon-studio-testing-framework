@@ -79,7 +79,7 @@ public class VerifyOptionNotPresentByLabelKeyword extends WebUIAbstractKeyword {
             int numPresent = 0
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_LBL)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_LBL)
                 if (label == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_LBL_CANNOT_BE_NULL)
                 }

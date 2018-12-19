@@ -90,7 +90,7 @@ public class GetAllLinksOnCurrentPageKeyword extends WebUIAbstractKeyword {
         int timeOut = RunConfiguration.getTimeOut()
         final By locator = By.xpath("//*[@href] | //*[@src] | //*[@cite] | //object[@data]")
         try {
-            logger.logInfo(CoreWebuiMessageConstants.KW_LOG_INFO_FINDING_ALL_LINKS_ON_PAGE)
+            logger.logDebug(CoreWebuiMessageConstants.KW_LOG_INFO_FINDING_ALL_LINKS_ON_PAGE)
             WebDriver webDriver = DriverFactory.getWebDriver();
             float timeCount = 0;
             long miliseconds = System.currentTimeMillis();
@@ -98,7 +98,7 @@ public class GetAllLinksOnCurrentPageKeyword extends WebUIAbstractKeyword {
                 try {
                     List<WebElement> webElements = webDriver.findElements(locator);
                     if (webElements != null && webElements.size() > 0) {
-                        logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_FOUND_X_ELEMENTS, webElements.size()))
+                        logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_FOUND_X_ELEMENTS, webElements.size()))
                         return webElements;
                     }
                 } catch (NoSuchElementException e) {

@@ -75,7 +75,7 @@ public class UploadFileKeyword extends WebUIAbstractKeyword {
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_UPLOADING_FILE_X_TO_OBJ_Y, [fileAbsolutePath, to.getObjectId()] as Object[]))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_UPLOADING_FILE_X_TO_OBJ_Y, [fileAbsolutePath, to.getObjectId()] as Object[]))
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                 webElement.sendKeys(fileAbsolutePath)
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_FILE_X_SENT_TO_OBJ_Y, [fileAbsolutePath, to.getObjectId()] as Object[]))

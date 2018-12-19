@@ -47,7 +47,7 @@ public class ClickOffsetKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_CLICKING_ON_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
+                logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_CLICKING_ON_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
                 Actions builder = new Actions(DriverFactory.getWebDriver())
                 builder.moveToElement(webElement, offsetX, offsetY).click().perform()
                 logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_PASSED_OBJ_CLICKED_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))

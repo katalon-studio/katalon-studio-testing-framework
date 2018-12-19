@@ -71,15 +71,15 @@ public class ScrollToPositionKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void scrollToPosition(int x, int y, FailureHandling flowControl) {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.COMM_LOG_INFO_CHECKING_X)
+            logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_X)
             if (x < 0) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_X_MUST_BE_ABOVE_ZERO)
             }
-            logger.logInfo(StringConstants.COMM_LOG_INFO_CHECKING_Y)
+            logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_Y)
             if (y < 0) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_Y_MUST_BE_ABOVE_ZERO)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SCROLLING_TO_POSITION_X_Y, [x.toString(), y.toString()] as Object[]))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SCROLLING_TO_POSITION_X_Y, [x.toString(), y.toString()] as Object[]))
             ((JavascriptExecutor) DriverFactory.getWebDriver()).executeScript("window.scrollTo(" + x.toString() + ", " + y.toString() + ");")
             logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_SCROLL_TO_POSITION_X_Y, [x.toString(), y.toString()] as Object[]))
         }, flowControl, true, MessageFormat.format(StringConstants.KW_MSG_CANNOT_SCROLL_TO_POSITION_X_Y, [x.toString(), y.toString()] as Object[]))

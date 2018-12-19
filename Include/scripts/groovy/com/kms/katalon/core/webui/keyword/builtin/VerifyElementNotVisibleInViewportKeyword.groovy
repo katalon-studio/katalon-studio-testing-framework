@@ -76,7 +76,7 @@ public class VerifyElementNotVisibleInViewportKeyword extends WebUIAbstractKeywo
                     WebUIKeywordMain.stepFailed(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_NOT_VISIBLE_IN_VIEWPORT, to.getObjectId()), flowControl, null, true)
                     return false
                 }  else {
-                    KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_NOT_VISIBLE_IN_VIEWPORT, to.getObjectId()))
+                    logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_NOT_VISIBLE_IN_VIEWPORT, to.getObjectId()))
                     return true
                 }
             } catch (WebElementNotFoundException ex) {

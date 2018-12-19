@@ -77,7 +77,7 @@ public class WaitForImagePresentKeyword extends WebUIAbstractKeyword {
             if (imagePath == null || imagePath.equals("")) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_NO_IMAGE_FILE_PROP_IN_OBJ)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_WAITING_FOR_IMG_X_PRESENT, imagePath))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_WAITING_FOR_IMG_X_PRESENT, imagePath))
             // Relative path?
             if (to.getUseRelativeImagePath()) {
                 String currentDirFilePath = new File(RunConfiguration.getProjectDir()).getAbsolutePath()

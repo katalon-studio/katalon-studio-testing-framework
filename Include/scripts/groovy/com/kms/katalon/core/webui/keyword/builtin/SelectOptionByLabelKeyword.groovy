@@ -78,7 +78,7 @@ public class SelectOptionByLabelKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_LBL_PARAM)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_LBL_PARAM)
                 if (labelText == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_LBL_IS_NULL)
                 }

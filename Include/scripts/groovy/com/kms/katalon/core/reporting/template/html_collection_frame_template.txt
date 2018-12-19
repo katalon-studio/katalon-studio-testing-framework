@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>REPORT_TITLE</title>
+    <style media="all" type="text/css">
+    html,body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:.8em;color:#000;background:#fff;margin:0;padding:0;height:100%;overflow:hidden}
+    .flex-row-container{display:flex;flex-direction:row;justify-content:space-between;align-items:stretch;align-content:center}
+    .fix-top{position:fixed;top:0;right:0;left:0;z-index:9999}
+    .hidden-content{display:none;color:#000;text-align:center}
+    .tsc-header{height:60px;background-color:#333;padding:0 15px}
+    .tsc-header .title{color:#fff;margin:15px;font-weight:400;align-self:center}
+    #ts-selection{margin:15px 15px 15px 0;padding:5px;border:1px solid #fafafa;align-self:center}
+    .tsc-header a{cursor:pointer;align-self:center}
+    .tsc-header img{vertical-align:middle;width:24px;height:24px}
+    #ts-container{border:0;margin:0;width:100%;height:100%;position:absolute;left:0;right:0;bottom:0}
+    </style>
+    <style media="print" type="text/css">
+    .no-print,.no-print *{display:none!important}
+    .hidden-content{display:block}
+    </style>
+</head>
+
+<body>
+    <header name="tsc-header" class="tsc-header fix-top flex-row-container no-print">
+        <div class="flex-row-container">
+            <a class="view" href="index.html" title="List View"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjY0cHgiIGhlaWdodD0iNjRweCIgdmlld0JveD0iMCAwIDM1IDM1IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzNSAzNTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0wLDB2MzVoMzVWMEgweiBNMzMsMzNIMlYyaDMxVjMzeiIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjEwIiB5PSI1IiB3aWR0aD0iMjAiIGhlaWdodD0iMi44MjQiIGZpbGw9IiNGRkZGRkYiLz4KCQk8cmVjdCB4PSIxMCIgeT0iOS40MzgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjgxOSIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjEwIiB5PSIxMy44NjkiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjgyNCIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjEwIiB5PSIxOC4zMDciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjgxOCIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjEwIiB5PSIyMi43MzkiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyLjgyOSIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjEwIiB5PSIyNy4xOCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIuODIiIGZpbGw9IiNGRkZGRkYiLz4KCQk8cmVjdCB4PSI1IiB5PSI1IiB3aWR0aD0iMi44MjQiIGhlaWdodD0iMi44MjQiIGZpbGw9IiNGRkZGRkYiLz4KCQk8cmVjdCB4PSI1IiB5PSI5LjQzNiIgd2lkdGg9IjIuODI0IiBoZWlnaHQ9IjIuODIzIiBmaWxsPSIjRkZGRkZGIi8+CgkJPHJlY3QgeD0iNSIgeT0iMTMuODciIHdpZHRoPSIyLjgyNCIgaGVpZ2h0PSIyLjgyMyIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjUiIHk9IjE4LjMwNSIgd2lkdGg9IjIuODI0IiBoZWlnaHQ9IjIuODI0IiBmaWxsPSIjRkZGRkZGIi8+CgkJPHJlY3QgeD0iNSIgeT0iMjIuNzQiIHdpZHRoPSIyLjgyNCIgaGVpZ2h0PSIyLjgyNCIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxyZWN0IHg9IjUiIHk9IjI3LjE3NiIgd2lkdGg9IjIuODI0IiBoZWlnaHQ9IjIuODI0IiBmaWxsPSIjRkZGRkZGIi8+Cgk8L2c+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" /></a>
+            <h1 class="title">REPORT_TITLE</h1>
+        </div>
+        <div class="ts-navigation">
+            <select id="ts-selection" name="ts-selection"></select>
+            <a id="ts-open" href="#" target="_blank" title="Open report in new window"><img src="data:image/svg+xml;base64,CjxzdmcgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDEwMDAgMTAwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTAwMCAxMDAwIiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPG1ldGFkYXRhPiBTdmcgVmVjdG9yIEljb25zIDogaHR0cDovL3d3dy5vbmxpbmV3ZWJmb250cy5jb20vaWNvbiA8L21ldGFkYXRhPgogIDxnPjxwYXRoIGQ9Ik0xMCwxOTMuOHY3MDkuNGMwLDY3LjQsMjgsODYuOSw5NS40LDg2LjloNzAwLjlWODY3LjVINzQ1djYxLjNINzEuM3YtNjc0bDYxLjMsMC4ydi02MS4zSDEweiBNOTI4LjgsNzQ1SDI1NVY3MS4zaDE4My44VjEwSDI3MS4yYy01Mi40LDAtNzcuNSwyNS4xLTc3LjUsNzcuNXY2NDguNWMwLDUyLjQsMjUuMSw3MC40LDc3LjUsNzAuNGg2NDAuNmM1Mi40LDAsNzguMi0xOCw3OC4yLTcwLjRWNTYxLjNoLTYxLjN2MTE0LjJWNzQ1eiBNOTkwLDEwdjQyOC44aC02MS4zVjEyMC4zbC00NDEsNDQxbC00OS00OWw0NDEuMS00NDFINTYxLjNWMTBIOTkweiIgc3R5bGU9ImZpbGw6I0ZGRkZGRiI+PC9wYXRoPjwvZz48L3N2Zz4KICA=" width="24" height="24"></a>
+        </div>
+    </header>
+    <h1 class="hidden-content">REPORT_TITLE</h1>
+    <p class="hidden-content">This report view does not support printing. Please use List View report.</p>
+    <iframe id="ts-container" class="no-print" src="#"></iframe>
+    <script type="text/javascript">
+    var tsList = JSON.parse('TEST_SUITE_REPORT_LIST');
+
+    function ready(fn) {
+        if (document.readyState != 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    ready(function() {
+        var tsContainer = document.getElementById('ts-container');
+        var tsSelection = document.getElementById('ts-selection');
+        var tsOpen = document.getElementById('ts-open');
+
+        tsList.forEach(function(item, index) {
+            var option = document.createElement('option');
+            option.value = item.report;
+            option.innerHTML = item.report_location;
+            tsSelection.appendChild(option);
+            if (index === 0) {
+                tsContainer.setAttribute("src", option.value);
+                tsOpen.setAttribute("href", option.value);
+            }
+        });
+        tsSelection.selectedIndex = 0;
+
+        tsSelection.addEventListener('change', function(event) {
+            var tsUrl = event.target.value;
+            tsContainer.setAttribute("src", tsUrl);
+            tsOpen.setAttribute("href", tsUrl);
+        });
+    });
+    </script>
+</body>
+
+</html>

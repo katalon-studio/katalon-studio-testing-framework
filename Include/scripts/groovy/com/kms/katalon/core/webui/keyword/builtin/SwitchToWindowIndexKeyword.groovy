@@ -70,11 +70,11 @@ public class SwitchToWindowIndexKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void switchToWindowIndex(Object index, FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_INDEX)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_INDEX)
             if (index == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_INDEX_IS_NULL)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_WITCHING_WINDOW_W_IDX_X, index))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_WITCHING_WINDOW_W_IDX_X, index))
             boolean switched = WebUiCommonHelper.switchToWindowUsingIndex(DriverFactory.getWebDriver(),
                     Integer.parseInt(String.valueOf(index)))
             if (switched) {

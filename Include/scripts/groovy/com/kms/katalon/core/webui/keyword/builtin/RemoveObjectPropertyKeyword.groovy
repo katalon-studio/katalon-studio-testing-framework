@@ -71,19 +71,19 @@ public class RemoveObjectPropertyKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public TestObject removeObjectProperty(TestObject testObject, String propertyName, FailureHandling flowControl) {
         Object result = WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOF_INFO_CHK_TO)
+            logger.logDebug(StringConstants.KW_LOF_INFO_CHK_TO)
             if (testObject == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_TO_IS_NULL)
             }
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHK_PROP_NAME)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHK_PROP_NAME)
             if (propertyName == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_PROP_NAME_IS_NULL)
             }
             TestObjectProperty property = testObject.findProperty(propertyName)
             if (property == null) {
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_NOT_FOUND_PROP_DO_NOTHING, propertyName, testObject.getObjectId(), propertyName))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_NOT_FOUND_PROP_DO_NOTHING, propertyName, testObject.getObjectId(), propertyName))
             } else {
-                logger.logInfo(MessageFormat.format(StringConstants.KW_MSG_REMOVE_OBJ_PROP_X_OF_OBJ_Y, [testObject.getObjectId(), propertyName] as Object[]))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_MSG_REMOVE_OBJ_PROP_X_OF_OBJ_Y, [testObject.getObjectId(), propertyName] as Object[]))
                 testObject.getProperties().remove(property)
             }
             logger.logPassed(StringConstants.KW_MSG_REMOVE_OBJ_PROP_SUCESSFULLY)

@@ -70,11 +70,11 @@ public class CloseWindowTitleKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void closeWindowTitle(String title, FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_TITLE)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_TITLE)
             if (title == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_TITLE_IS_NULL)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CLOSING_WINDOW_W_TITLE_X, title))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CLOSING_WINDOW_W_TITLE_X, title))
             boolean switched = WebUiCommonHelper.closeWindowUsingTitle(DriverFactory.getWebDriver(), title)
             if (switched) {
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CLOSED_WINDOW_W_TITLE_X, title))

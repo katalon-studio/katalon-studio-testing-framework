@@ -76,7 +76,7 @@ public class GetTextKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement element = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_GETTING_OBJ_TXT, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_GETTING_OBJ_TXT, to.getObjectId()))
                 text = element.getText()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_TXT_IS, [to.getObjectId(), text] as Object[]))
                 return text

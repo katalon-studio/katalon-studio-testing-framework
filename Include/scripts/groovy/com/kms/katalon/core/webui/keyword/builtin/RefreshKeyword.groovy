@@ -69,7 +69,7 @@ public class RefreshKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void refresh(FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_REFRESHING)
+            logger.logDebug(StringConstants.KW_LOG_INFO_REFRESHING)
             DriverFactory.getWebDriver().navigate().refresh()
             logger.logPassed(StringConstants.KW_LOG_PASSED_REFRESH)
         }, flowControl, true, StringConstants.KW_MSG_CANNOT_REFRESH_PAGE)

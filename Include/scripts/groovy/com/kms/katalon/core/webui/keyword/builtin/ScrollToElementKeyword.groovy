@@ -77,7 +77,7 @@ public class ScrollToElementKeyword extends WebUIAbstractKeyword {
                 timeOut = WebUiCommonHelper.checkTimeout(timeOut)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SCROLLING_TO_OBJ_X, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SCROLLING_TO_OBJ_X, to.getObjectId()))
                 ((JavascriptExecutor) DriverFactory.getWebDriver()).executeScript("arguments[0].scrollIntoView();", webElement)
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_SCROLLING_TO_OBJ_X, to.getObjectId()))
             } finally {

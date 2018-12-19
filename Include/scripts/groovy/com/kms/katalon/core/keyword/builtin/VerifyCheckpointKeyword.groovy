@@ -30,8 +30,6 @@ import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCase
 import com.kms.katalon.core.testcase.TestCaseBinding
 
-import java.text.MessageFormat
-
 import com.kms.katalon.core.configuration.RunConfiguration
 import com.kms.katalon.core.testdata.TestData
 
@@ -56,11 +54,11 @@ public class VerifyCheckpointKeyword extends AbstractKeyword {
     @CompileStatic
     public boolean verifyCheckpoint(Checkpoint checkpoint, boolean logChangedValues, FailureHandling flowControl) throws StepFailedException {
         KeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_MSG_VERIFY_CHECKPOINT)
+            logger.logDebug(StringConstants.KW_MSG_VERIFY_CHECKPOINT)
             if (checkpoint == null) {
                 throw new IllegalArgumentException(StringConstants.KW_MSG_CHECKPOINT_IS_NULL)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_MSG_CHECKPOINT_ID_X, checkpoint.getId()))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_MSG_CHECKPOINT_ID_X, checkpoint.getId()))
             if (checkpoint.getTakenDate() == null) {
                 throw new StepFailedException(StringConstants.KW_MSG_NO_SNAPSHOT)
             }
@@ -79,13 +77,13 @@ public class VerifyCheckpointKeyword extends AbstractKeyword {
             }
 
             if (checkpoint.getCheckpointRowNumbers() == checkpoint.getSourceRowNumbers()) {
-                logger.logInfo(StringConstants.KW_MSG_CHECKPOINT_ROW_NUMBER_MATCHES)
+                logger.logDebug(StringConstants.KW_MSG_CHECKPOINT_ROW_NUMBER_MATCHES)
             } else {
                 logger.logWarning(StringConstants.KW_MSG_CHECKPOINT_ROW_NUMBER_DOES_NOT_MATCH)
             }
 
             if (checkpoint.getCheckpointColumnNumbers() == checkpoint.getSourceColumnNumbers()) {
-                logger.logInfo(StringConstants.KW_MSG_CHECKPOINT_COL_NUMBER_MATCHES)
+                logger.logDebug(StringConstants.KW_MSG_CHECKPOINT_COL_NUMBER_MATCHES)
             } else {
                 logger.logWarning(StringConstants.KW_MSG_CHECKPOINT_COL_NUMBER_DOES_NOT_MATCH)
             }
@@ -93,7 +91,7 @@ public class VerifyCheckpointKeyword extends AbstractKeyword {
             List<List<Object>> sourceData = checkpoint.getSourceData()
             List<List<CheckpointCell>> checkpointData = checkpoint.getCheckpointData()
             try {
-                logger.logInfo(StringConstants.KW_MSG_VERIFY_CHECKED_VALUES)
+                logger.logDebug(StringConstants.KW_MSG_VERIFY_CHECKED_VALUES)
                 boolean isDataNotChanged = true
                 for (int rowIndex = 0; rowIndex < checkpoint.getCheckpointRowNumbers(); rowIndex++) {
                     List<CheckpointCell> row = checkpointData.get(rowIndex)

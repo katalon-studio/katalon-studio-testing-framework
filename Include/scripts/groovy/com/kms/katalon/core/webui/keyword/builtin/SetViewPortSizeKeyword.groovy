@@ -71,11 +71,11 @@ public class SetViewPortSizeKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void setViewPortSize(int width, int height, FailureHandling flowControl) {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.COMM_LOG_INFO_CHECKING_WIDTH)
+            logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_WIDTH)
             if (width <= 0) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_WIDTH_MUST_BE_ABOVE_ZERO)
             }
-            logger.logInfo(StringConstants.COMM_LOG_INFO_CHECKING_HEIGHT)
+            logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_HEIGHT)
             if (height <= 0) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_HEIGHT_MUST_BE_ABOVE_ZERO)
             }

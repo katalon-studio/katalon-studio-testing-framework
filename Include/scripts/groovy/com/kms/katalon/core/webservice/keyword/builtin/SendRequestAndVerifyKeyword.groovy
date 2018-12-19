@@ -43,7 +43,7 @@ public class SendRequestAndVerifyKeyword extends WebserviceAbstractKeyword {
             WebServiceCommonHelper.checkRequestObject(request)
             ResponseObject responseObject = ServiceRequestFactory.getInstance(request).send(request)
             
-            logger.logInfo(StringConstants.KW_LOG_INFO_VERIFICATION_START)
+            logger.logDebug(StringConstants.KW_LOG_INFO_VERIFICATION_START)
             String verificationScript = request.getVerificationScript()
             WSResponseManager.getInstance().setRequestObjectId(request.getObjectId())
             WSResponseManager.getInstance().setCurrentResponse(responseObject)

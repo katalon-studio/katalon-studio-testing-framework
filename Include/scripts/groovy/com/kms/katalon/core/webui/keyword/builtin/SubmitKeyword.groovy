@@ -75,7 +75,7 @@ public class SubmitKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SUBMITTING_ON_FORM_CONTAINING_OBJ, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SUBMITTING_ON_FORM_CONTAINING_OBJ, to.getObjectId()))
                 webElement.submit()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_FORM_CONTAINING_OBJ_IS_SUBMITTED, to.getObjectId()))
             } finally {

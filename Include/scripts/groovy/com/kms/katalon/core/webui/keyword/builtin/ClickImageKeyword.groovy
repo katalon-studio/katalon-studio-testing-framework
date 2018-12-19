@@ -76,7 +76,7 @@ public class ClickImageKeyword extends WebUIAbstractKeyword {
             if (imagePath == null || imagePath.equals("")) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_NO_IMAGE_FILE_PROP_IN_OBJ)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CLICKING_ON_IMG_X, imagePath))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CLICKING_ON_IMG_X, imagePath))
             // Relative path?
             if (to.getUseRelativeImagePath()) {
                 String currentDirFilePath = new File(RunConfiguration.getProjectDir()).getAbsolutePath()

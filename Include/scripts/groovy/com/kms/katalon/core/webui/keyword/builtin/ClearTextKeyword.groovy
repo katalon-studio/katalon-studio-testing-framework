@@ -42,7 +42,7 @@ public class ClearTextKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
                 webElement.clear()
                 logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_PASSED_OBJ_TXT_IS_CLEARED, to.getObjectId()))
 

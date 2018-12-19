@@ -77,7 +77,7 @@ public class GetNumberOfSelectedOptionKeyword extends WebUIAbstractKeyword {
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                 Select select = new Select(webElement)
                 int num = 0
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_COUNTING_TOTAL_SELECTED_OPTS_OF_OBJ_X, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_COUNTING_TOTAL_SELECTED_OPTS_OF_OBJ_X, to.getObjectId()))
                 List<WebElement> elements = select.getOptions()
                 for (WebElement child : elements) {
                     if (child.isSelected()) {

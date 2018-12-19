@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Katalon HTML Report</title>
+</head>
+<body>
+<div id="javascript-disabled">
+  <h1>Failed to open Katalon report</h1>
+  <p>Ensure that:</p>
+  <ul>
+    <li>You have <b>JavaScript enabled</b> in your browser.</li>
+    <li>You are using a <b>modern browser</b>. Firefox 3.5, IE 8, or equivalent is required, newer browsers are recommended.</li>
+  </ul>
+</div>
+<script type="text/javascript">removeJavaScriptDisabledWarning();</script>
+
+<div id="header"></div>
+<div id="statistics-container"></div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    try {
+        var topsuite = window.testdata.suite();
+    } catch (error) {
+        addJavaScriptDisabledWarning(error);
+        return;
+    }
+    initLayout(topsuite.name, 'Log');
+    //addStatistics();
+    addErrors();
+    addExecutionEnvironmentInfo(window.environment_info);
+    addTestExecutionLog(topsuite);
+    addLogLevelSelector(window.settings['minLevel'], window.settings['defaultLevel']);
+    if (window.location.hash) {
+        makeElementVisible(window.location.hash.substring(1));
+    } else {
+        expandSuite(topsuite);
+    }
+    
+    if($("s1").attr('class') == 'element-header closed'){
+		toggleSuite('s1')
+	}
+	$("#s1").find("div[id*='s1-t']").each(function(){
+		toggleTest(this.id);
+	});
+    
+});
+
+function addLogLevelSelector(minLevel, defaultLevel) {
+    var controller = LogLevelController(minLevel, defaultLevel);
+    if (controller.showLogLevelSelector()) {
+        var selector = $.tmpl('logLevelSelectorTemplate', controller);
+        selector.find('select').val(controller.defaultLogLevel());
+        selector.appendTo($('#top-right-header'));
+        $('#report-or-log-link').find('a').css({'border-bottom-left-radius': '0'});
+        setMessageVisibility(controller.defaultLogLevel());
+    }
+}
+
+function addErrors() {
+    var errors = window.testdata.errorIterator();
+    if (errors.hasNext()) {
+        $.tmpl('errorHeaderTemplate').appendTo($('body'));
+        drawErrorsRecursively(errors, $('#errors'));
+    }
+}
+
+function drawErrorsRecursively(errors, target) {
+    var elements = popFromIterator(errors, 10);
+    $.tmpl('errorTemplate', elements).appendTo(target);
+    if (errors.hasNext())
+        setTimeout(function () { drawErrorsRecursively(errors, target); }, 0);
+    else
+        scrollToHash();
+}
+
+function scrollToHash() {
+    if (window.location.hash)
+        setTimeout(function () {
+            var id = window.location.hash.substring(1);
+            window.location.hash = '#';
+            window.location.hash = id;
+            highlight($('#' + id));
+        }, 0);
+}
+
+function highlight(element, color) {
+    if (color === undefined)
+        color = 242;
+    if (color < 255) {
+        element.css({'background-color': 'rgb('+color+','+color+','+color+')'});
+        setTimeout(function () { highlight(element, color+1); }, 300);
+    } else {
+        element.css({'background-color': ''});
+    }
+}
+
+function popFromIterator(iterator, upTo) {
+    var result = [];
+    while (iterator.hasNext() > 0 && result.length < upTo)
+        result.push(iterator.next());
+    return result;
+}
+
+function makeElementVisible(id) {
+    window.testdata.ensureLoaded(id, function (ids) {
+        util.map(ids, expandElementWithId);
+        if (ids.length) {
+            expandCriticalFailed(window.testdata.findLoaded(util.last(ids)));
+            window.location.hash = id;
+            scrollToHash();
+        }
+    });
+}
+
+function addTestExecutionLog(main) {
+    $('body').append($('<h2>Test Execution Log</h2>'),
+                     $.tmpl('suiteTemplate', main));
+}
+
+function addExecutionEnvironmentInfo(environment_info) {
+    $('body').append($('<h2>Execution Environment</h2>'),
+                     $.tmpl('testEnvironmentInfoTemplate', environment_info));
+}
+
+</script>
+
+<script type="text/x-jquery-tmpl" id="totalStatisticsRowTemplate">
+  <tr class="row-${$item.index}">
+    <td class="stats-col-name">
+      <div class="stat-name">
+        <span>{{html label}}</span>
+      </div>
+    </td>
+    {{tmpl($data) 'statColumnsTemplate'}}
+  </tr>
+</script>
+
+<script type="text/x-jquery-tmpl" id="tagStatisticsRowTemplate">
+  <tr class="row-${$item.index}">
+    <td class="stats-col-name" title="${doc}">
+      <div class="stat-name">
+        <span>{{html label}}</span>
+        {{if info}}(${info}){{/if}}
+      </div>
+      <div class="tag-links">
+        {{each links}}
+        <span>[<a href="{{html $value.url}}" title="{{html $value.url}}">{{html $value.title}}</a>]</span>
+        {{/each}}
+      </div>
+    </td>
+    {{tmpl($data) 'statColumnsTemplate'}}
+  </tr>
+</script>
+
+<script type="text/x-jquery-tmpl" id="suiteStatisticsRowTemplate">
+  <tr onclick="makeElementVisible('${id}')" class="row-${$item.index}">
+    <td class="stats-col-name" title="${label}">
+      <div class="stat-name">
+        <a href="#${id}"><span class="parent-name">{{html formatParentName}}</span>{{html name}}</a>
+      </div>
+    </td>
+    {{tmpl($data) 'statColumnsTemplate'}}
+  </tr>
+</script>
+
+<script type="text/x-jquery-tmpl" id="errorHeaderTemplate">
+  <h2>Test Execution Errors</h2>
+  <table id="errors"></table>
+</script>
+
+<script type="text/x-jquery-tmpl" id="errorTemplate">
+  <tr id="${id}" class="message-row">
+    <td class="error-time">
+      {{if link}}
+      <a onclick="makeElementVisible('${link}')" href="#${link}" title="Link to details">${date} ${time}</a>
+      {{else}}
+      ${date} ${time}
+      {{/if}}
+    </td>
+    <td class="${level.toLowerCase()} level">${level}</td>
+    <td class="message">{{html text}}</td>
+    <td class="select-text" onclick="javascript:selectMessage('${id}')"
+        title="Select message text"></td>
+  </tr>
+</script>
+
+<script type="text/x-jquery-tmpl" id="suiteTemplate">
+  <div id="${id}" class="suite">
+    <div class="element-header closed" onclick="toggleSuite('${id}')" title="{{html fullName}}">
+      <span class="${status.toLowerCase()}">TEST SUITE: </span>
+      <span class="name">{{html name}}</span>
+      <a class="expand" title="Expand this suite fully"
+         href="javascript:expandAllChildren('${id}')"
+         onclick="stopPropagation(event)">Expand All</a>
+    </div>
+    <div class="children">
+      <table class="metadata">
+        <tr>
+          <th>Full Name:</th>
+          <td>{{html fullName}}</td>
+        </tr>
+        {{if doc()}}
+        <tr>
+          <th>Documentation:</th>
+          <td class="doc">{{html doc()}}</td>
+        </tr>
+        {{/if}}
+        {{each metadata}}
+        <tr>
+          <th>{{html $value[0]}}:</th>
+          <td class="doc">{{html $value[1]}}</td>
+        </tr>
+        {{/each}}
+        {{if source}}
+        <tr>
+          <th>Source:</th>
+          {{if relativeSource}}
+          <!-- <td><a href="${relativeSource}">{{html source}}</a></td> -->
+          <td><span><i>{{html source}}</i></span></td>
+          {{else}}
+          <td>{{html source}}</td>
+          {{/if}}
+        </tr>
+        {{/if}}
+        <tr>
+          <th>Start / End / Elapsed:</th>
+          <td>${times.startTime} / ${times.endTime} / ${times.elapsedTime}</td>
+        </tr>
+        <tr>
+          <th>Status:</th>
+          <td>{{tmpl($data) 'suiteStatusMessageTemplate'}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-jquery-tmpl" id="testTemplate">
+  <div id="${id}" class="test">
+    <div class="element-header closed" onclick="toggleTest('${id}')" title="{{html fullName}}">
+      <span class="${status.toLowerCase()}">TEST CASE: </span>
+      <span class="name">{{html name}}</span>
+      <a class="expand" title="Expand this test fully"
+         href="javascript:expandAllChildren('${id}')"
+         onclick="stopPropagation(event)">Expand All</a>
+    </div>
+    <div class="children">
+      <table class="metadata">
+        <tr>
+          <th>Full Name:</th>
+          <td>{{html fullName}}</td>
+        </tr>
+        {{if doc()}}
+        <tr>
+          <th>Documentation:</th>
+          <td class="doc">{{html doc()}}</td>
+        </tr>
+        {{/if}}
+        {{if tags.length}}
+        <tr>
+          <th>Tags:</th>
+          <td>{{html tags.join(', ')}}</td>
+        </tr>
+        {{/if}}
+        {{if timeout}}
+        <tr>
+          <th>Timeout:</th>
+          <td>{{html timeout}}</td>
+        </tr>
+        {{/if}}
+        <tr>
+          <th>Start / End / Elapsed:</th>
+          <td>${times.startTime} / ${times.endTime} / ${times.elapsedTime}</td>
+        </tr>
+        <tr>
+          <th>Status:</th>
+          <td><span class="${status.toLowerCase()}">${status}</span></td>
+        </tr>
+        {{if message()}}
+        <tr>
+          <th>Message:</th>
+          <td class="message">{{html message()}}</td>
+        </tr>
+        {{/if}}
+      </table>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-jquery-tmpl" id="keywordTemplate">
+  <div id="${id}" class="keyword">
+    <div class="element-header closed" onclick="toggleKeyword('${id}')" title="${name}">
+      <span class="${status.toLowerCase()}">TEST STEP: </span>
+      
+      {{if doc()}}
+      <span>Description: <font>{{html doc()}}</font></span>	
+      {{else}}
+      <span style="color:#808080; font-style: italic">{{html name}}</span>
+      <span style="color:#808080; font-style: italic" class="arg">{{html arguments}}</span>
+      {{/if}}
+      
+    </div>
+    {{if doc()}}
+      	<div style="margin-left: 2.6cm; color:#808080; font-style: italic"><span>{{html name}}</span><span class="arg">{{html arguments}}</span></div>
+    {{/if}}
+    
+    <div class="children">
+      <table class="metadata keyword-metadata">
+        {{if timeout}}
+        <tr>
+          <th>Timeout:</th>
+          <td>{{html timeout}}</td>
+        </tr>
+        {{/if}}
+        <tr>
+          <th>Start / End / Elapsed:</th>
+          <td>${times.startTime} / ${times.endTime} / ${times.elapsedTime}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-jquery-tmpl" id="messageTemplate">
+  <table id="${id}" class="messages ${level.toLowerCase()}-message">
+    <tr class="message-row">
+      <td class="time">${time}</td>
+      <td class="${level.toLowerCase()} level">${level}</td>
+      <td class="message">{{html text}}
+      
+      	{{if link}}
+        <div>
+          <IMG src='{{html link}}' width='800px'/>
+        </div>
+        {{/if}}
+      
+      </td>
+      <td class="select-text" onclick="javascript:selectMessage('${id}')"
+          title="Select message text"></td>
+    </tr>
+  </table>
+</script>
+
+<script type="text/x-jquery-tmpl" id="logLevelSelectorTemplate">
+  <div id="log-level-selector">
+  Log level:
+    <select onchange="logLevelSelected(this.options[selectedIndex].value)">
+      <option value="2">INFO</option>
+      <option value="1">DEBUG</option>
+      {{if showTrace()}}<option value="0">TRACE</option>{{/if}}
+    </select>
+  </div>
+</script>
+
+<script type="text/x-jquery-tmpl" id="testEnvironmentInfoTemplate">
+  <table>
+  	<tr>
+  		<td>Host name:<td>
+  		<td>{{html host}}<td>
+  	</tr>
+  	<tr>
+  		<td>OS:<td>
+  		<td>{{html os}}<td>
+  	</tr>
+  	<tr>
+  		<td>Katalon version:<td>
+  		<td>{{html katalonVersion}}<td>
+  	</tr>
+  	
+  	{{if browser}}
+  	<tr>
+  		<td>Browser:<td>
+  		<td>{{html browser}}<td>
+  	</tr>
+  	{{/if}}
+  		
+  	{{if deviceName}}
+  	<tr>
+  		<td>Device Name:<td>
+  		<td>{{html deviceName}}<td>
+  	</tr>
+  	{{/if}}	
+  	
+  	{{if devicePlatform}}
+  	<tr>
+  		<td>Device Platform:<td>
+  		<td>{{html devicePlatform}}<td>
+  	</tr>
+  	{{/if}}	
+  	
+  </table>
+</script>
+</body>
+</html>

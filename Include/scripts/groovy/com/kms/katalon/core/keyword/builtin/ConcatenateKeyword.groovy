@@ -24,7 +24,6 @@ import com.kms.katalon.core.main.TestResult
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCase
 import com.kms.katalon.core.testcase.TestCaseBinding
-import java.text.MessageFormat
 import com.kms.katalon.core.configuration.RunConfiguration
 
 @Action(value = "concatenate")
@@ -54,7 +53,7 @@ public class ConcatenateKeyword extends AbstractKeyword {
     public String concatenate(String[] strings, FailureHandling flowControl) throws StepFailedException {
         String stringArrayValue = null
         return KeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHECING_STRINGS_PARAM)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHECING_STRINGS_PARAM)
             if (strings == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_STRS_PARAM_IS_NULL)
             }
@@ -65,7 +64,7 @@ public class ConcatenateKeyword extends AbstractKeyword {
                 stringArrayValueBuilder.append("',")
             }
             stringArrayValue = stringArrayValueBuilder.substring(0, stringArrayValueBuilder.length() - 1) + "]"
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CONCAT_STR_ARRAY, stringArrayValue))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CONCAT_STR_ARRAY, stringArrayValue))
             StringBuilder sb = new StringBuilder()
             for (String str : strings) {
                 sb.append(str)

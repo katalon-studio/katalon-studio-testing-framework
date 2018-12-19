@@ -53,26 +53,26 @@ import com.kms.katalon.core.webui.util.FileUtil
 @Action(value = "getWindowIndex")
 public class GetWindowIndexKeyword extends WebUIAbstractKeyword {
 
-	@CompileStatic
-	@Override
-	public SupportLevel getSupportLevel(Object ...params) {
-		return super.getSupportLevel(params)
-	}
+    @CompileStatic
+    @Override
+    public SupportLevel getSupportLevel(Object ...params) {
+        return super.getSupportLevel(params)
+    }
 
-	@CompileStatic
-	@Override
-	public Object execute(Object ...params) {
-		FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
-		return getWindowIndex(flowControl)
-	}
+    @CompileStatic
+    @Override
+    public Object execute(Object ...params) {
+        FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
+        return getWindowIndex(flowControl)
+    }
 
-	@CompileStatic
-	public int getWindowIndex(FailureHandling flowControl) throws StepFailedException {
-		return WebUIKeywordMain.runKeywordAndReturnInt({
-			logger.logInfo(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_INDEX)
-			int windowIndex = DriverFactory.getCurrentWindowIndex()
-			logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CURR_WINDOW_INDEX, windowIndex))
-			return windowIndex
-		}, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_CURR_WINDOW_INDEX)
-	}
+    @CompileStatic
+    public int getWindowIndex(FailureHandling flowControl) throws StepFailedException {
+        return WebUIKeywordMain.runKeywordAndReturnInt({
+            logger.logDebug(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_INDEX)
+            int windowIndex = DriverFactory.getCurrentWindowIndex()
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CURR_WINDOW_INDEX, windowIndex))
+            return windowIndex
+        }, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_CURR_WINDOW_INDEX)
+    }
 }

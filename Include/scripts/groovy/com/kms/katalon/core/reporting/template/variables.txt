@@ -1,0 +1,31 @@
+<script type="text/javascript">
+window.output = {};
+</script>
+<script type="text/javascript">
+//window.output["suite"] = [1,2,3,0,[],[0,0,75719],[],[[4,0,1,0,[],[1,840,38478],[[0,5,0,0,0,[1,840,8948],[[0,6,0,7,8,[1,840,7718],[],[[840,2,9]]],[0,10,0,11,0,[1,8558,210],[],[]],[0,12,0,13,14,[1,8768,0],[],[]],[0,15,0,16,17,[1,8768,1020],[],[[9788,2,18]]]],[]],[0,19,0,0,20,[1,9788,3240],[[0,21,0,22,23,[1,9788,3240],[],[[9798,2,24]]]],[]],[0,25,0,0,0,[1,13028,26290],[[0,26,0,27,28,[1,25268,14050],[],[[35008,2,29]]]],[]]]],[30,0,1,0,[],[0,39318,36401,31],[[0,32,0,0,0,[0,39328,35281],[[0,33,0,34,35,[0,56948,17651],[[0,36,0,37,0,[1,67099,7500],[],[[74599,2,38]]]],[[65009,2,39],[74599,4,31]]]],[]],[2,40,0,41,0,[1,74609,1110],[],[]]]]],[],[2,1,2,1]];
+window.output["suite"] = [1,2,3,0,[],[0,0,75719],[],[[4,0,1,0,[],[1,840,38478],[[0,5,0,0,0,[1,840,8948],[[0,6,0,7,8,[1,840,7718],[],[[840,2,9]]],[0,10,0,11,0,[1,8558,210],[],[]],[0,12,0,13,14,[1,8768,0],[],[]],[0,15,0,16,17,[1,8768,1020],[],[[9788,2,18]]]],[]],[0,19,0,0,20,[1,9788,3240],[[0,21,0,22,23,[1,9788,3240],[],[[9798,2,24]]]],[]],[0,25,0,0,0,[1,13028,26290],[[0,26,0,27,28,[1,25268,14050],[],[[35008,2,29]]]],[]]]],[30,0,1,0,[],[0,39318,36401,31],[[0,32,0,0,0,[0,39328,35281],[[0,33,0,34,35,[0,56948,17651],[[0,36,0,37,0,[1,67099,7500],[],[[74599,2,38]]]],[[65009,2,39],[74599,4,31]]]],[]],[2,40,0,41,0,[1,74609,1110],[],[]]]]],[],[2,1,2,1]];
+</script>
+<script type="text/javascript">
+window.output["strings"] = [];
+</script>
+<script type="text/javascript">
+window.output["strings"] = window.output["strings"].concat(["*","*qAutomate Googling","*D:\\tmp\\Robot\\My TS.tc","eNqzSVTIKEpNs1VKy8xJtdLX13ex0i/JLdAPyk/KL9EvApHx6fn56TmZeel6JRUlSnZEKrTRT7QDANVlIJA=","*Go To Google Page [Documentation] Go to google page and search something","*Open Browser To Google Page","*Selenium2Library.Open Browser","*<p>Opens a new browser instance to given URL.\x3c/p>","*${google_url}","*Opening browser 'firefox' to base url '<a href=\"http://www.google.com/\">http://www.google.com/\x3c/a>'","*Selenium2Library.Maximize Browser Window","*<p>Maximizes current browser window.\x3c/p>","*Selenium2Library.Set Selenium Speed","*<p>Sets the delay in seconds that is waited after each Selenium command.\x3c/p>","*${sel_speed}","*Selenium2Library.Title Should Be","*<p>Verifies that current page title equals `title`.\x3c/p>","*Google","*Page title is 'Google'.","*Input Search","*selenium","*Selenium2Library.Input Text","*<p>Types the given `text` into text field identified by `locator`.\x3c/p>","*q, ${search}","*Typing text 'selenium' into text field 'q'","*Submit Search","*Selenium2Library.Click Button","*<p>Clicks a button identified by `locator`.\x3c/p>","*btnG","*Clicking button 'btnG'.","*Open Selenium Page [Documentation] TestCase for open Selenium page","*ValueError: Element locator '<a href=\"http://seleniumhq.org/\">http://seleniumhq.org/\x3c/a>' did not match any elements.","*Click Selenium Link","*Selenium2Library.Click Link","*<p>Clicks a link identified by locator.\x3c/p>","*<a href=\"http://seleniumhq.org/\">http://seleniumhq.org/\x3c/a>","*Selenium2Library.Capture Page Screenshot","*<p>Takes a screenshot of the current page and embeds it into the log.\x3c/p>","*\x3c/td>\x3c/tr><tr><td colspan=\"3\"><a href=\"selenium-screenshot-1.png\"><img src=\"selenium-screenshot-1.png\" width=\"800px\">\x3c/a>","*Clicking link '<a href=\"http://seleniumhq.org/\">http://seleniumhq.org/\x3c/a>'.","*Selenium2Library.Close Browser","*<p>Closes the current browser.\x3c/p>"]);
+</script>
+<script type="text/javascript">
+window.output["errors"] = [];
+</script>
+<script type="text/javascript">
+//window.output["stats"] = [[{"elapsed":"00:01:15","fail":1,"label":"Critical Tests","pass":1},{"elapsed":"00:01:15","fail":1,"label":"All Tests","pass":1}],[],[{"elapsed":"00:01:16","fail":1,"id":"s1","label":"Robot Googling","name":"Robot Googling","pass":1}]];
+</script>
+<script type="text/javascript">
+window.output["generatedTimestamp"] = "20141111 15:03:52 GMT +08:00";
+</script>
+<script type="text/javascript">
+window.output["generatedMillis"] = 74789;
+</script>
+<script type="text/javascript">
+window.output["baseMillis"] = 1415692957211;
+</script>
+<script type="text/javascript">
+window.settings = {"defaultLevel":"INFO","minLevel":"PASSED","reportURL":"report.html","splitLogBase":"log","title":""};
+</script>

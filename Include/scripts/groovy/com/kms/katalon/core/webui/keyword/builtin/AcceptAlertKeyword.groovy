@@ -71,7 +71,7 @@ public class AcceptAlertKeyword extends WebUIAbstractKeyword {
         WebUIKeywordMain.runKeyword({
             Alert alert = DriverFactory.getAlert();
             if (alert != null) {
-                logger.logInfo(StringConstants.KW_LOG_INFO_ACCEPTING_ALERT);
+                logger.logDebug(StringConstants.KW_LOG_INFO_ACCEPTING_ALERT);
                 alert.accept();
                 logger.logPassed(StringConstants.KW_LOG_PASSED_ALERT_ACCEPTED);
             } else {

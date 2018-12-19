@@ -70,11 +70,11 @@ public class SwitchToWindowUrlKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void switchToWindowUrl(String url, FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_URL)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_URL)
             if (url == null) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_URL_IS_NULL)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SWITCHING_TO_WINDOW_W_URL_X, url))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SWITCHING_TO_WINDOW_W_URL_X, url))
             boolean switched = WebUiCommonHelper.switchToWindowUsingUrl(DriverFactory.getWebDriver(), url)
             if (switched) {
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_SWITCHED_TO_WINDOW_W_URL_X, url))

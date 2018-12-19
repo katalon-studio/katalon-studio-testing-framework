@@ -71,7 +71,7 @@ public class ScrollToTextKeyword extends MobileAbstractKeyword {
 
     public void scrollToText(String text, FailureHandling flowControl) throws StepFailedException {
         MobileKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.COMM_LOG_INFO_CHECKING_TEXT)
+            logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_TEXT)
             if (text == null) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_TEXT_IS_NULL)
             }
@@ -92,7 +92,7 @@ public class ScrollToTextKeyword extends MobileAbstractKeyword {
                     List<MobileElement> elements = ((IOSDriver) driver).findElements(MobileBy
                         .xpath("//*[contains(@label, '" + text + "') or contains(@text, '" + text + "')]"));
                     if (elements != null && !elements.isEmpty()) {
-                        logger.logInfo(MessageFormat.format(CoreMobileMessageConstants.KW_LOG_TEXT_FOUND_IN_ELEMENTS, text, elements.size()))
+                        logger.logDebug(MessageFormat.format(CoreMobileMessageConstants.KW_LOG_TEXT_FOUND_IN_ELEMENTS, text, elements.size()))
                         element = elements.get(0)
                         TouchAction action = new TouchAction(driver).press(0, 0).moveTo(element).release()
                         action.perform()

@@ -38,7 +38,10 @@ public class VerifyResponseStatusCodeInRangeKeyword extends WebserviceAbstractKe
         return KeywordMain.runKeyword({
             WebServiceCommonHelper.checkResponseObject(responseObject)
             int statusCode = responseObject.getStatusCode()
-            return verifyStatusCode(statusCode >= fromStatusCode && statusCode <= toStatusCode, MessageFormat.format(CoreWebserviceMessageConstants.KW_LOG_FAILED_STATUS_CODE_DOES_NOT_MATCH_IN_EXPECTED_RANGE, fromStatusCode, toStatusCode, statusCode), flowControl)
+            return verifyStatusCode(
+                statusCode >= fromStatusCode && statusCode <= toStatusCode, 
+                MessageFormat.format(CoreWebserviceMessageConstants.KW_LOG_FAILED_STATUS_CODE_DOES_NOT_MATCH_IN_EXPECTED_RANGE, fromStatusCode, toStatusCode, statusCode), 
+                flowControl)
         }, flowControl, CoreWebserviceMessageConstants.KW_MSG_UNABLE_TO_VERIFY_RESPONSE_STATUS_CODE)
     }
 

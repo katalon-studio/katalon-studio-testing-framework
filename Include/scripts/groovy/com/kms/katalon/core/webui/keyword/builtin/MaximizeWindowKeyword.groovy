@@ -72,7 +72,7 @@ public class MaximizeWindowKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void maximizeWindow(FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-			logger.logInfo(StringConstants.KW_LOG_INFO_MAX_CURR_WINDOW);
+			logger.logDebug(StringConstants.KW_LOG_INFO_MAX_CURR_WINDOW);
 			WebDriver webDriver = DriverFactory.getWebDriver();
 			if (webDriver instanceof ChromeDriver && System.getProperty("os.name").toLowerCase().contains("mac")) {
 				java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();

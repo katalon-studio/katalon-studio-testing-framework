@@ -75,7 +75,7 @@ public class VerifyElementNotHasAttributeKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                KeywordLogger.getInstance().logInfo(StringConstants.COMM_LOG_INFO_CHECKING_ATTRIBUTE_NAME)
+                logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_ATTRIBUTE_NAME)
                 if (attributeName == null) {
                     throw new IllegalArgumentException(StringConstants.COMM_EXC_ATTRIBUTE_NAME_IS_NULL)
                 }
@@ -83,7 +83,7 @@ public class VerifyElementNotHasAttributeKeyword extends WebUIAbstractKeyword {
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to, timeOut)
                 WebElement foundElement = WebUIAbstractKeyword.findWebElement(to, timeOut)
                 if (foundElement.getAttribute(attributeName) == null) {
-                    KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_NOT_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]))
+                    logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_NOT_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]))
                     return true
                 }  else {
                     WebUIKeywordMain.stepFailed(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_NOT_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]), flowControl, null, true)

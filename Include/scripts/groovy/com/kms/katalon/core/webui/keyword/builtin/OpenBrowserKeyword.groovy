@@ -53,31 +53,31 @@ import com.kms.katalon.core.webui.util.FileUtil
 @Action(value = "openBrowser")
 public class OpenBrowserKeyword extends WebUIAbstractKeyword {
 
-	@CompileStatic
-	@Override
-	public SupportLevel getSupportLevel(Object ...params) {
-		return super.getSupportLevel(params)
-	}
+    @CompileStatic
+    @Override
+    public SupportLevel getSupportLevel(Object ...params) {
+        return super.getSupportLevel(params)
+    }
 
-	@CompileStatic
-	@Override
-	public Object execute(Object ...params) {
-		String rawUrl = (String) params[0]
-		FailureHandling flowControl = (FailureHandling)(params.length > 1 && params[1] instanceof FailureHandling ? params[1] : RunConfiguration.getDefaultFailureHandling())
-		openBrowser(rawUrl,flowControl)
-	}
+    @CompileStatic
+    @Override
+    public Object execute(Object ...params) {
+        String rawUrl = (String) params[0]
+        FailureHandling flowControl = (FailureHandling)(params.length > 1 && params[1] instanceof FailureHandling ? params[1] : RunConfiguration.getDefaultFailureHandling())
+        openBrowser(rawUrl,flowControl)
+    }
 
-	@CompileStatic
-	public void openBrowser(String rawUrl, FailureHandling flowControl) throws StepFailedException {
-		WebUIKeywordMain.runKeyword({
-			logger.logInfo(StringConstants.KW_LOG_INFO_OPENING_BROWSER)
-			DriverFactory.openWebDriver()
-			if (rawUrl != null && !rawUrl.isEmpty()) {
-				URL url = PathUtil.getUrl(rawUrl, "http")
-				logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_NAVIGATING_BROWSER_TO, url.toString()))
-				DriverFactory.getWebDriver().get(url.toString())
-			}
-			logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_BROWSER_IS_OPENED_W_URL, rawUrl))
-		}, flowControl, false, (rawUrl != null) ? MessageFormat.format(StringConstants.KW_MSG_UNABLE_TO_OPEN_BROWSER_W_URL, rawUrl) : StringConstants.KW_MSG_UNABLE_TO_OPEN_BROWSER)
-	}
+    @CompileStatic
+    public void openBrowser(String rawUrl, FailureHandling flowControl) throws StepFailedException {
+        WebUIKeywordMain.runKeyword({
+            logger.logDebug(StringConstants.KW_LOG_INFO_OPENING_BROWSER)
+            DriverFactory.openWebDriver()
+            if (rawUrl != null && !rawUrl.isEmpty()) {
+                URL url = PathUtil.getUrl(rawUrl, "http")
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_NAVIGATING_BROWSER_TO, url.toString()))
+                DriverFactory.getWebDriver().get(url.toString())
+            }
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_BROWSER_IS_OPENED_W_URL, rawUrl))
+        }, flowControl, false, (rawUrl != null) ? MessageFormat.format(StringConstants.KW_MSG_UNABLE_TO_OPEN_BROWSER_W_URL, rawUrl) : StringConstants.KW_MSG_UNABLE_TO_OPEN_BROWSER)
+    }
 }

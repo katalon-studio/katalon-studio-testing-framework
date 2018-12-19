@@ -72,7 +72,7 @@ public class GetAlertTextKeyword extends WebUIAbstractKeyword {
             Alert alert = DriverFactory.getAlert()
             String text = ""
             if (alert != null) {
-                logger.logInfo(StringConstants.KW_LOG_INFO_GETTING_ALERT_TXT)
+                logger.logDebug(StringConstants.KW_LOG_INFO_GETTING_ALERT_TXT)
                 text = alert.getText()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_ALERT_TXT_SUCCESSFULLY, text))
             } else {

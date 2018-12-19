@@ -79,7 +79,7 @@ public class TypeOnImageKeyword extends WebUIAbstractKeyword {
             if (text == null) {
                 throw new IllegalArgumentException(StringConstants.COMM_EXC_TEXT_IS_NULL)
             }
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_TYPING_ON_IMG_X, imagePath))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_TYPING_ON_IMG_X, imagePath))
             if (to.getUseRelativeImagePath()) {
                 imagePath = PathUtil.relativeToAbsolutePath(imagePath, RunConfiguration.getProjectDir())
             }

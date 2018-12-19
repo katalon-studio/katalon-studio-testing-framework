@@ -69,7 +69,7 @@ public class BackKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void back(FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_NAVIGATING_BACK)
+            logger.logDebug(StringConstants.KW_LOG_INFO_NAVIGATING_BACK)
             DriverFactory.getWebDriver().navigate().back()
             logger.logPassed(StringConstants.KW_LOG_PASSED_NAVIGATE_BACK)
         }, flowControl, true, StringConstants.KW_MSG_CANNOT_BACK_TO_PREV_PAGE)

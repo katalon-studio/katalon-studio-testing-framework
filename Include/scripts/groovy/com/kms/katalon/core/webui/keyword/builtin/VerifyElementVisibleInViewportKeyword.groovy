@@ -73,7 +73,7 @@ public class VerifyElementVisibleInViewportKeyword extends WebUIAbstractKeyword 
         WebUIKeywordMain.runKeyword({
             try {
                 if (WebUiCommonHelper.isElementVisibleInViewport(DriverFactory.getWebDriver(), to, timeOut)) {
-                    KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_VISIBLE_IN_VIEWPORT, to.getObjectId()))
+                    logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_VISIBLE_IN_VIEWPORT, to.getObjectId()))
                     return true
                 }  else {
                     WebUIKeywordMain.stepFailed(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_VISIBLE_IN_VIEWPORT, to.getObjectId()), flowControl, null, true)

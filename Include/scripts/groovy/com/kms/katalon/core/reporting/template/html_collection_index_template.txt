@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>REPORT_TITLE</title>
+    <style media="all" type="text/css">
+    html,body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:.8em;color:#000;background:#fff;margin:0;padding:0;height:100%;overflow-y:auto}
+    .hidden-content{display:none;color:#000;text-align:center}
+    .flex-row-container{display:flex;flex-direction:row;justify-content:space-between;align-items:stretch;align-content:center}
+    .tsc-header{height:60px;background-color:#333;padding:0 15px}
+    .tsc-header .title{color:#fff;margin:15px;font-weight:400;align-self:center}
+    .tsc-header a{cursor:pointer;align-self:center}
+    .tsc-header img{vertical-align:middle;width:24px;height:24px}
+    #ts-container{border:0;margin:0;width:100%}
+    #ts-container table{font-size:14px;width:100%;border-collapse:collapse;margin:0 auto}
+    #ts-container table,th,td{border:1px solid #333;padding:10px;text-align:left;vertical-align:middle}
+    #ts-container td:nth-child(2){word-wrap:break-word;word-break:break-all}
+    #ts-container tr:hover{background-color:#eee}
+    #ts-container th{background-color:#ccc}
+    #ts-container th:first-child{width:50px;text-align:center}
+    #ts-container td:first-child{text-align:center}
+    .status-not-started{background-color:gray}
+    .status-incomplete{background-color:#f2bc70}
+    .fail{background-color:#f19696}
+    .icon{height:16px;width:16px;display:inline-block;vertical-align:middle;margin-right:5px;background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAASZJREFUOBFjjIyM3MLAwOANxOSArQxAA/6ToxOkB6SXCZ/mskNOZiCMTw0LPkmGfww5UPk4XOowDKg56Kb49/9fif9MjFL//v4PA2msOOSykfHf/2fMjMwvWux33Uc2DMOA3//+mgMDZQHD33/sMIVAg9YwMDD+/Pf/bwJQDMUAjDDodNy7gpGB0QWo4SvMABAbJAaSQ4hBWBgGgISVeJVOMjAiBTCQDRZD1w3kYzXgwfcHRkC5n4xMjDkgDGLf/XbHEIt+BowwACn69+/fNy5WFvUG612vQPyGo26rv//5Jw5iYwBKExIjJQaAXUOJASC9oDDYSoEhWzHCBCaAbCgyGyYPoxlhDBgdFRV16////6qMjIwMQBosDGMD6dvLli1Tg6kF0QASjmxrJM+UgwAAAABJRU5ErkJggg==)}
+    .chrome{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAm5JREFUOBGlUu1Lk1EUP+fuedwgcbNSK0woQiwZJEgaiz4UEmQSac7NEWU0iaCg/0Bo0csXEerbgiIpfCEEGwSRmR8itlZRQi+Si0hpRiWSmc967uncB+6YQZ+6cJ9znt/9/c695wXgPxcW6qmnx5h597yTpAwSQB0SrQfEb8xJ8u6vbPUMYHDILtTkA8yGW2psCYME5C8krPAR0m4yOioGRt5r3AnwNRIp+WkvTBPRGn3wT4uYLTJh57qboxnFEe006GqPNJURweO/RJ8RcAIRH6zYAJNWjqKaa3xJLIVtoJNo4jHKwT5Akogi2nz43Lj121VL0nj1NlwzO588uhclurVw/uyJTb6GeEbYICNAFDgSOlSPAvsEYHfTwZhv2YKMtO17AFam5vbLKBJukyQTeoO0YiqY4ErXK0cSXB7z115qOxB7yLXo5ZQMhbNfxB250vXp+DCn9EthzkJsVFYAYKlyuPobr/mrTy8IsVWLFa6WCvLG8m4hhHz1GStXZ4KQVJ+dxYQzObd8zUWzNOZYhKXd5R+nuWXVeRzxu/I5BXiaB4lKN3jSzfyqUzxAyw7OYiTRfbF4OMK3mpqLQCnlCw7Rr0HHEvRVlKQ99mqqQpdrl+kyKlObez9wjhcKefxaR4dqDrJ3f6TU6BYSOI1Fxl5UrTX3X4X7j/j27fqcz8a9Ddf3sCUxhEGebezgPacJyrJgFX8SLA4Vipk3Y4AZUmLF4y4ATLR0TblMI8Bteqb+1WI/c947FeenO/12MMQnHrcRKG6MZx2Sw9MeW5XOXGKxldvYxkW8NVo2Vsd+JwEmeULv+HbcGNE3a9kfa1b+j4BIeRMAAAAASUVORK5CYII=)}
+    .firefox{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAmJJREFUOBGlU09IFFEc/t6bWffP7Lbuuqn9UQIjSCRK9xBiRdGmdCqLgvAgWHjrUtAlolt0iAgiOohll4ogqouWpBlZYQQagVFItAriorM76e7O7O7Ma95jZ5GJTr3D733f9/t+33sMb4D/XMQ9H777K8FA+sDQDoIau79s43eU0oFM/9Zxt18EJEe9nW3p+Uld1YfAWHdEUvHbDMOEJPwKzaJnwyCavD9nQ77ckZ6jwwtOEGXsKmWW+XC/8WzscGCk+3z0Bo6FnlSGuTFnBaBZEcR9H3a2ksm55MuqFieApMaV+lzBWHQEvvcvDuF9vmO9JHBMTuHepjPYKKeWmmPbG0j8c5GuGFUn3c5bdf24ErvslrFcqsUDrQ8KydbNpb/3cgM1QS64nTp8eLF23C0LfiAwJvZUIXaKA7psxgyhlEue+aFbfkzrbetlgWVSgmpGBa6W1DgHtFZa2iKUcnm6ehqd82/XSxXc4p2xP+SU4BIpeTiQ7dPUgJQNOq7u0GMUmYy5wg7w687oe3BfOyvaHvsGDZ6kwIbl1YAsZEqtT7bS6AT4SR694QFBJ3KH8DHfLnCUriARGHFsoIS84USOkPQ1BpyodGywUGrEpaWb+GLsFjIfvl1/zn5IP8o2YoXl1euciJf4bSQ07CP5rnJXbFlLwZS+F4blQ0dgAkG6VmnnWHCwuSvTxwURoI5GwosmphWyuq3i+gfQWORro7e4L3Iwk+EWyks0kdaCitWqWdWvOf/X0qya57uawnFnmPv++huTrzzxdCl00S8ZnRKKSoF5tbylPKr3qHc2Jwqz7vA/tLjUKaP5QJUAAAAASUVORK5CYII=)}
+    .ie{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAlpJREFUOBGNU01IVFEUPue+KUcNHAfShOiHIuZpoKiQUYt+KIIWFTY/u4jatYh2LiQkkGirLWrVKmkmMxeVG6kgioIIBpr+aBOY/Yi+yaloxvfu6bvjXBlpFh24c9537vede885d5j+0zoyXpeI9C3TpZGZv+QS0bFQLX37+HyHaNVNJBtY0yI4W7TQ1Ntk9Jrlu2nvuPlelcDN5A+R6Ival71EusyVioJFTrsZ73IyHhkdYtbOmtB7s8WVfXLTC+dAHgXWLDSG03uBXbtvPQQTDdujqfBnCj89xgXHbJj6cMVJiL4qUhcQOkXMm5D/BdYScLPhVcz1vWLpVX/9tMHK/ASiB5E5qxxOCethYlnPjnS/S0X3YG1TxFcNb8VED+zOSL3BoX2PJPztu9fp1KkjfjG4h1gb1ksVqJaOtNdiSOj+a+OtobTGPHkHgO+H5uYWN5LQiaAkAwjEKqRe3OqhFdT0mjabeCiXaPrYPv5jlw6CM5bITD+RdNbiWh7v4I+Jl8covn8J3ysTEeIsascol63rrhcp+dxjsfEsoZzxaudEwUVNhw2osr7Y7Xw5NiSiiiUZxQ2n7ZJAT2lnqc7wOZZeGEabzuL4dSLUUJXEXOkDcBMOaF0VZ76CV2l6Vh7jUdQzglxxKArVRAh3/CPGQ2ptaR60PIUZbVXCz5DxwVp2OvGAbqKJvy1hxTPNKFbnk8lo/PF+9m2c3Vvzz5n4xptU9LoJund+tbFfPIjERVEqjGkU2KFPif5I1vwHrNB6jmXyPaT1CNo6i5pnIHqSOhmZrEW2omr/F5Cv5yTE3J11AAAAAElFTkSuQmCC)}
+    .edge{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAgdJREFUOBGlUs9rE0EUfu/N+CMtRaQUDxXsyYSWZhEPUmghHj2JqNGNSEFQ8abn/gOe9F48tYeVFKwIFcRDr4KnqiXZiIgGjaA2hwZN7e4830w7cRFSBGfZmXk/vjfzzfsA/nNgFn+y+u7QpulcRMYr4i8AywfwDZEfaqDFN+FkM5tv970C49H6iYTTJwB89O+kHRu7BHytXgmibNwVKESvSwxmhRkGbBABN2Vqy/lDconDWQAR3qxfLs57H5VW3x80wA8cGHGFkE5rrcbisHisHk4Og8JziPDDA9jA3cKj2rC36Uurcx3tyVrP7FPqthSbHRkZcAAU8o1LxcfAdN8D7I14a/uWt8kgH99/AKZJUy1Jk+fyBq3V0tgWM6P/keCFB9hVipzyNgbVeHStnP+Uj9YWhMZVH9hrFUqf4zAYtTnuEaeqzdxGsvFVeja4F/BPDLuNSjFnbW2nNrTHPVgqvhVX3fr7D/7lY66AApUaSHZ8iC+lA1ZI/zTIZqWamsJrtwJcsKLqh7ZqzcZ6SsxHr57Kq59xQYSfyHRPoXnGCNspaU0mnRANzEoHPjQqQeiLOArOUHwHE5yWhCHpU06UOZcwzMkewCRgdhFy048ebFdHwW7ichCDorMi45a1+w5GT9Wl9Ch4gJNpN7khNzkvhx+RhEGh8V1UVQPCZU1qab080fH5vwEJz8LcDWVN8AAAAABJRU5ErkJggg==)}
+    .remote{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAX5JREFUOBFjYBhowIjNAVFRUaFA8UIg1vn///8HRkbGLRwcHC3z5s17hq4ew4DIyMhJQEW56AqB/KesrKxOixYtuoUsh2JAdHR0+L9//1YgK0BmA11ymoWFJUZJSelOQ0PDP5Ac3ACgANvNmzePAsVMkDVhYwMNeg/EeUuXLl3CDNTIIiUl1fP27du1QMVyTExMDPHx8QwXLlxA0ZuQkMBw6dIlBmCYgMQ5gXSQgYHBMSagrSVATiEQc3BzczOUl5czuLm5oWgGcUBiIDmQGhgAereGERjit4CaVUGCJSUlDEZGRjB5rPS5c+cYenp6YHIfWYAscRhv+vTpDHl5eQy6uroMQINhwmB62bJlDJcvX2YAqYEBYDh8YAYqBrlXEST4+/dvhmPHjjHw8PBghAEvLy/DtGnTGH79+gXTzwA0YDMjMOqsgX45CBRlhssQwQBq/gxMF4bMQGc91tPTOwYU0ABiYaBeUPz+xYWBar4B5Q4BYyt88eLFN4DsoQ4Ah7WHjEF7vaMAAAAASUVORK5CYII=)}
+    .android{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAXtJREFUOBGtU88rRFEUPvd5MzHKZpCyUkp2YiJJSMlKqcnCwh9gJ8lGecrOP2BtIUnZW80kiSbZWVopxVgoM5p55jrfmXde771mNZy679xzvu877/44l+iPZqJ6z3pOtXC9RobWOZ/jkeVR5lEiS6dd87PnnvEaHIcWFtgrLg3V7M8FWTseosmJMQ9p05E/nLt6VkgKQFy3/p211AfAddI0mp2mTrebvv0veirfkt+oicYYeksZd0qLOFg2/qxisMb6F2hleJPyI9viEauBBz50yDX3nFh2bmCZ/+jTR/VV/ATHMWO+nBUnXTkwG4Pp+HErnmgVNQ/6zGUMpy22M3lCR/cbtD9zSZlUj6apUv+kg5tVUjwARId94KrEejOD4qNiJDRWXEiBDgVwz+2Y6FCgpOr3yotOW/oELjoHHaZs7B+GPUdNY8UFC3QO2pO4w6ICHBhst7AoXmMJ8GG+6HjqoLfRnuiwkMATXa56xcADX9/E/7wFrd7Oa/wFwCykzv7L+AEAAAAASUVORK5CYII=)}
+    .ios{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAATFJREFUOBFjYKAQMOLTn5uby/727dvG////+yxfvlwHm1ombIIwMaDmCUDN5UD+SZgYOs2CLoDGd2ZkZJwrICBQgCYO56J4ISoqyg5oYxlQkymQvghUtQ/EBtJOQAwU+r9GUFCwaNq0aV9gJsBdEB0dbf3v378dQAlOoEKQvCsIQ9kgPgikvn///hSQngPmAQl4GAA1lwH5nDAJbDTQNYuBgQnXDFIDNwAoaYdNE5rYCjQ+wgCgxF90SSx8YXQxuAuAEnfRJdH5wPAojo2N5UYWRzZgG7IEDrb+379/DyHLwQ1gZmaeDgyHz8iSONj7kMXhBixevPgVUKIKWRKdDbTgPg8PTwuyODMy5/Lly6f09fU5gGJ6QMUngXgxEN8GYmEgfszKyho8b968x8h6Bp4NAF9lWaoi8cayAAAAAElFTkSuQmCC)}
+    .headless{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAQJJREFUOBFjTEtLY/3y5Uvz////YxkYGKSAmBjwjJGRcTEPD08tC0gzUIceBweHxfz58x8TozsxMVH258+fM0F6mUA2s7OzpxOrGWQBSC1ID9jVkZGR/2G2xsXFqcHYxNAgvUzICv/8+TMtKiqqD1mMEBvFAGCgBAM12AANmUhII0wexYBZs2Z9ZGZmzgVKpgENMYMpwkejGBAfH6/99+/f9UBDEpctW3YKn0aYHAuMAaJ///49Fai5aPHixSuALrgFDGVVmDww3m8DDcUMZORYgCkmlsaIBWI1IqtDCQNkCWLZVDHgGShtE2sjTB1UzzMmUK4CZQxSDIFlJpBeRkqzMwBBWGv+wEsvngAAAABJRU5ErkJggg==)}
+    </style>
+    <style media="print" type="text/css">
+    .no-print,.no-print *{display:none!important}
+    .hidden-content{display:block}
+    </style>
+</head>
+
+<body>
+    <header name="tsc-header" class="tsc-header flex-row-container no-print">
+        <div class="flex-row-container">
+            <a href="index-frame-view.html" title="Frame View"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjY0cHgiIGhlaWdodD0iNjRweCIgdmlld0JveD0iMCAwIDM1IDM1IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzNSAzNTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnPgoJCTxwYXRoIGQ9Ik0zNC45OTgsMEgwLjAwMkgwdjM1aDM1VjBIMzQuOTk4eiBNMzIuOTk4LDJ2Mi43NzdIMi4wMDJWMkgzMi45OTh6IE0yLDMzVjYuNzc3aDMxVjMzSDJ6IiBmaWxsPSIjRkZGRkZGIi8+CgkJPHJlY3QgeD0iNy41IiB5PSI5Ljg4OSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjRkZGRkZGIi8+Cgk8L2c+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" /></a>
+            <h1 class="title">REPORT_TITLE</h1>
+        </div>
+    </header>
+    <h1 class="hidden-content">REPORT_TITLE</h1>
+    <div id="ts-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Test Suite ID</th>
+                    <th>Environment</th>
+                    <th>Status</th>
+                    <th>Failed Tests / Total</th>
+                </tr>
+            </thead>
+            <tbody id="ts-table-body"></tbody>
+        </table>
+    </div>
+    <script type="text/javascript">
+    var tsList = JSON.parse('TEST_SUITE_REPORT_LIST');
+
+    function ready(fn) {
+        if (document.readyState != 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    ready(function() {
+        var tsTableBody = document.getElementById('ts-table-body');
+        tsList.forEach(function(item, index) {
+            var row = document.createElement('tr');
+            row.innerHTML = '<td>' + (index + 1) + '</td><td><a href="' + item.report + '" target="_blank" title="Open report in new window">' + item.id + '</a></td><td><i class="icon ' + item.environment.toLowerCase() + '"></i>' + item.environment + '</td><td style="' + getBackgroundColorStyle(item.status_color) + '">' + item.status + '</td><td style="' + getBackgroundColorStyle(item.fail_color) + '">' + item.fail_on_total + '</td>';
+            tsTableBody.appendChild(row);
+        });
+    });
+
+    function getBackgroundColorStyle(color) {
+        if (color === "") {
+            return "";
+        }
+        if (color === "15") {
+            color = "lightgray";
+        }
+        return "background-color: " + color;
+    }
+    </script>
+</body>
+
+</html>

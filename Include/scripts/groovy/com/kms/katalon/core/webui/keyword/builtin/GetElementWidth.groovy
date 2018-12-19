@@ -61,7 +61,7 @@ public class GetElementWidth extends WebUIAbstractKeyword {
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                  WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                  String testObjectID = to.getObjectId()
-                 logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_GETTING_ELEMENT_WIDTH, testObjectID))
+                 logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_GETTING_ELEMENT_WIDTH, testObjectID))
                  int width = webElement.getSize().width
                  logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_PASSED_GET_ELEMENT_WIDTH, testObjectID, width))
                  return width;

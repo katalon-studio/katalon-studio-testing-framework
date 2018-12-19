@@ -45,7 +45,7 @@ public class StartApplicationKeyword extends MobileAbstractKeyword {
         MobileKeywordMain.runKeyword({
             Preconditions.checkArgument(StringUtils.isNotEmpty(appFile), CoreMobileMessageConstants.KW_MSG_APP_FILE_MISSING);
             String applicationFileAbs = getAbsolutePath(appFile)
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_STARTING_APP_AT, StringUtils.defaultString(applicationFileAbs)))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_STARTING_APP_AT, StringUtils.defaultString(applicationFileAbs)))
             MobileDriverFactory.startMobileDriver(applicationFileAbs, uninstallAfterCloseApp)
             logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_START_APP_AT,  StringUtils.defaultString(applicationFileAbs)))
         }, flowControl, false, MessageFormat.format(StringConstants.KW_MSG_UNABLE_TO_START_APP_AT, StringUtils.defaultString(appFile)))

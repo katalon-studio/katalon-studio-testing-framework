@@ -53,26 +53,26 @@ import com.kms.katalon.core.webui.util.FileUtil
 @Action(value = "getViewportTopPosition")
 public class GetViewportTopPositionKeyword extends WebUIAbstractKeyword {
 
-	@CompileStatic
-	@Override
-	public SupportLevel getSupportLevel(Object ...params) {
-		return super.getSupportLevel(params)
-	}
+    @CompileStatic
+    @Override
+    public SupportLevel getSupportLevel(Object ...params) {
+        return super.getSupportLevel(params)
+    }
 
-	@CompileStatic
-	@Override
-	public Object execute(Object ...params) {
-		FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
-		return getViewportTopPosition(flowControl)
-	}
+    @CompileStatic
+    @Override
+    public Object execute(Object ...params) {
+        FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
+        return getViewportTopPosition(flowControl)
+    }
 
-	@CompileStatic
-	public int getViewportTopPosition(FailureHandling flowControl) {
-		return WebUIKeywordMain.runKeywordAndReturnInt({
-			Number topPosition = (Number) ((JavascriptExecutor) DriverFactory.getWebDriver()).executeScript('return window.pageYOffset || document.documentElement.scrollTop;')
-			int topPositionIntValue = topPosition.intValue()
-			logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_TOP_POSITION_X, topPositionIntValue.toString()))
-			return topPositionIntValue
-		}, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_VIEWPORT_TOP_POSITION)
-	}
+    @CompileStatic
+    public int getViewportTopPosition(FailureHandling flowControl) {
+        return WebUIKeywordMain.runKeywordAndReturnInt({
+            Number topPosition = (Number) ((JavascriptExecutor) DriverFactory.getWebDriver()).executeScript('return window.pageYOffset || document.documentElement.scrollTop;')
+            int topPositionIntValue = topPosition.intValue()
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_TOP_POSITION_X, topPositionIntValue.toString()))
+            return topPositionIntValue
+        }, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_VIEWPORT_TOP_POSITION)
+    }
 }

@@ -24,7 +24,6 @@ import com.kms.katalon.core.main.TestResult
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCase
 import com.kms.katalon.core.testcase.TestCaseBinding
-import java.text.MessageFormat
 import com.kms.katalon.core.configuration.RunConfiguration
 
 @Action(value = "verifyMatch")
@@ -50,7 +49,7 @@ public class VerifyMatchKeyword extends AbstractKeyword {
     public boolean verifyMatch(String actualText, String expectedText, boolean isRegex, FailureHandling flowControl) throws StepFailedException {
         String regularExpressionLog = ((isRegex) ? " using regular expression" : "")
         return KeywordMain.runKeyword({
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_MATCHING_ACTUAL_TXT_W_EXPECTED_TXT, actualText, expectedText, regularExpressionLog))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_MATCHING_ACTUAL_TXT_W_EXPECTED_TXT, actualText, expectedText, regularExpressionLog))
             if (KeywordHelper.match(actualText, expectedText, isRegex)) {
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_ACTUAL_TXT_MATCHED_EXPECTED_TXT, actualText, expectedText, regularExpressionLog))
                 return true

@@ -40,7 +40,7 @@ public class SetEncryptedTextKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_TXT)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_TXT)
                 if (encryptedText == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_TXT_IS_NULL)
                 }
@@ -50,10 +50,10 @@ public class SetEncryptedTextKeyword extends WebUIAbstractKeyword {
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                 
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
                 webElement.clear()
                 
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SETTING_OBJ_TXT_TO_ENCRYPTED_VAL, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SETTING_OBJ_TXT_TO_ENCRYPTED_VAL, to.getObjectId()))
                 webElement.sendKeys(rawText)
                 
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_ENCRYPTED_TXT_IS_SET_ON_OBJ, to.getObjectId()))

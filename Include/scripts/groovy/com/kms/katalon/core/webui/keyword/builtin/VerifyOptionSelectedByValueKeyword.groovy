@@ -78,7 +78,7 @@ public class VerifyOptionSelectedByValueKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_VAL)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_VAL)
                 if (value == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_VAL_CANNOT_BE_NULL)
                 }

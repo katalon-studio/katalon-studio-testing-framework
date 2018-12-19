@@ -70,7 +70,7 @@ public class GetViewportHeightKeyword extends WebUIAbstractKeyword {
     public int getViewportHeight(FailureHandling flowControl) throws StepFailedException {
         return WebUIKeywordMain.runKeywordAndReturnInt({
             int viewportHeight = WebUiCommonHelper.getViewportHeight(DriverFactory.getWebDriver())
-            KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_HEIGHT_X, viewportHeight.toString()))
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_GET_VIEWPORT_HEIGHT_X, viewportHeight.toString()))
             return viewportHeight
         }, flowControl, false, StringConstants.KW_MSG_CANNOT_GET_VIEWPORT_HEIGHT)
     }

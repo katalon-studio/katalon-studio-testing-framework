@@ -75,7 +75,7 @@ public class TakeScreenshotKeyword extends MobileAbstractKeyword {
     }
 
     private String defaultFileName() {
-        return KeywordLogger.getInstance().getLogFolderPath() + File.separator + System.currentTimeMillis() + ".png";
+        return logger.getLogFolderPath() + File.separator + System.currentTimeMillis() + ".png";
     }
 
     @CompileStatic

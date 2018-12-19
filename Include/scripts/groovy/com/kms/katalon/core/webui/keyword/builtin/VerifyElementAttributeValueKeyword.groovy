@@ -76,7 +76,7 @@ public class VerifyElementAttributeValueKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                KeywordLogger.getInstance().logInfo(StringConstants.COMM_LOG_INFO_CHECKING_ATTRIBUTE_NAME)
+                logger.logDebug(StringConstants.COMM_LOG_INFO_CHECKING_ATTRIBUTE_NAME)
                 if (attributeName == null) {
                     throw new IllegalArgumentException(StringConstants.COMM_EXC_ATTRIBUTE_NAME_IS_NULL)
                 }
@@ -85,7 +85,7 @@ public class VerifyElementAttributeValueKeyword extends WebUIAbstractKeyword {
                 WebElement foundElement = WebUIAbstractKeyword.findWebElement(to, timeOut)
                 if (foundElement.getAttribute(attributeName) != null) {
                     if (foundElement.getAttribute(attributeName).equals(attributeValue)) {
-                        KeywordLogger.getInstance().logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_ATTRIBUTE_Y_VALUE_Z, to.getObjectId(), attributeName, attributeValue))
+                        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_ATTRIBUTE_Y_VALUE_Z, to.getObjectId(), attributeName, attributeValue))
                         return true
                     } else {
                         WebUIKeywordMain.stepFailed(

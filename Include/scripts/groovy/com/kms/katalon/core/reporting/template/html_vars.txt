@@ -1,0 +1,45 @@
+<script type="text/javascript">
+window.output = {};
+</script>
+
+<script type="text/javascript">
+window.output["suite"] = 
+//JavaScript Suite model for Reporting
+;
+</script>
+
+<script type="text/javascript">
+window.output["strings"] = [];
+</script>
+
+<script type="text/javascript">
+window.output["strings"] = window.output["strings"].concat([
+//JavaScript Strings constant for Reporting
+]);
+</script>
+
+<script type="text/javascript">
+window.output["errors"] = [];
+</script>
+
+<script type="text/javascript">
+window.output["generatedTimestamp"] = "20141111 15:03:52 GMT +08:00";
+</script>
+
+<script type="text/javascript">
+window.output["generatedMillis"] = 0;
+</script>
+
+<script type="text/javascript">
+window.output["baseMillis"] = 0;
+</script>
+
+<script type="text/javascript">
+window.settings = {"defaultLevel":"INFO","minLevel":"PASSED","reportURL":"report.html","splitLogBase":"log","title":""};
+</script>
+
+<script type="text/javascript">
+window.environment_info = 
+//JavaScript Test Execution Environment Info
+;
+</script>

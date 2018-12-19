@@ -69,7 +69,7 @@ public class CloseBrowserKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void closeBrowser(FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CLOSING_BROWSER)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CLOSING_BROWSER)
             DriverFactory.closeWebDriver()
             logger.logPassed(StringConstants.KW_LOG_PASSED_BROWSER_IS_CLOSED)
         }, flowControl, true, StringConstants.KW_MSG_UNABLE_TO_CLOSE_BROWSER)

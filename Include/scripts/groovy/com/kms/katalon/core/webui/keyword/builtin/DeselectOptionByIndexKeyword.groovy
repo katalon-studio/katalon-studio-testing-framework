@@ -74,7 +74,7 @@ public class DeselectOptionByIndexKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_INDEX_RANGE)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_INDEX_RANGE)
                 if (range == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_INDEX_RANGE_IS_NULL)
                 }

@@ -78,7 +78,7 @@ public class RightClickOffsetKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_RIGHT_CLICKING_ON_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
+                logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_RIGHT_CLICKING_ON_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
                 Actions action = new Actions(DriverFactory.getWebDriver())
                 action.moveToElement(webElement, offsetX, offsetY).contextClick().build().perform()
                 logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_PASSED_OBJ_IS_RIGHT_CLICKED_ON_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))

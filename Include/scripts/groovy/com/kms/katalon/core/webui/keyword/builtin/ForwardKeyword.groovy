@@ -69,7 +69,7 @@ public class ForwardKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void forward(FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_NAVIGATING_FORWARD)
+            logger.logDebug(StringConstants.KW_LOG_INFO_NAVIGATING_FORWARD)
             DriverFactory.getWebDriver().navigate().forward()
             logger.logPassed(StringConstants.KW_LOG_PASSED_NAVIGATE_FORWARD)
         }, flowControl, true, StringConstants.KW_MSG_CANNOT_FORWARD_TO_NEXT_PAGE)

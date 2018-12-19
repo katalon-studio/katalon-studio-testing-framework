@@ -13,7 +13,7 @@ import com.kms.katalon.core.util.internal.ExceptionsUtil
 
 public class KeywordMain {
     private static final String EMPTY_REASON = "";
-    private static KeywordLogger logger = KeywordLogger.getInstance();
+    private static final KeywordLogger logger = KeywordLogger.getInstance(KeywordMain.class);
     
     @CompileStatic
     public static stepFailed(String message, FailureHandling flHandling) throws StepFailedException {

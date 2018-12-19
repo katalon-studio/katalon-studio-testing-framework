@@ -81,7 +81,7 @@ public class MouseOverOffsetKeyword extends WebUIAbstractKeyword {
                 }
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement hoverElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_MOVING_MOUSE_OVER_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
+                logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_MOVING_MOUSE_OVER_OBJ_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))
                 Actions builder = new Actions(DriverFactory.getWebDriver())
                 builder.moveToElement(hoverElement, offsetX, offsetY).perform()
                 logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_PASSED_OBJ_IS_HOVERED_OFFSET_X_Y, to.getObjectId(), offsetX, offsetY))

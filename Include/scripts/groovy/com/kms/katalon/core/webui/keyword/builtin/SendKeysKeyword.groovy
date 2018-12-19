@@ -48,7 +48,7 @@ public class SendKeysKeyword extends WebUIAbstractKeyword {
                 }
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 String readableText = SeleniumKeysUtil.getReadableText(strKeys)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SENDING_KEYS_TO_OBJ, [readableText, to.getObjectId()] as Object[]))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SENDING_KEYS_TO_OBJ, [readableText, to.getObjectId()] as Object[]))
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                 webElement.sendKeys(strKeys)
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_KEYS_SENT_TO_OBJ, [readableText, to.getObjectId()] as Object[]))

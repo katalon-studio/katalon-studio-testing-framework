@@ -75,7 +75,7 @@ public class GetNumberOfTotalOptionKeyword extends WebUIAbstractKeyword {
                 WebUiCommonHelper.checkTestObjectParameter(to)
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_COUNTING_TOTAL_OPTS_OF_OBJ_X, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_COUNTING_TOTAL_OPTS_OF_OBJ_X, to.getObjectId()))
                 Select select = new Select(webElement)
                 int num = select.getOptions().size()
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_X_OPTS_OF_OBJ_Y_COUNTED, [Integer.toString(num), to.getObjectId()] as Object[]))

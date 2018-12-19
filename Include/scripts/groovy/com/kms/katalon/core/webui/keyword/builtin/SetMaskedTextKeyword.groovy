@@ -78,17 +78,17 @@ public class SetMaskedTextKeyword extends WebUIAbstractKeyword {
             boolean isSwitchIntoFrame = false
             try {
                 WebUiCommonHelper.checkTestObjectParameter(to)
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_TXT)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_TXT)
                 if (text == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_TXT_IS_NULL)
                 }
                 isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to)
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
                 webElement.clear()
 
                 webElement = WebUIAbstractKeyword.findWebElement(to)
-                logger.logInfo(MessageFormat.format(
+                logger.logDebug(MessageFormat.format(
                         StringConstants.KW_LOG_INFO_SETTING_OBJ_TXT_TO_VAL, [to.getObjectId(), getMaskedText(text)] as Object[]))
                 webElement.sendKeys(text)
                 logger.logPassed(MessageFormat.format(

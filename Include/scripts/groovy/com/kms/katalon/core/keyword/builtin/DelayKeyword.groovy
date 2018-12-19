@@ -24,7 +24,6 @@ import com.kms.katalon.core.main.TestResult
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCase
 import com.kms.katalon.core.testcase.TestCaseBinding
-import java.text.MessageFormat
 import com.kms.katalon.core.configuration.RunConfiguration
 
 @Action(value = "delay")
@@ -47,7 +46,7 @@ public class DelayKeyword extends AbstractKeyword {
     @CompileStatic
     public void delay(Object second, FailureHandling flowControl) throws StepFailedException {
         KeywordMain.runKeyword({
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_DELAYING_BROWSER_IN_SEC, second))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_DELAYING_BROWSER_IN_SEC, second))
             int secondIntValue = (int) Integer.valueOf(String.valueOf(second))
             try {
                 Thread.sleep(secondIntValue * 1000)

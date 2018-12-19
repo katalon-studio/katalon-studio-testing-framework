@@ -61,11 +61,11 @@ public class AuthenticateKeyword extends WebUIAbstractKeyword {
                 }
                 
                 //Pre-check username and password
-                KeywordLogger.getInstance().logInfo(StringConstants.KW_LOG_INFO_CHECKING_USERNAME)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_USERNAME)
                 if (userName == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_USERNAME_IS_NULL)
                 }
-                KeywordLogger.getInstance().logInfo(StringConstants.KW_LOG_INFO_CHECKING_PASSWORD)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_PASSWORD)
                 if (password == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_PASSWORD_IS_NULL)
                 }

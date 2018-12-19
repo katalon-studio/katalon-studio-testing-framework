@@ -70,13 +70,13 @@ public class NavigateToUrlKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public void navigateToUrl(String rawUrl, FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_URL)
+            logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_URL)
             if (rawUrl == null || rawUrl.isEmpty()) {
                 throw new IllegalArgumentException(StringConstants.KW_EXC_URL_CANNOT_BE_NULL_OR_EMPTY)
             }
 
             URL url = PathUtil.getUrl(rawUrl, "http")
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_NAVIGATING_TO, url.toString()))
+            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_NAVIGATING_TO, url.toString()))
             WebDriver webDriver = DriverFactory.getWebDriver()
             webDriver.navigate().to(url.toString())
             logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_NAVIGATE_TO, url.toString()))

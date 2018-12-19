@@ -73,7 +73,7 @@ public class getCSSValueKeyword extends WebUIAbstractKeyword {
         WebUIKeywordMain.runKeyword({
             WebUiCommonHelper.checkTestObjectParameter(to)
             WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
-            logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_GETTING_CSS_VALUE, cssProp, to.getObjectId()))
+            logger.logDebug(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_INFO_GETTING_CSS_VALUE, cssProp, to.getObjectId()))
             String cssValue = webElement.getCssValue(cssProp)
             if (StringUtils.isEmpty(cssValue)) {
                 WebUIKeywordMain.stepFailed(MessageFormat.format(CoreWebuiMessageConstants.KW_MSG_CANNOT_GET_CSS_VALUE, cssProp, to.getObjectId()), flowControl, null, false)

@@ -24,7 +24,6 @@ import com.kms.katalon.core.main.TestResult
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCase
 import com.kms.katalon.core.testcase.TestCaseBinding
-import java.text.MessageFormat
 import com.kms.katalon.core.configuration.RunConfiguration
 
 @Action(value = "callTestCase")
@@ -50,12 +49,12 @@ public class CallTestCaseKeyword extends AbstractKeyword {
         KeywordMain.runKeyword({
             List<Throwable> parentErrors = ErrorCollector.getCollector().getCoppiedErrors()
             try {
-                logger.logInfo(StringConstants.KW_LOG_INFO_CHECKING_CALLED_TC)
+                logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_CALLED_TC)
                 if (calledTestCase == null) {
                     throw new IllegalArgumentException(StringConstants.KW_EXC_CALLED_TC_IS_NULL)
                 }
 
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_STARTING_TO_CALL_TC, calledTestCase.getTestCaseId()))
+                logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_STARTING_TO_CALL_TC, calledTestCase.getTestCaseId()))
                 TestResult result = TestCaseMain.runTestCase(calledTestCase.getTestCaseId(), new TestCaseBinding(
                         calledTestCase.getTestCaseId(), binding), flowControl, false, false)
                 switch (result.getTestStatus().getStatusValue()) {

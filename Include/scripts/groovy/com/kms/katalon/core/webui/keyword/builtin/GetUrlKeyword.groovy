@@ -69,7 +69,7 @@ public class GetUrlKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     public String getUrl(FailureHandling flowControl) throws StepFailedException {
         return WebUIKeywordMain.runKeyword({
-            logger.logInfo(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_URL)
+            logger.logDebug(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_URL)
             String url = DriverFactory.getWebDriver().getCurrentUrl()
             logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CURR_WINDOW_URL, url))
             return url

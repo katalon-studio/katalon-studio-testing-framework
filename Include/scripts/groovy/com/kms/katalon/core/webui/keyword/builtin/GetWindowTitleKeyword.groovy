@@ -53,26 +53,26 @@ import com.kms.katalon.core.webui.util.FileUtil
 @Action(value = "getWindowTitle")
 public class GetWindowTitleKeyword extends WebUIAbstractKeyword {
 
-	@CompileStatic
-	@Override
-	public SupportLevel getSupportLevel(Object ...params) {
-		return super.getSupportLevel(params)
-	}
+    @CompileStatic
+    @Override
+    public SupportLevel getSupportLevel(Object ...params) {
+        return super.getSupportLevel(params)
+    }
 
-	@CompileStatic
-	@Override
-	public Object execute(Object ...params) {
-		FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
-		return getWindowTitle(flowControl)
-	}
+    @CompileStatic
+    @Override
+    public Object execute(Object ...params) {
+        FailureHandling flowControl = (FailureHandling)(params.length > 0 && params[0] instanceof FailureHandling ? params[0] : RunConfiguration.getDefaultFailureHandling())
+        return getWindowTitle(flowControl)
+    }
 
-	@CompileStatic
-	public String getWindowTitle(FailureHandling flowControl) throws StepFailedException {
-		return WebUIKeywordMain.runKeyword({
-			logger.logInfo(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_TITLE)
-			String windowTitle = String.valueOf(DriverFactory.getWebDriver().getTitle())
-			logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CURR_WINDOW_TITLE, windowTitle))
-			return windowTitle
-		}, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_CURR_WINDOW_TITLE)
-	}
+    @CompileStatic
+    public String getWindowTitle(FailureHandling flowControl) throws StepFailedException {
+        return WebUIKeywordMain.runKeyword({
+            logger.logDebug(StringConstants.KW_LOG_INFO_GETTING_CURR_WINDOW_TITLE)
+            String windowTitle = String.valueOf(DriverFactory.getWebDriver().getTitle())
+            logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CURR_WINDOW_TITLE, windowTitle))
+            return windowTitle
+        }, flowControl, true, StringConstants.KW_MSG_CANNOT_GET_CURR_WINDOW_TITLE)
+    }
 }
