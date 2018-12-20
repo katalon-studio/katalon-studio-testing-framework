@@ -20,7 +20,7 @@ You can use this project for two purposes:
 
 ## How to contribute a new Keywords
 
-This project requires Katalon Studio 5.8.6.
+This project requires Katalon Studio 5.10.0.
 
 1. Fork this repository.
 2. Open this project with Katalon Studio.
