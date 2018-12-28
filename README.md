@@ -1,5 +1,5 @@
-Katalon Studio's Open-source Built-in Keywords
-==============================================
+# Katalon Studio Open-source Testing Framework
+
 
 ## What is it for
 
