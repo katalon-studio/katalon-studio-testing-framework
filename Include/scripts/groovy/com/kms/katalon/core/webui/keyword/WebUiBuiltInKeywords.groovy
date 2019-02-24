@@ -3839,4 +3839,29 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
             message,
             flowControl)
     }
+
+    /**
+     * This sample demonstrates how to create a new built-in keyword.
+     * The real work is implemented in "Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy".
+     * The respective test case is defined in "Test Cases/HelloWorldFromWebUiTestCase".
+     *
+     * @since 5.8.7
+     * @param message the greeting message
+     * @param flowControl FailureHandling
+     * @return the greeting message
+     * @throws StepFailedException
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static boolean setDate(
+            TestObject to,
+            String date,
+            FailureHandling flowControl) throws StepFailedException {
+        return (String) KeywordExecutor.executeKeywordForPlatform(
+                KeywordExecutor.PLATFORM_WEB,
+                "setDateCalendar",
+                to,
+                date,
+                flowControl)
+    }
 }
