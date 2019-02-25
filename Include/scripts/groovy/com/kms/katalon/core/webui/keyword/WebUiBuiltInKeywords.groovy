@@ -3855,13 +3855,17 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
     public static boolean setDate(
             TestObject to,
-            String date,
+            int day,
+            int month,
+            int year,
             FailureHandling flowControl) throws StepFailedException {
         return (String) KeywordExecutor.executeKeywordForPlatform(
                 KeywordExecutor.PLATFORM_WEB,
                 "setDateCalendar",
                 to,
-                date,
+                day,
+                month,
+                year,
                 flowControl)
     }
 }

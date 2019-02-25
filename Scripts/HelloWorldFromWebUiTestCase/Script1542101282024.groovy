@@ -38,7 +38,7 @@ WebUI.click(findTestObject('startDate'), FailureHandling.STOP_ON_FAILURE)
 
 WebUI.delay(2)
 
-WebUI.setDate(findTestObject('calendar'), '', FailureHandling.STOP_ON_FAILURE)
+WebUI.setDate(findTestObject('calendar'), 1, 1, 2020, FailureHandling.STOP_ON_FAILURE)
 
 WebUI.delay(15)
 
