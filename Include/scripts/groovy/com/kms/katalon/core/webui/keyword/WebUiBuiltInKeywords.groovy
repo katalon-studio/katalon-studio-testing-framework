@@ -3846,26 +3846,31 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      * The respective test case is defined in "Test Cases/HelloWorldFromWebUiTestCase".
      *
      * @since 5.8.7
-     * @param message the greeting message
+     * @param to represent a calendar web element
+     * @param day the day value begin with 1
+     * @param month the month value between 1 and 12
+     * @param year four-digit value of the year
+     * @param slideTimeOut the waiting time (millisecond) when moving between months
      * @param flowControl FailureHandling
-     * @return the greeting message
      * @throws StepFailedException
      */
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
-    public static boolean setDate(
+    public static void setDate(
             TestObject to,
             int day,
             int month,
             int year,
+            int slideTimeOut,
             FailureHandling flowControl) throws StepFailedException {
-        return (String) KeywordExecutor.executeKeywordForPlatform(
+        KeywordExecutor.executeKeywordForPlatform(
                 KeywordExecutor.PLATFORM_WEB,
                 "setDateCalendar",
                 to,
                 day,
                 month,
                 year,
+                slideTimeOut,
                 flowControl)
     }
 }
