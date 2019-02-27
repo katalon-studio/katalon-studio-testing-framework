@@ -3841,9 +3841,8 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     }
 
     /**
-     * This sample demonstrates how to create a new built-in keyword.
-     * The real work is implemented in "Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy".
-     * The respective test case is defined in "Test Cases/HelloWorldFromWebUiTestCase".
+     * 
+     * Set date for the calendar. Assume that the calendar is visible on UI.
      *
      * @since 5.8.7
      * @param to represent a calendar web element
