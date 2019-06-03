@@ -35,6 +35,8 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
      * relativeFilePath of Feature file
      * @param flowControl
      * an instance {@link FailureHandling} that controls the running flow
+     * @param tagExpression
+     * expression of tags: "(@production and not @pending)"
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      * 
@@ -42,7 +44,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
      * @see CucumberRunnerResult
      */
     @Keyword
-    public static CucumberRunnerResult runFeatureFile(String relativeFilePath, FailureHandling flowControl) {
+    public static CucumberRunnerResult runFeatureFile(String relativeFilePath, FailureHandling flowControl, String tagExpression = null) {
         return KeywordMain.runKeyword({
             if (StringUtils.isEmpty(relativeFilePath)) {
                 throw new IllegalArgumentException("featureRelativeFilePath param must not be null or empty")
@@ -70,6 +72,9 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
                 "--plugin",
                 CucumberReporter.class.getName()
             ]
+            if (tagExpression != null) {
+				argv = argv + ["--tags", tagExpression ]
+			}
             if (runningMode == RunningMode.CONSOLE) {
                 argv = argv + ["--monochrome"]
             }
@@ -91,14 +96,16 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
      *
      * @param relativeFilePath
      * relativeFilePath of Feature file
+     * @param tagExpression
+     * expression of tags: "(@production and not @pending)"
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      *
      * @since 5.7
      */
     @Keyword
-    public static boolean runFeatureFile(String relativeFilePath) {
-        return runFeatureFile(relativeFilePath, RunConfiguration.getDefaultFailureHandling());
+    public static boolean runFeatureFile(String relativeFilePath, String tagExpression = null) {
+        return runFeatureFile(relativeFilePath, RunConfiguration.getDefaultFailureHandling(), tagExpression);
     }
 
     /**
@@ -111,12 +118,14 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
      * folder relative path that starts from the current project location
      * @param flowControl
      * an instance {@link FailureHandling} that controls the running flow
+     * @param tagExpression
+     * expression of tags: "(@production and not @pending)"
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      * @since 5.7
      */
     @Keyword
-    public static boolean runFeatureFolder(String folderRelativePath, FailureHandling flowControl) {
+    public static boolean runFeatureFolder(String folderRelativePath, FailureHandling flowControl, String tagExpression = null) {
         return KeywordMain.runKeyword({
             if (StringUtils.isEmpty(folderRelativePath)) {
                 throw new IllegalArgumentException("folderRelativePath param must not be null")
@@ -141,6 +150,9 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
                 "--plugin",
                 "junit:"+ reportDir + "/cucumber.xml"
             ]
+            if (tagExpression != null) {
+				argv = argv + ["--tags", tagExpression ]
+			}
             if (runningMode == RunningMode.CONSOLE) {
                 argv = argv + ["--monochrome"]
             }
@@ -163,13 +175,15 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
      *
      * @param folderRelativePath
      * folder relative path that starts from current project location
+     * @param tagExpression
+     * expression of tags: "(@production and not @pending)"
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      * @since 5.7
      */
     @Keyword
-    public static boolean runFeatureFolder(String folderRelativePath) {
-        return runFeatureFolder(folderRelativePath, RunConfiguration.getDefaultFailureHandling())
+    public static boolean runFeatureFolder(String folderRelativePath, String tagExpression = null) {
+        return runFeatureFolder(folderRelativePath, RunConfiguration.getDefaultFailureHandling(), tagExpression)
     }
 
     /**
