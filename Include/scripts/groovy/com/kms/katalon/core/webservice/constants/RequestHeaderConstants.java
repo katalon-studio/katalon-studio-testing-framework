@@ -56,6 +56,8 @@ public class RequestHeaderConstants {
     public static final String SIGNATURE_METHOD_HMAC_SHA1 = "HMAC-SHA1";
 
     public static final String AUTHORIZATION_TYPE_OAUTH_1_0 = "OAuth 1.0";
+    
+	public static final String AUTHORIZATION_TYPE_OAUTH_2_0 =  "OAuth 2.0";
 
     public static final String AUTHORIZATION_TYPE_BASIC_AUTH = "Basic";
 
@@ -66,5 +68,15 @@ public class RequestHeaderConstants {
     public static final String CONTENT_TYPE_APPLICATION_XML = "application/xml";
 
     public static final String USER_AGENT = "User-Agent";
+
+	public static final String SIGNATURE_METHOD_PASSWORD_CREDENTIALS = "Password Credentials";
+
+	public static final String SIGNATURE_METHOD_AUTHORIZTION_CODE = "Authorization Code";
+
+	public static final String SIGNATURE_METHOD_IMPLICIT = "Implicit";
+
+	public static final String SIGNATURE_METHOD_CLIENT_CREDENTIALS = "Client Credentials";
+
+	public static final String REFRESH_TOKEN = "Refresh Token";
 
 }

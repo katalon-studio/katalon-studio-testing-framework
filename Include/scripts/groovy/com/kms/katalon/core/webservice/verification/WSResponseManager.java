@@ -19,10 +19,10 @@ import com.kms.katalon.core.testobject.impl.HttpTextBodyContent;
 public class WSResponseManager {
 
     private static final String REQUEST_OBJECT_FILE_EXTENSION = ".rs";
+    
+    private RequestObject request;
 
     private ResponseObject response;
-
-    private String requestObjectId;
 
     private static WSResponseManager instance;
 
@@ -53,21 +53,22 @@ public class WSResponseManager {
         return response;
     }
 
-    public void setCurrentResponse(ResponseObject responseObject) {
-        response = responseObject;
+    public void setCurrentResponse(ResponseObject response) {
+        this.response = response;
     }
 
     public RequestObject getCurrentRequest() throws Exception {
-        if (requestObjectId == null) {
-            requestObjectId = (String) RunConfiguration.getProperty(StringConstants.WS_VERIFICATION_REQUEST_OBJECT_ID);
+        if (request == null) {
+            String requestObjectId = (String) RunConfiguration.getProperty(StringConstants.WS_VERIFICATION_REQUEST_OBJECT_ID);
+            File objectFile = new File(RunConfiguration.getProjectDir(), requestObjectId + REQUEST_OBJECT_FILE_EXTENSION);
+            request = (RequestObject) ObjectRepository.findRequestObject(requestObjectId, objectFile);
         }
-        File objectFile = new File(RunConfiguration.getProjectDir(), requestObjectId + REQUEST_OBJECT_FILE_EXTENSION);
-        RequestObject requestObject = (RequestObject) ObjectRepository.findRequestObject(requestObjectId, objectFile);
-        return requestObject;
+        
+        return request;
     }
 
-    public void setRequestObjectId(String requestObjectId) {
-        this.requestObjectId = requestObjectId;
+    public void setCurrentRequest(RequestObject request) {
+        this.request = request;
     }
 
     private static class HttpBodyContentInstanceCreator implements InstanceCreator<HttpBodyContent> {

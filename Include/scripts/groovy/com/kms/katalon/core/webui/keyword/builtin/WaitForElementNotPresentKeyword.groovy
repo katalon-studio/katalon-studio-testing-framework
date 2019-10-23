@@ -68,7 +68,6 @@ public class WaitForElementNotPresentKeyword extends WebUIAbstractKeyword {
         return waitForElementNotPresent(to, timeOut, flowControl)
     }
 
-    @CompileStatic
     public boolean waitForElementNotPresent(TestObject to, int timeOut, FailureHandling flowControl) throws StepFailedException {
         return WebUIKeywordMain.runKeyword({
             boolean isSwitchIntoFrame = false

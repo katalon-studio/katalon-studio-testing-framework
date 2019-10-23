@@ -1,16 +1,17 @@
 package com.kms.katalon.core.mobile.helper;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MultiTouchAction;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.android.AndroidDriver;
-
 import java.text.MessageFormat;
 
 import com.kms.katalon.core.exception.StepFailedException;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.mobile.constants.StringConstants;
 import com.kms.katalon.core.mobile.keyword.internal.MobileDriverFactory;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MultiTouchAction;
+import io.appium.java_client.TouchAction;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.touch.offset.PointOption;
 
 public class MobileGestureCommonHelper {
     
@@ -35,15 +36,15 @@ public class MobileGestureCommonHelper {
         int offsetParts = offset / PINCH_PART_LENGTH;
         int offsetRemainingPart = offset % PINCH_PART_LENGTH;
         AppiumDriver<?> driver = MobileDriverFactory.getDriver();
-        TouchAction leftTouchAction = new TouchAction(driver).press(startX, startY);
-        TouchAction rightTouchAction = new TouchAction(driver).press(startX, startY);
+        TouchAction<?> leftTouchAction = new TouchAction<>(driver).press(PointOption.point(startX, startY));
+        TouchAction<?> rightTouchAction = new TouchAction<>(driver).press(PointOption.point(startX, startY));
         for (int i = 0; i < offsetParts; i++) {
-            leftTouchAction = leftTouchAction.moveTo(0, -PINCH_PART_LENGTH);
-            rightTouchAction = rightTouchAction.moveTo(0, PINCH_PART_LENGTH);
+            leftTouchAction = leftTouchAction.moveTo(PointOption.point(0, -PINCH_PART_LENGTH));
+            rightTouchAction = rightTouchAction.moveTo(PointOption.point(0, PINCH_PART_LENGTH));
         }
         if (offsetRemainingPart != 0) {
-            leftTouchAction = leftTouchAction.moveTo(0, -offsetRemainingPart);
-            rightTouchAction = rightTouchAction.moveTo(0, offsetRemainingPart);
+            leftTouchAction = leftTouchAction.moveTo(PointOption.point(0, -offsetRemainingPart));
+            rightTouchAction = rightTouchAction.moveTo(PointOption.point(0, offsetRemainingPart));
         }
         leftTouchAction = leftTouchAction.release();
         rightTouchAction = rightTouchAction.release();
@@ -66,15 +67,15 @@ public class MobileGestureCommonHelper {
         int offsetParts = offset / PINCH_PART_LENGTH;
         int offsetRemainingPart = offset % PINCH_PART_LENGTH;
         int additionalOffset = (driver instanceof AndroidDriver<?>) ? ANDROID_PINCH_OFFSET : IOS_PINCH_OFFSET;
-        TouchAction leftTouchAction = new TouchAction(driver).press(endX, endY - offset - additionalOffset);
-        TouchAction rightTouchAction = new TouchAction(driver).press(endX, endY + offset + additionalOffset);
+        TouchAction<?> leftTouchAction = new TouchAction<>(driver).press(PointOption.point(endX, endY - offset - additionalOffset));
+        TouchAction<?> rightTouchAction = new TouchAction<>(driver).press(PointOption.point(endX, endY + offset + additionalOffset));
         for (int i = 0; i < offsetParts; i++) {
-            leftTouchAction = leftTouchAction.moveTo(0, PINCH_PART_LENGTH);
-            rightTouchAction = rightTouchAction.moveTo(0, -PINCH_PART_LENGTH);
+            leftTouchAction = leftTouchAction.moveTo(PointOption.point(0, PINCH_PART_LENGTH));
+            rightTouchAction = rightTouchAction.moveTo(PointOption.point(0, -PINCH_PART_LENGTH));
         }
         if (offsetRemainingPart != 0) {
-            leftTouchAction = leftTouchAction.moveTo(0, offsetRemainingPart);
-            rightTouchAction = rightTouchAction.moveTo(0, -offsetRemainingPart);
+            leftTouchAction = leftTouchAction.moveTo(PointOption.point(0, offsetRemainingPart));
+            rightTouchAction = rightTouchAction.moveTo(PointOption.point(0, -offsetRemainingPart));
         }
         leftTouchAction = leftTouchAction.release();
         rightTouchAction = rightTouchAction.release();

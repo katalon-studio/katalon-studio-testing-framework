@@ -1,8 +1,5 @@
 package com.kms.katalon.core.webui.driver;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.remote.MobileCapabilityType;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.MessageFormat;
@@ -10,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -22,6 +20,9 @@ import com.kms.katalon.core.driver.DriverType;
 import com.kms.katalon.core.exception.StepFailedException;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.webui.constants.StringConstants;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.remote.MobileCapabilityType;
 
 public class WebMobileDriverFactory {
     
@@ -75,16 +76,18 @@ public class WebMobileDriverFactory {
         return desireCapabilities;
     }
 
-    private static DesiredCapabilities createCapabilities(WebUIDriverType osType) {
+    private static DesiredCapabilities createCapabilities(WebUIDriverType osType, String platformVersion) {
         DesiredCapabilities capabilities = new DesiredCapabilities();
         Map<String, Object> driverPreferences = RunConfiguration.getDriverPreferencesProperties(MOBILE_DRIVER_PROPERTY);
         String deviceId = getDeviceId();
+        if (StringUtils.isNotEmpty(platformVersion)) {
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, platformVersion);
+        }
         if (driverPreferences != null && osType == WebUIDriverType.IOS_DRIVER) {
             capabilities.merge(toDesireCapabilities(driverPreferences, WebUIDriverType.IOS_DRIVER));
             capabilities.setCapability(MobileCapabilityType.BROWSER_NAME, SAFARI);
             if (deviceId == null) {
                 capabilities.setCapability(MobileCapabilityType.PLATFORM, getDeviceOS());
-                capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, getDeviceOSVersion());
             }
             try {
                 if (AppiumDriverManager.getXCodeVersion() >= 8) {
@@ -101,7 +104,7 @@ public class WebMobileDriverFactory {
             capabilities.setPlatform(Platform.ANDROID);
             capabilities.setCapability(MobileCapabilityType.BROWSER_NAME, CHROME);
         }
-        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, getDeviceName());
+        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, "test");
         if (deviceId != null) {
             capabilities.setCapability(MobileCapabilityType.UDID, deviceId);
         }
@@ -126,7 +129,7 @@ public class WebMobileDriverFactory {
      */
     public static AppiumDriver<?> createMobileDriver(WebUIDriverType osType)
             throws MobileDriverInitializeException, IOException, InterruptedException, AppiumStartException {
-        return AppiumDriverManager.createMobileDriver(osType, getDeviceId(), createCapabilities(osType));
+        return AppiumDriverManager.createMobileDriver(osType, getDeviceId(), createCapabilities(osType, getDeviceOSVersion()));
     }
 
     /**

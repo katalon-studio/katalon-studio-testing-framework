@@ -73,6 +73,41 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     public static void startApplication(String appFile, boolean uninstallAfterCloseApp) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "startApplication", appFile,uninstallAfterCloseApp)
     }
+    
+    /**
+     * Starts Appium driver and activate an installed application by it's given application ID.
+     * @param appId
+     *      ID of the application under test. It is package name for Android app, and bundleId for iOS app.
+     * @throws StepFailedException
+     *      If KS could not start Appium Driver, could not start the application or the application doesn't exist.
+     * @since 6.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_APPLICATION)
+    public static void startExistingApplication(String appId) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "startExistingApplication", appId)
+    }
+
+    /**
+     * Starts Appium driver and activate an installed application by it's given application ID.
+     * @param appId
+     *      ID of the application under test. It is package name for Android app, and bundleId for iOS app.
+     * @param flowControl 
+     *      Optional parameter: Used to control the step if the step failed. <p>
+     *      <ul>
+     *      <li>STOP_ON_FAILURE: throws a StepFailedException if the step failed (default).</li>
+     *      <li>CONTINUE_ON_FAILURE: continue the test if the test failed but the test result is still failed.</li>
+     *      <li>OPTIONAL: continue the test and ignore the test result.</li>
+     *      </ul> 
+     * @throws StepFailedException
+     *      If KS could not start Appium Driver, could not start the application or the application doesn't exist.
+     * @since 6.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_APPLICATION)
+    public static void startExistingApplication(String appId, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "startExistingApplication", appId, flowControl)
+    }
 
     /**
      * Close the current running application
@@ -178,7 +213,7 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     public static String takeScreenshot(String fileName) throws StepFailedException {
         return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", fileName)
     }
-    
+
     /**
      * Taking screenshot of the mobile device screen
      * @throws StepFailedException

@@ -13,6 +13,7 @@ import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testcase.TestCaseBinding
 import com.kms.katalon.core.testobject.RequestObject
 import com.kms.katalon.core.testobject.ResponseObject
+import com.kms.katalon.core.webservice.common.HarLogger
 import com.kms.katalon.core.webservice.common.ServiceRequestFactory
 import com.kms.katalon.core.webservice.constants.StringConstants
 import com.kms.katalon.core.webservice.helper.WebServiceCommonHelper
@@ -41,11 +42,14 @@ public class SendRequestAndVerifyKeyword extends WebserviceAbstractKeyword {
     public ResponseObject sendRequestAndVerify(RequestObject request, FailureHandling flowControl) throws Exception {
         Object object = KeywordMain.runKeyword({
             WebServiceCommonHelper.checkRequestObject(request)
+            HarLogger harLogger = new HarLogger()
+            harLogger.initHarFile()
             ResponseObject responseObject = ServiceRequestFactory.getInstance(request).send(request)
+            harLogger.logHarFile(request, responseObject, RunConfiguration.getReportFolder())
             
             logger.logDebug(StringConstants.KW_LOG_INFO_VERIFICATION_START)
             String verificationScript = request.getVerificationScript()
-            WSResponseManager.getInstance().setRequestObjectId(request.getObjectId())
+            WSResponseManager.getInstance().setCurrentRequest(request)
             WSResponseManager.getInstance().setCurrentResponse(responseObject)
             
             TestResult result = TestCaseMain.runWSVerificationScript(createTestCaseBinding(request),

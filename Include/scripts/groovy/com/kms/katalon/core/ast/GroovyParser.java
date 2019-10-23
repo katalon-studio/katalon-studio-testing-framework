@@ -1196,7 +1196,7 @@ public class GroovyParser {
                 // Static import
                 Map<String, ImportNode> staticImports = moduleNode.getStaticImports();
                 if (staticImports.size() > 0) {
-                    List<ImportNode> staticImportNodes = new ArrayList<>(staticImports.values());
+                    List<ImportNode> staticImportNodes = new ArrayList<ImportNode>(staticImports.values());
                     Collections.sort(staticImportNodes, importNodeComparator);
                     for (ImportNode importNode : staticImportNodes) {
                         parse(importNode);

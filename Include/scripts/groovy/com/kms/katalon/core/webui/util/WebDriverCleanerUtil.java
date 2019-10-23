@@ -18,4 +18,40 @@ public class WebDriverCleanerUtil {
             killProcessOnUnix("geckodriver");
         }
     }
+    
+    public static String getOS() {
+        return System.getProperty("os.name");
+    }
+
+    public static void terminateChromedriver() throws InterruptedException, IOException {
+        String os = getOS();
+        if (os.toLowerCase().contains("win")) {
+            killProcessOnWindows("chromedriver.exe");
+        } else {
+            killProcessOnUnix("chromedriver");
+        }
+    }
+
+    public static void terminateGeckodriver() throws InterruptedException, IOException {
+        String os = getOS();
+        if (os.toLowerCase().contains("win")) {
+            killProcessOnWindows("geckodriver.exe");
+        } else {
+            killProcessOnUnix("geckodriver");
+        }
+    }
+
+    public static void terminateMicrosoftWebDriver() throws InterruptedException, IOException {
+        String os = getOS();
+        if (os.toLowerCase().contains("win")) {
+            killProcessOnWindows("MicrosoftWebDriver.exe");
+        }
+    }
+
+    public static void terminateIEDriverServer() throws InterruptedException, IOException {
+        String os = getOS();
+        if (os.toLowerCase().contains("win")) {
+            killProcessOnWindows("IEDriverServer.exe");
+        }
+    }
 }

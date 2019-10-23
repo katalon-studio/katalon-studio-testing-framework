@@ -122,10 +122,8 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
     public static final String KW_LOG_INFO_FINDING_WEB_ELEMENT_USING_HEURISTIC_METHOD = CoreWebuiMessageConstants.KW_LOG_INFO_FINDING_WEB_ELEMENT_USING_HEURISTIC_METHOD;
     public static final String KW_LOG_INFO_REPORT_FAILURE_WHEN_USING_HEURISTIC_METHOD = CoreWebuiMessageConstants.KW_LOG_INFO_REPORT_FAILURE_WHEN_USING_HEURISTIC_METHOD;
     public static final String KW_LOG_INFO_SUGGESTION_IN_SELECTING_ATTRIBUTES_FOR_LOCATOR = CoreWebuiMessageConstants.KW_LOG_INFO_SUGGESTION_IN_SELECTING_ATTRIBUTES_FOR_LOCATOR;
-    public static final String KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS;
-    public static final String KW_LOG_INFO_NOT_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_NOT_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS;
-    public static final String KW_LOG_INFO_WHERE_TO_TURN_OFF_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_WHERE_TO_TURN_OFF_SMART_XPATHS;
-    public static final String KW_LOG_INFO_WHERE_TO_TURN_ON_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_WHERE_TO_TURN_ON_SMART_XPATHS;
+    public static final String KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_THIS_SMART_XPATH = CoreWebuiMessageConstants.KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_THIS_SMART_XPATH;
+    public static final String KW_LOG_INFO_COULD_NOT_FIND_WEB_ELEMENT_WITH_THIS_SMART_XPATH = CoreWebuiMessageConstants.KW_LOG_INFO_COULD_NOT_FIND_WEB_ELEMENT_WITH_THIS_SMART_XPATH;
     public static final String KW_EXC_WEB_ELEMENT_W_ID_DOES_NOT_HAVE_SATISFY_PROP = CoreWebuiMessageConstants.KW_EXC_WEB_ELEMENT_W_ID_DOES_NOT_HAVE_SATISFY_PROP;
     public static final String KW_LOG_PASSED_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER = CoreWebuiMessageConstants.KW_LOG_PASSED_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER;
     public static final String KW_MSG_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER = CoreWebuiMessageConstants.KW_MSG_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER;
@@ -538,10 +536,12 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
     public static final String SET_ENCRYPTED_TEXT_KEYWORD = "setEncryptedText";
     
     public static final String KW_LOG_INFO_SMART_XPATHS_SUPPORT_START = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_START;
-    public static final String KW_LOG_INFO_SMART_XPATHS_TRIGGER = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_TRIGGER;
-    public static final String KW_LOG_INFO_SMART_XPATHS_LEARN_ABOUT = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_LEARN_ABOUT;
     public static final String KW_LOG_INFO_SMART_XPATHS_USING = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_USING;
     public static final String KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION;
     public static final String KW_LOG_INFO_SMART_XPATHS_SUPPORT_END = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_END;
     public static final String KW_LOG_INFO_USING_HEURISTIC_METHOD = CoreWebuiMessageConstants.KW_LOG_INFO_USING_HEURISTIC_METHOD;
+	public static final String KW_LOG_INFO_SCREENSHOTS_BY_SMART_XPATH_ARE_SAVED = CoreWebuiMessageConstants.KW_LOG_INFO_SCREENSHOTS_BY_SMART_XPATH_ARE_SAVED;
+	public static final String KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT = CoreWebuiMessageConstants.KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT;
+	public static final String KW_LOG_INFO_SELECT_SMART_XPATH = CoreWebuiMessageConstants.KW_LOG_INFO_SELECT_SMART_XPATH;
+	public static final String KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS;	
 }

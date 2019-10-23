@@ -4,6 +4,7 @@ package com.kms.katalon.core.setting;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 
 import com.kms.katalon.util.CryptoUtil;
 
@@ -76,5 +77,9 @@ public class BundleSettingStore {
             throws GeneralSecurityException, IOException {
         String storedValue = shouldEncrypt ? CryptoUtil.encode(CryptoUtil.getDefault(rawValue)) : rawValue;
         setProperty(key, storedValue);
+    }
+
+    public void removeProperties(Collection<String> keys) throws IOException {
+        PropertySettingStoreUtil.removeAll(keys, getPropertyFile());
     }
 }

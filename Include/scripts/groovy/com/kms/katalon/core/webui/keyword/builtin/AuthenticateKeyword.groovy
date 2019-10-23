@@ -88,7 +88,7 @@ public class AuthenticateKeyword extends WebUIAbstractKeyword {
                 if (authenticateSuccess) {
                     logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_NAVIAGTED_TO_AUTHENTICATED_PAGE, [userName, password] as Object[]))
                 } else {
-                    WebUIKeywordMain.stepFailed(StringConstants.KW_MSG_CANNOT_NAV_TO_AUTHENTICATED_PAGE, flowControl, "", false)
+                    WebUIKeywordMain.stepFailedWithReason(StringConstants.KW_MSG_CANNOT_NAV_TO_AUTHENTICATED_PAGE, flowControl, "", false)
                 }
                 
         }, flowControl, false, StringConstants.KW_MSG_CANNOT_NAV_TO_AUTHENTICATED_PAGE)

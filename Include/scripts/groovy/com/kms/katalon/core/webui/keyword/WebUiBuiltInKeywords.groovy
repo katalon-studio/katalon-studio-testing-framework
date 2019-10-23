@@ -22,7 +22,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     /**
      * Open browser and navigate to the specified url; if url is left empty then just open browser
      * @param rawUrl
-     *         url of the web page to be opened, can be left empty or null. If rawUrl doesn't contain protocol prefix,
+     *         url of the web page to be opened, can be left empty or null. If rawUrl doesn't contain protocol prefix, 
      *         then the protocol will be <code>http://</code>.
      *      </p>Example:
      *      <ul>
@@ -281,9 +281,9 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Wait for the given element to NOT present (disappear) within the given time in second unit
-     * @param to
+     * @param to 
      *          represent a web element
-     * @param timeOut
+     * @param timeOut 
      *          system will wait at most timeout (seconds) to return result
      * @return
      *      true if the element is NOT present, and false if the element is present
@@ -403,7 +403,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /***
      * Wait until the given web element is visible within timeout.
-     * @param to
+     * @param to 
      *      represent a web element
      * @param timeOut
      *      how many seconds to wait (maximum)
@@ -646,7 +646,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     }
 
     /**
-     * If this current element is a form, or an element within a form, then this will be submitted.
+     * If this current element is a form, or an element within a form, then this will be submitted. 
      * If this causes the current page to change, then this method will block until the new page is loaded.
      * @param to
      *      represent a web element
@@ -949,7 +949,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     public static void setText(TestObject to, String text) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "setText", to,text)
     }
-
+    
     /**
      * Set encrypted text into an input field. It also clears the previous value of the input field.
      * To encrypt raw text, go to Help/Encrypt Text
@@ -965,7 +965,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     public static void setEncryptedText(TestObject to, String encryptedText, FailureHandling flowControl) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "setEncryptedText", to, encryptedText, flowControl)
     }
-
+    
     /**
      * Set encrypted text into an input field. It also clears the previous value of the input field.
      * To encrypt raw text, go to Help/Encrypt Text
@@ -1071,7 +1071,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      *          represent a web element
      * @param range
      *          index range of the options to select. Index starts from 0.
-     <p>Example:
+     <p>Example: 
      <p>2 - index 2
      <p>"2,3" - index 2 and 3
      <p>"2-5" - index 2 to 5 (2, 3, 4, 5)
@@ -1207,7 +1207,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      *         represent a web element
      * @param index
      *  index range of the options to be deselected
-     *  <p>Example:
+     *  <p>Example: 
      *  <p>2 - index 2
      *  <p>"2,3" - index 2 and 3
      *  <p>"2-5" - index 2 to 5 (2, 3, 4, 5)
@@ -1470,7 +1470,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     /**
      * Simulate users clicking on "OK" button of alert class (alert,
      * confirmation popup, prompt popup)
-     *
+     * 
      * @param flowControl
      * @throws StepFailedException
      */
@@ -2458,7 +2458,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Wait for jQuery to load within the given time in second unit.
-     *
+     * 
      * @param seconds
      *         the number of seconds to wait
      * @return true if jQuery is ready. Otherwise, false.
@@ -2497,17 +2497,17 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      * @param testObject
      *          represent a web element
      * @param propertyName
-     *          name of the property, for example, xpath, id, name,...
-     *          <p>If the property already exists in the object, the keyword will modify its related artifacts;
+     *          name of the property, for example, xpath, id, name,... 
+     *          <p>If the property already exists in the object, the keyword will modify its related artifacts; 
      *          if not, the keyword will add new property.
      * @param matchCondition
-     *          condition to match property name with property value, for example, equals, not equals,...
+     *          condition to match property name with property value, for example, equals, not equals,... 
      *          <p>In case the property already exists, input null to this argument to keep the old value of match condition.
      * @param modifyValue
-     *          value of the property.
+     *          value of the property. 
      *          <p>In case the property already exists, input null to this argument to keep the old property value.
      * @param isActive
-     *          true if the property is checked (used to find the test object); otherwise, false.
+     *          true if the property is checked (used to find the test object); otherwise, false. 
      *          <p>In case the property already exists, input null to this argument to keep the old value.
      * @param flowControl
      * @return the newly created TestObject
@@ -2551,10 +2551,10 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     }
 
     /**
-     * Remove existing property of test object. Use when test object
-     * has attributes changing in runtime. This keyword does not
-     * modify the object saved in Object Repository, instead, it creates
-     * another test object, modify and return this test object. Hence,
+     * Remove existing property of test object. Use when test object 
+     * has attributes changing in runtime. This keyword does not 
+     * modify the object saved in Object Repository, instead, it creates 
+     * another test object, modify and return this test object. Hence, 
      * users must use a variable to store the returned object.
      *
      * @param testObject
@@ -2660,7 +2660,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      *          username to authenticate
      * @param password
      *          password to authenticate
-     * @param timeout
+     * @param timeout 
      *          time to wait since navigating to the page until entering username
      * @param flowControl
      */
@@ -2768,7 +2768,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      * Wait for an image to be presented on page
      * @param to
      *       represent an image
-     * @param timeOutInSeconds
+     * @param timeOutInSeconds 
      *      system will wait at most timeout (seconds) to return result
      * @param flowControl
      * @return true if the image if present; otherwise, false
@@ -2820,7 +2820,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
      *      system will wait at most timeout (seconds) to return result
      * @return
      *      the found web elements or null if cannot find any
-     *
+     * 
      * @throws IllegalArgumentException
      * @throws WebElementNotFoundException
      * @throws StepFailedException
@@ -2917,7 +2917,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Upload file to an input html element with type = "file"
-     * @param to
+     * @param to 
      *    represent a web element.
      * @param fileAbsolutePath
      *       absolute path of the file on local machine
@@ -3126,7 +3126,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
         return (int) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "getViewportWidth")
     }
 
-    /**
+    /** 
      * Get current viewport's height value
      * @param flowControl
      * @return current viewport's height
@@ -3665,7 +3665,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Get all links on current page
-     *
+     * 
      * @since 4.8
      * @param isIncludedExternalLinks If false, only target to links on the same HOST. Otherwise, target to all links.
      * @param excludedLinks A list of excluded links (URLs)
@@ -3696,7 +3696,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Verify a list of links (URLs) are accessible
-     *
+     * 
      * @since 4.8
      * @param links A list of links (URLs)
      * @param flowControl FailureHandling
@@ -3725,7 +3725,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
 
     /**
      * Verify all links (URLs) on the current page are accessible
-     *
+     * 
      * @since 4.8
      * @param isIncludedExternalLinks If false, only target to links on the same HOST. Otherwise, target to all links.
      * @param excludedLinks A list of excluded links (URLs)
@@ -3752,8 +3752,8 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
     public static boolean verifyAllLinksOnCurrentPageAccessible(boolean isIncludedExternalLinks, List excludedLinks) throws StepFailedException {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "verifyAllLinksOnCurrentPageAccessible", isIncludedExternalLinks, excludedLinks)
-    }
-
+    }    
+    
     /**
      * Execute JavaScript on the currently selected frame or window.</br>
      * The provided script fragment will be executed as the body of an anonymous function.
@@ -3774,7 +3774,7 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     /**
      * Execute JavaScript on the currently selected frame or window.</br>
      * The provided script fragment will be executed as the body of an anonymous function.
-     *
+     * 
      * @since 5.0
      * @param script The JavaScript to execute.
      * @param arguments The arguments to the script. May be empty or null.
@@ -3786,11 +3786,11 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     public static Object executeJavaScript(String script, List arguments) throws StepFailedException {
         return (Object) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "executeJavaScript", script, arguments)
     }
-
-
+    
+    
     /**
      * Clear all text of the test object.
-     *
+     * 
      * @since 5.3
      * @param to represent a web element.
      * @param flowControl FailureHandling
@@ -3802,10 +3802,10 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     public static boolean clearText(TestObject to, FailureHandling flowControl) throws StepFailedException {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "clearText", to, flowControl)
     }
-
+    
     /**
      * Clear all text of the test object.
-     *
+     * 
      * @since 5.3
      * @param to represent a web element.
      * @return true if text of object is clear. Otherwise, false.
@@ -3816,27 +3816,70 @@ public class WebUiBuiltInKeywords extends BuiltinKeywords {
     public static boolean clearText(TestObject to) throws StepFailedException {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "clearText", to)
     }
-
+    
     /**
-     * This sample demonstrates how to create a new built-in keyword.
-     * The real work is implemented in "Include/scripts/groovy/com/kms/katalon/core/webui/keyword/builtin/HelloWorldFromWebUiKeyword.groovy".
-     * The respective test case is defined in "Test Cases/HelloWorldFromWebUiTestCase".
+     * Convert a WebElement to a TestObject. It will create
+     * a Test Object with no name that wraps around the given WebElement.
+     * When the Test Object is used by built-in keywords, it is unwrapped
+     * and the given WebElement will be used
      *
-     * @since 5.8.7
-     * @param message the greeting message
-     * @param flowControl FailureHandling
-     * @return the greeting message
+     * @since 6.2.0
+     * @param webElement the WebElement retrieved by Selenium or other APIs
+     * @param flowControl failureHandling
+     * @return a TestObject that wraps around the given WebElement
      * @throws StepFailedException
      */
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
-    public static String helloWorldFromWebUi(
-        String message,
-        FailureHandling flowControl) throws StepFailedException {
-        return (String) KeywordExecutor.executeKeywordForPlatform(
-            KeywordExecutor.PLATFORM_WEB,
-            "helloWorldFromWebUi",
-            message,
-            flowControl)
+    public static TestObject convertWebElementToTestObject(WebElement webElement, FailureHandling flowControl) throws StepFailedException {
+        return (TestObject) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "convertWebElementToTestObject", webElement, flowControl)
+    }
+    
+    /**
+     * Convert a WebElement to a TestObject. It will create
+     * a Test Object with no name that wraps around the given WebElement.
+     * When the Test Object is used by built-in keywords, it is unwrapped
+     * and the given WebElement will be used
+     *
+     * @since 6.2.0
+     * @param webElement the WebElement retrieved by Selenium or other APIs
+     * @return a TestObject that wraps around the given WebElement
+     * @throws StepFailedException
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static TestObject convertWebElementToTestObject(WebElement webElement) throws StepFailedException {
+        return (TestObject) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "convertWebElementToTestObject", webElement)
+    }
+    
+    /**
+     * Enable smart wait functionality. Katalon will precede actions on elements by waiting
+     * activities to ensure that the page is not loading elements or executing AJAX calls. 
+     * Such waiting activities greatly increase the chance that elements are available or interactable. 
+     * <p>
+     * It is recommended to always enable smart wait functionality globally in project setting. 
+     * </p>
+     * 
+     * @since 6.3.4
+     * @throws StepFailedException
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void enableSmartWait() throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "enableSmartWait")
+    }
+
+    /**
+     * Disable smart wait functionality. If global smart wait option
+     * is enabled, then this keyword will turn off the smart wait functionality until the end of 
+     * the calling test case or until the keyword {@link WebUiBuiltinKeywords#enableSmartWait} is called.
+     * 
+     * @since 6.3.4
+     * @throws StepFailedException
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void disableSmartWait() throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB, "disableSmartWait")
     }
 }

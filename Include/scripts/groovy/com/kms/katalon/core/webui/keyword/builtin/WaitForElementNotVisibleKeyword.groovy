@@ -68,7 +68,6 @@ public class WaitForElementNotVisibleKeyword extends WebUIAbstractKeyword {
         return waitForElementNotVisible(to, timeOut, flowControl)
     }
 
-    @CompileStatic
     public boolean waitForElementNotVisible(TestObject to, int timeOut, FailureHandling flowControl) throws StepFailedException {
         return WebUIKeywordMain.runKeyword({
             boolean isSwitchIntoFrame = false
@@ -95,10 +94,10 @@ public class WaitForElementNotVisibleKeyword extends WebUIAbstractKeyword {
                     }
                     return true
                 } catch (WebElementNotFoundException e) {
-                    logger.logWarning(e.getMessage())
+                    logger.logWarning(e.getMessage(), null, e)
                     return false
                 } catch (TimeoutException e) {
-                    logger.logWarning(MessageFormat.format(StringConstants.KW_MSG_OBJ_IS_VISIBLE_AFTER_X_SEC, [to.getObjectId(), timeOut] as Object[]))
+                    logger.logWarning(MessageFormat.format(StringConstants.KW_MSG_OBJ_IS_VISIBLE_AFTER_X_SEC, [to.getObjectId(), timeOut] as Object[]), null, e)
                     return false
                 }
             } finally {

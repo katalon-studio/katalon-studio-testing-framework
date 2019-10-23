@@ -99,7 +99,7 @@ public class VerifyElementAttributeValueKeyword extends WebUIAbstractKeyword {
                     return false
                 }
             } catch (WebElementNotFoundException ex) {
-                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()))
+                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()), null, ex)
             } finally {
                 if (isSwitchIntoFrame) {
                     WebUiCommonHelper.switchToDefaultContent()

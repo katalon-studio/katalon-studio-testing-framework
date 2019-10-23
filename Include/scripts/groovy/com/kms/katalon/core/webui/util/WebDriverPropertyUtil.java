@@ -14,6 +14,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.kms.katalon.core.logging.KeywordLogger;
+import com.kms.katalon.core.util.internal.JsonUtil;
 import com.kms.katalon.core.webui.constants.StringConstants;
 import com.kms.katalon.core.webui.driver.WebUIDriverType;
 import com.kms.katalon.selenium.firefox.CFirefoxProfile;
@@ -164,8 +165,9 @@ public class WebDriverPropertyUtil {
         if (chromeOptions.get(CHROME_ARGUMENT_PROPERTY_KEY) instanceof List) {
             argumentsList.addAll((List<?>) chromeOptions.get(CHROME_ARGUMENT_PROPERTY_KEY));
         }
-        argumentsList.add(CHROME_SWITCHES);
-        argumentsList.add(DISABLE_EXTENSIONS);
+        // https://github.com/kms-technology/katalon/issues/2815
+        // argumentsList.add(CHROME_SWITCHES);
+        // argumentsList.add(DISABLE_EXTENSIONS);
         if (isRunningInDocker()) {
             argumentsList.add(CHROME_NO_SANDBOX);
         }

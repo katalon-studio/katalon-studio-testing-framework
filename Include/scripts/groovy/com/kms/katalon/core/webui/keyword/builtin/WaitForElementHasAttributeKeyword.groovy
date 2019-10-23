@@ -69,7 +69,6 @@ public class WaitForElementHasAttributeKeyword extends WebUIAbstractKeyword {
         return waitForElementHasAttribute(to,attributeName,timeOut,flowControl)
     }
 
-    @CompileStatic
     public boolean waitForElementHasAttribute(TestObject to, String attributeName, int timeOut, FailureHandling flowControl) {
         WebUIKeywordMain.runKeyword({
             boolean isSwitchIntoFrame = false
@@ -95,9 +94,9 @@ public class WaitForElementHasAttributeKeyword extends WebUIAbstractKeyword {
                     return true
                 }
             } catch (WebElementNotFoundException ex) {
-                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()))
+                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()), null, ex)
             } catch (TimeoutException e) {
-                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]))
+                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]), null, e)
             } finally {
                 if (isSwitchIntoFrame) {
                     WebUiCommonHelper.switchToDefaultContent()

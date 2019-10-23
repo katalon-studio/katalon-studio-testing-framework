@@ -82,6 +82,8 @@ public class ClickImageKeyword extends WebUIAbstractKeyword {
                 String currentDirFilePath = new File(RunConfiguration.getProjectDir()).getAbsolutePath()
                 imagePath = currentDirFilePath + File.separator + imagePath
             }
+
+            ScreenUtil screenUtil = new ScreenUtil()
             screenUtil.clickImage(imagePath)
             logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CLICKED_IMG_X, imagePath))
         }, flowControl, true, (imagePath != null) ?

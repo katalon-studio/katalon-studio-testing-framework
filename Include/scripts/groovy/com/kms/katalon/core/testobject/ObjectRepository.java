@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -29,6 +28,8 @@ import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.main.ScriptEngine;
 import com.kms.katalon.core.testobject.impl.HttpTextBodyContent;
 import com.kms.katalon.core.testobject.internal.impl.HttpBodyContentReader;
+import com.kms.katalon.core.testobject.internal.impl.WindowsObjectRepository;
+import com.kms.katalon.core.util.StrSubstitutor;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
 import com.kms.katalon.core.util.internal.JsonUtil;
 
@@ -173,6 +174,16 @@ public class ObjectRepository {
         }
         return readTestObjectFile(testObjectId, objectFile, RunConfiguration.getProjectDir(), variables);
     }
+    
+    public static WindowsTestObject findWindowsObject(final String windowsObjectId) {
+        File objectFile = new File(RunConfiguration.getProjectDir(), windowsObjectId + ".wrs");
+        return WindowsObjectRepository.readWindowsTestObjectFile(windowsObjectId, objectFile, RunConfiguration.getProjectDir(), Collections.emptyMap());
+    }
+    
+    public static WindowsTestObject findWindowsObject(final String windowsObjectId, Map<String, Object> variables) {
+        File objectFile = new File(RunConfiguration.getProjectDir(), windowsObjectId + ".wrs");
+        return WindowsObjectRepository.readWindowsTestObjectFile(windowsObjectId, objectFile, RunConfiguration.getProjectDir(), variables);
+    }
 
     private static Map<String, TestObject> getCapturedTestObjects() {
         if (recordedTestObjects != null) {
@@ -212,7 +223,7 @@ public class ObjectRepository {
             return null;
         } catch (DocumentException e) {
             logger.logWarning(MessageFormat.format(StringConstants.TO_LOG_WARNING_CANNOT_GET_TEST_OBJECT_X_BECAUSE_OF_Y,
-                    testObjectId, ExceptionsUtil.getMessageForThrowable(e)));
+                    testObjectId, ExceptionsUtil.getMessageForThrowable(e)), null, e);
             return null;
         }
     }
@@ -238,6 +249,19 @@ public class ObjectRepository {
             testObject.setSelectorMethod(SelectorMethod.valueOf(dfSelectorMethodElement.getText()));
         }
 
+        Map<String, Object> variablesStringMap = new HashMap<String, Object>();
+        for (Entry<String, Object> entry : variables.entrySet()) {
+            variablesStringMap.put(String.valueOf(entry.getKey()), entry.getValue());
+        }
+
+        try {
+            ScriptEngine scriptEngine = ScriptEngine.getDefault(ObjectRepository.class.getClassLoader());
+            variablesStringMap.put("GlobalVariable", scriptEngine.runScriptWithoutLogging("internal.GlobalVariable", new Binding()));
+        } catch (ClassNotFoundException | ResourceException | ScriptException | IOException e) {
+        }
+        
+        StrSubstitutor strSubtitutor = new StrSubstitutor(variablesStringMap);
+        
         Element propertySelectorCollection = element.element(PROPERTY_SELECTOR_COLLECTION);
         if (propertySelectorCollection != null) {
             List<?> selectorEntry = propertySelectorCollection.elements(PROPERTY_ENTRY);
@@ -245,7 +269,7 @@ public class ObjectRepository {
                 selectorEntry.forEach(entry -> {
                     Element selectorMethodElement = ((Element) entry);
                     SelectorMethod entryKey = SelectorMethod.valueOf(selectorMethodElement.elementText(PROPERTY_KEY));
-                    String entryValue = selectorMethodElement.elementText(PROPERTY_VALUE);
+                    String entryValue = strSubtitutor.replace(selectorMethodElement.elementText(PROPERTY_VALUE));
                     testObject.setSelectorValue(entryKey, entryValue);
                 });
             }
@@ -264,7 +288,7 @@ public class ObjectRepository {
 
             objectProperty.setName(propertyName);
             objectProperty.setCondition(propertyCondition);
-            objectProperty.setValue(propertyValue);
+            objectProperty.setValue(strSubtitutor.replace(propertyValue));
             objectProperty.setActive(isPropertySelected);
 
             // Check if this element is inside a frame
@@ -291,7 +315,7 @@ public class ObjectRepository {
 
             objectXpath.setName(propertyName);
             objectXpath.setCondition(propertyCondition);
-            objectXpath.setValue(propertyValue);
+            objectXpath.setValue(strSubtitutor.replace(propertyValue));
             objectXpath.setActive(isPropertySelected);
 
             // Check if this element is inside a frame
@@ -303,19 +327,6 @@ public class ObjectRepository {
             } else {
                 testObject.addXpath(objectXpath);
             }
-        }
-
-        if (testObject == null || variables == null || variables.isEmpty()) {
-            return testObject;
-        }
-        Map<String, Object> variablesStringMap = new HashMap<String, Object>();
-        for (Entry<String, Object> entry : variables.entrySet()) {
-            variablesStringMap.put(String.valueOf(entry.getKey()), entry.getValue());
-        }
-
-        StrSubstitutor strSubtitutor = new StrSubstitutor(variablesStringMap);
-        for (TestObjectProperty objectProperty : testObject.getProperties()) {
-            objectProperty.setValue(strSubtitutor.replace(objectProperty.getValue()));
         }
 
         return testObject;
@@ -330,37 +341,49 @@ public class ObjectRepository {
         String serviceType = reqElement.elementText("serviceType");
         requestObject.setServiceType(serviceType);
         
-        Map<String, String> rawVariables = new HashMap<>();
+        Map<String, Object> defaultVariables = new HashMap<>();
         // Use default value of variables if available in case user passes nothing or null
-        if(variables == null || variables.size() == 0){ 
-        	
-        	List<Element> variableElements = reqElement.elements("variables");
-        	if(variableElements != null && variableElements.size() > 0 ){
-        		for(Element variableElement : variableElements){
-                	if(variableElement != null){
-                		Element defaultValue = variableElement.element("defaultValue");
-                		Element name = variableElement.element("name");
-                		
-                		if(!defaultValue.equals(StringUtils.EMPTY)){                			
-                			rawVariables.put(name.getData().toString(), defaultValue.getData().toString());
-                		}
-                	}
-        		}
-        	}
-        	boolean exception = false;
-        	try {
-				variables = evaluateVariables(rawVariables);
-			} catch (Exception e){
-				exception = true;
-			}
-        	finally{
-				if(exception == true){
-					variables = new HashMap<>();	
-				}				
-			}
-        }
         
-        StrSubstitutor substitutor = new StrSubstitutor(variables);
+        List<Element> variableElements = reqElement.elements("variables");
+        if (variableElements != null && variableElements.size() > 0) {
+            Map<String, String> rawVariables = new HashMap<>();
+            for (Element variableElement : variableElements) {
+                if (variableElement != null) {
+                    Element defaultValue = variableElement.element("defaultValue");
+                    Element name = variableElement.element("name");
+
+                    if (!defaultValue.equals(StringUtils.EMPTY)) {
+                        rawVariables.put(name.getData().toString(), defaultValue.getData().toString());
+                    }
+                }
+            }
+            boolean exception = false;
+            try {
+                defaultVariables = evaluateVariables(rawVariables);
+            } catch (Exception e) {
+                exception = true;
+            } finally {
+                if (exception == true) {
+                    defaultVariables = new HashMap<>();
+                }
+            }
+        }
+
+        Map<String, Object> mergedVariables = new HashMap<>();
+        mergedVariables.putAll(defaultVariables);
+
+        if (variables != null && variables.size() > 0) {
+            mergedVariables.putAll(variables);
+        }
+            
+        try {
+            ScriptEngine scriptEngine = ScriptEngine.getDefault(ObjectRepository.class.getClassLoader());
+            mergedVariables.put("GlobalVariable", scriptEngine.runScriptWithoutLogging("internal.GlobalVariable", new Binding()));
+        } catch (ClassNotFoundException | ResourceException | ScriptException | IOException e) {
+        }
+
+        
+        StrSubstitutor substitutor = new StrSubstitutor(mergedVariables);
         if ("SOAP".equals(serviceType)) {
             requestObject.setWsdlAddress(substitutor.replace(reqElement.elementText("wsdlAddress")));
             requestObject.setSoapRequestMethod(reqElement.elementText("soapRequestMethod"));
@@ -399,11 +422,14 @@ public class ObjectRepository {
             }
         }
         
-        requestObject.setVariables(variables);
+        requestObject.setVariables(mergedVariables);
 
         String verificationScript = reqElement.elementText("verificationScript");
         requestObject.setVerificationScript(verificationScript);
-
+        
+        boolean followRedirects = Boolean.valueOf(reqElement.elementText("followRedirects"));
+        requestObject.setFollowRedirects(followRedirects);
+        
         return requestObject;
     }
     
@@ -422,7 +448,7 @@ public class ObjectRepository {
             return findRequestObject(requestObjectId, reqElement, RunConfiguration.getProjectDir(), variables);
         } catch (Exception e) {
             logger.logWarning(MessageFormat.format(StringConstants.TO_LOG_WARNING_CANNOT_GET_TEST_OBJECT_X_BECAUSE_OF_Y,
-                    requestObjectId, ExceptionsUtil.getMessageForThrowable(e)));
+                    requestObjectId, ExceptionsUtil.getMessageForThrowable(e)), null, e);
             return null;
         }
     }

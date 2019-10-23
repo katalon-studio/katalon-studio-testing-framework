@@ -3,18 +3,27 @@ package com.kms.katalon.core.context.internal;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.kms.katalon.core.constants.CoreMessageConstants;
+import com.kms.katalon.core.constants.StringConstants;
 import com.kms.katalon.core.helper.screenrecorder.VideoRecorder;
 import com.kms.katalon.core.helper.screenrecorder.VideoRecorderBuilder;
 import com.kms.katalon.core.helper.screenrecorder.VideoRecorderException;
 import com.kms.katalon.core.helper.screenrecorder.VideoSubtitleWriter;
+import com.kms.katalon.core.logging.KeywordLogger;
+import com.kms.katalon.core.logging.KeywordLogger.KeywordStackElement;
 import com.kms.katalon.core.setting.VideoRecorderSetting;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
 
 public class VideoRecorderService implements ExecutionListenerEventHandler {
+    
+    private final KeywordLogger logger = KeywordLogger.getInstance(this.getClass());
+    
     private String reportFolder;
 
     private VideoRecorderSetting videoRecorderSetting;
@@ -89,8 +98,15 @@ public class VideoRecorderService implements ExecutionListenerEventHandler {
                             || ("FAILED".equals(testCaseStatus) && !videoRecorderSetting.isAllowedRecordIfFailed())) {
                         deleteVideo();
                     } else {
-                        System.out.println(MessageFormat.format(CoreMessageConstants.EXEC_LOG_VIDEO_RECORDING_COMPLETED,
-                                lastestTestCaseContext.getTestCaseId()));
+                        Map<String, String> attributes = new HashMap<>();
+                        attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY,
+                                videoRecorder.getCurrentVideoLocation());
+                        String message = MessageFormat.format(CoreMessageConstants.EXEC_LOG_VIDEO_RECORDING_COMPLETED,
+                                lastestTestCaseContext.getTestCaseId());
+                        logger.startKeyword("Video", new HashMap<>(), new Stack<>());
+                        logger.logInfo(message, attributes);
+                        logger.endKeyword("Video", new HashMap<>(), new Stack<>());
+                        System.out.println(message);
                     }
                 } catch (VideoRecorderException e) {
                     System.err.println(ExceptionsUtil.getStackTraceForThrowable(e));

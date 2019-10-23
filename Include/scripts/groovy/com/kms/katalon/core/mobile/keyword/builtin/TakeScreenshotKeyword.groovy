@@ -94,7 +94,7 @@ public class TakeScreenshotKeyword extends MobileAbstractKeyword {
                     FileUtils.copyFile(tempFile, new File(fileName))
                     FileUtils.forceDelete(tempFile)
                 } catch (Exception e) {
-                    logger.logWarning(e.getMessage())
+                    logger.logWarning(e.getMessage(), null, e)
                     return null;
                 }
                 Map<String, String> attributes = new HashMap<>()

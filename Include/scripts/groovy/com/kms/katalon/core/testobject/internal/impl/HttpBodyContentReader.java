@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 
 import com.google.gson.reflect.TypeToken;
 import com.kms.katalon.core.exception.KatalonRuntimeException;
@@ -20,6 +19,7 @@ import com.kms.katalon.core.testobject.impl.HttpFileBodyContent;
 import com.kms.katalon.core.testobject.impl.HttpFormDataBodyContent;
 import com.kms.katalon.core.testobject.impl.HttpTextBodyContent;
 import com.kms.katalon.core.testobject.impl.HttpUrlEncodedBodyContent;
+import com.kms.katalon.core.util.StrSubstitutor;
 import com.kms.katalon.core.util.internal.JsonUtil;
 import com.kms.katalon.core.util.internal.PathUtil;
 

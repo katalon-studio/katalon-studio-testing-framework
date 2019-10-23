@@ -67,7 +67,7 @@ public class SheetPOI extends ExcelData {
     }
 
     @Override
-    protected String internallyGetValue(int col, int row) throws IOException {
+    protected Object internallyGetValue(int col, int row) throws IOException {
         int maxRow = getRowNumbers();
         if (row > maxRow) {
             throw new IllegalArgumentException(
@@ -77,13 +77,13 @@ public class SheetPOI extends ExcelData {
         int maxColumnAtRow = getMaxColumn(row + getHeaderRowIdx());
 
         if (maxColumnAtRow < 0) {
-            return "";
+            return null;
         }
 
         if (col > maxColumnAtRow) {
             // throw new IllegalArgumentException(MessageFormat.format(StringConstants.EXCEL_INVALID_COL_NUMBER, col,
             // maxColumnAtRow));
-            return "";
+            return null;
         }
 
         // check if cell index is in a merged region
@@ -91,21 +91,163 @@ public class SheetPOI extends ExcelData {
             // If the region does contain the cell index
             if (mergedRegion.isInRange(row, col)) {
                 // Now, you need to get the cell from the top left hand corner of this
-                return internallyGetCellText(mergedRegion.getFirstColumn(), mergedRegion.getFirstRow());
+                return getCellAt(mergedRegion.getFirstColumn(), mergedRegion.getFirstRow());
             }
         }
 
-        return internallyGetCellText(col, row + getHeaderRowIdx());
+        return getCellAt(col, row + getHeaderRowIdx());
     }
-
-    private String internallyGetCellText(int col, int row) {
+    
+    private Object getCellAt(int col, int row) {
         Row curRow = sheet.getRow(row);
 
         if (curRow == null) {
-            return "";
+            return null;
         }
 
         Cell curCell = curRow.getCell(col);
+
+        if (curCell == null) {
+            return null;
+        }
+        String readAsString = this.getProperty("readAsString");
+        if (readAsString == null || (Boolean.valueOf(readAsString).booleanValue())) {
+            return decorateExcelCellAsString(workbook, curCell);
+        }
+        return decorateExcelCellAsIs(workbook, curCell);
+    }
+
+    protected int getColumnIndex(String colName) throws IOException {
+        if (colName == null) {
+            throw new IllegalArgumentException("Column name cannot be null");
+        }
+
+        String[] columnNames = getColumnNames();
+        for (int i = 0; i < columnNames.length; i++) {
+            if (colName.equals(columnNames[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    protected Object internallyGetValue(String colName, int row) throws IOException {
+        int col = getColumnIndex(colName);
+
+        if (col < 0) {
+            throw new IllegalArgumentException("Column not found");
+        }
+
+        Object value = internallyGetValue(col, row);
+        return value;
+    }
+
+    /**
+     * Get the max column of a row
+     * 
+     * @param rowIndex the row index
+     * @return the max column of a row, or -1 if the row index is invalid
+     * @throws IOException
+     */
+    @Override
+    public int getMaxColumn(int rowIndex) {
+        Row curRow = sheet.getRow(rowIndex);
+        if (curRow != null) {
+            return curRow.getLastCellNum();
+        }
+        return -1;
+    }
+
+    /**
+     * Get all column names of the test data
+     * 
+     * @return an array that contains names of all columns
+     * @throws IOException if any io errors happened
+     */
+    @Override
+    public String[] getColumnNames() throws IOException {
+        if (ArrayUtils.isEmpty(columnNames)) {
+            int maxColumnCounts = getColumnCount();
+
+            if (maxColumnCounts < 0) {
+                return new String[0];
+            }
+
+            columnNames = new String[maxColumnCounts];
+            if (hasHeaders) {
+                for (int i = 0; i < maxColumnCounts; i++) {
+                    columnNames[i] = (String) getCellAt(i, COLUMN_HEADER_ROW_NUMBER);
+                }
+            }
+        }
+        return columnNames;
+    }
+
+    private int getColumnCount() throws IOException {
+        if (columnCount < 0) {
+            for (int rowIndex = 0; rowIndex < getRowNumbers(); rowIndex++) {
+                int maxColumnRow = getMaxColumn(rowIndex);
+                if (maxColumnRow > columnCount) {
+                    columnCount = maxColumnRow;
+                }
+            }
+        }
+        return Math.max(0, columnCount);
+    }
+
+    /**
+     * Get all sheet names of the parent excel file
+     * 
+     * @return an array contains all the sheet name
+     */
+    @Override
+    public String[] getSheetNames() {
+        int numberOfSheets = workbook.getNumberOfSheets();
+        String[] sheetNames = new String[numberOfSheets];
+        for (int i = 0; i < numberOfSheets; i++) {
+            sheetNames[i] = workbook.getSheetName(i);
+        }
+
+        return sheetNames;
+    }
+
+    /**
+     * Change this excel data to use another sheet with the specify sheet name
+     * 
+     * @param sheetName the new sheet name
+     */
+    @Override
+    public void changeSheet(String sheetName) {
+        sheet = workbook.getSheet(sheetName);
+        mergedRegionsList = null;
+        columnNames = null;
+        columnCount = -1;
+    }
+
+    /**
+     * Get total rows of the test data
+     * 
+     * @return total rows of the test data
+     */
+    @Override
+    public int getRowNumbers() throws IOException {
+        int totalRows = getSheet().getLastRowNum() + 1;
+        return totalRows - getHeaderRowIdx();
+    }
+
+    /**
+     * Get total column of the test data
+     * 
+     * @return total columns of the test data
+     * @throws IOException if any io errors happened
+     */
+    @Override
+    public int getColumnNumbers() throws IOException {
+        return getColumnCount();
+    }
+    
+    private String decorateExcelCellAsString(Workbook workbook, Cell curCell) {
 
         if (curCell == null) {
             return "";
@@ -170,141 +312,66 @@ public class SheetPOI extends ExcelData {
         }
     }
 
-    protected int getColumnIndex(String colName) throws IOException {
-        if (colName == null) {
-            throw new IllegalArgumentException("Column name cannot be null");
+    private Object decorateExcelCellAsIs(Workbook workbook, Cell curCell) {
+
+        if (curCell == null) {
+            return null;
         }
 
-        String[] columnNames = getColumnNames();
-        for (int i = 0; i < columnNames.length; i++) {
-            if (colName.equals(columnNames[i])) {
-                return i;
+        switch (curCell.getCellType()) {
+            case Cell.CELL_TYPE_STRING: {
+                return curCell.getRichStringCellValue().getString();
             }
-        }
-        return -1;
-    }
-
-    @Override
-    protected String internallyGetValue(String colName, int row) throws IOException {
-        int col = getColumnIndex(colName);
-
-        if (col < 0) {
-            throw new IllegalArgumentException("Column not found");
-        }
-
-        String text = internallyGetValue(col, row);
-        return text;
-    }
-
-    /**
-     * Get the max column of a row
-     * 
-     * @param rowIndex the row index
-     * @return the max column of a row, or -1 if the row index is invalid
-     * @throws IOException
-     */
-    @Override
-    public int getMaxColumn(int rowIndex) {
-        Row curRow = sheet.getRow(rowIndex);
-        if (curRow != null) {
-            return curRow.getLastCellNum();
-        }
-        return -1;
-    }
-
-    /**
-     * Get all column names of the test data
-     * 
-     * @return an array that contains names of all columns
-     * @throws IOException if any io errors happened
-     */
-    @Override
-    public String[] getColumnNames() throws IOException {
-        if (ArrayUtils.isEmpty(columnNames)) {
-            int maxColumnCounts = getColumnCount();
-
-            if (maxColumnCounts < 0) {
-                return new String[0];
+            case Cell.CELL_TYPE_NUMERIC: {
+                return curCell.getNumericCellValue();
             }
+            case Cell.CELL_TYPE_BOOLEAN: {
+                return curCell.getBooleanCellValue();
+            }
+            case Cell.CELL_TYPE_FORMULA: {
+                // try with String
+                FormulaEvaluator formulaEval = null;
+                try {
+                    formulaEval = workbook.getCreationHelper().createFormulaEvaluator();
+                    CellValue cellVal = formulaEval.evaluate(curCell);
 
-            columnNames = new String[maxColumnCounts];
-            if (hasHeaders) {
-                for (int i = 0; i < maxColumnCounts; i++) {
-                    columnNames[i] = internallyGetCellText(i, COLUMN_HEADER_ROW_NUMBER);
+                    switch (cellVal.getCellType()) {
+                        case Cell.CELL_TYPE_BLANK:
+                            return "";
+                        case Cell.CELL_TYPE_STRING:
+                            return cellVal.getStringValue();
+                        case Cell.CELL_TYPE_NUMERIC:
+                            return cellVal.getNumberValue();
+                        default:
+                            return cellVal.formatAsString();
+                    }
+                } catch (Exception ex) {
+                    // Try another way
                 }
-            }
-        }
-        return columnNames;
-    }
 
-    private int getColumnCount() throws IOException {
-        if (columnCount < 0) {
-            for (int rowIndex = 0; rowIndex < getRowNumbers(); rowIndex++) {
-                int maxColumnRow = getMaxColumn(rowIndex);
-                if (maxColumnRow > columnCount) {
-                    columnCount = maxColumnRow;
+                // Try with number
+                try {
+                    if (DateUtil.isCellDateFormatted(curCell)) {
+                        return curCell.getDateCellValue();
+                    } else {
+                        return curCell.getNumericCellValue();
+                    }
+                } catch (Exception ex) {
+                    // Try another way
                 }
+
+                return curCell.getStringCellValue();
             }
+            default:
+                return curCell.getStringCellValue();
         }
-        return Math.max(0, columnCount);
     }
 
-    protected String getFormatString(String rawFormatString) {
+    private static String getFormatString(String rawFormatString) {
         if (rawFormatString == null || rawFormatString.isEmpty()) {
             return rawFormatString;
         }
 
         return rawFormatString.replace("_(*", "_(\"\"*");
-    }
-
-    /**
-     * Get all sheet names of the parent excel file
-     * 
-     * @return an array contains all the sheet name
-     */
-    @Override
-    public String[] getSheetNames() {
-        int numberOfSheets = workbook.getNumberOfSheets();
-        String[] sheetNames = new String[numberOfSheets];
-        for (int i = 0; i < numberOfSheets; i++) {
-            sheetNames[i] = workbook.getSheetName(i);
-        }
-
-        return sheetNames;
-    }
-
-    /**
-     * Change this excel data to use another sheet with the specify sheet name
-     * 
-     * @param sheetName the new sheet name
-     */
-    @Override
-    public void changeSheet(String sheetName) {
-        sheet = workbook.getSheet(sheetName);
-        mergedRegionsList = null;
-        columnNames = null;
-        columnCount = -1;
-    }
-
-    /**
-     * Get total rows of the test data
-     * 
-     * @return total rows of the test data
-     */
-    @Override
-    public int getRowNumbers() throws IOException {
-        int totalRows = getSheet().getLastRowNum() + 1;
-        return totalRows - getHeaderRowIdx();
-    }
-
-    /**
-     * Get total column of the test data
-     * 
-     * @return total columns of the test data
-     * @throws IOException if any io errors happened
-     */
-    @Override
-    public int getColumnNumbers() throws IOException {
-        return getColumnCount();
     }
 }

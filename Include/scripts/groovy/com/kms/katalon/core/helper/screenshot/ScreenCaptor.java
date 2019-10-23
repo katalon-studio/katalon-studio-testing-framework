@@ -40,7 +40,7 @@ public abstract class ScreenCaptor {
         } catch (ScreenCaptureException e) {
             logger.logWarning(
                     MessageFormat.format(StringConstants.KW_LOG_WARNING_CANNOT_TAKE_SCREENSHOT,
-                            ExceptionsUtil.getMessageForThrowable(e)));
+                            ExceptionsUtil.getMessageForThrowable(e)), null, e);
         }
 
         return attributes;

@@ -1,32 +1,42 @@
 package com.kms.katalon.core.webui.common;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.InvalidSelectorException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchWindowException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
-
 
 import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.exception.StepFailedException;
@@ -39,6 +49,7 @@ import com.kms.katalon.core.testobject.TestObjectProperty;
 import com.kms.katalon.core.testobject.TestObjectXpath;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
 import com.kms.katalon.core.webui.common.XPathBuilder.PropertyType;
+import com.kms.katalon.core.webui.common.internal.SmartXPathController;
 import com.kms.katalon.core.webui.constants.CoreWebuiMessageConstants;
 import com.kms.katalon.core.webui.constants.StringConstants;
 import com.kms.katalon.core.webui.driver.DriverFactory;
@@ -59,6 +70,8 @@ public class WebUiCommonHelper extends KeywordHelper {
     public static final String WEB_ELEMENT_ATTRIBUTE_TEXT = "text";
 
     public static final String WEB_ELEMENT_XPATH = "xpath";
+    
+    private static AtomicInteger atomicCounter = new AtomicInteger(0);
 
     public static boolean isTextPresent(WebDriver webDriver, String text, boolean isRegex)
             throws WebDriverException, IllegalArgumentException {
@@ -480,7 +493,11 @@ public class WebUiCommonHelper extends KeywordHelper {
     public static void focusOnBrowser() throws WebDriverException, StepFailedException {
         ((JavascriptExecutor) DriverFactory.getWebDriver()).executeScript("window.focus()");
     }
-
+    
+    /*
+     * Build a locator based on its SelectorCollection and SelectorMethod
+     * Update SelectorCollection if previously empty
+     */
     public static By buildLocator(TestObject to) {
         SelectorMethod selectorMethod = to.getSelectorMethod();
         switch (selectorMethod) {
@@ -494,7 +511,11 @@ public class WebUiCommonHelper extends KeywordHelper {
             case CSS:
                 return By.cssSelector(to.getSelectorCollection().get(selectorMethod));
             case XPATH:
-                return By.xpath(to.getSelectorCollection().get(selectorMethod));
+            	// Update SelectorCollection of old TestObject for compatibility
+            	if(to.getSelectorCollection().isEmpty()){
+            		to.setSelectorValue(selectorMethod, to.getXpaths().get(0).getValue());
+            	}
+            	return By.xpath(to.getSelectorCollection().get(selectorMethod));
             default:
                 return null;
         }
@@ -506,7 +527,11 @@ public class WebUiCommonHelper extends KeywordHelper {
     public static By buildUnionXpath(TestObject to) {
         return buildXpath(to, XPathBuilder.AggregationType.UNION, to.getProperties());
     }
-
+    
+    /*
+     * Get a TestObject's selector value based on its SelectorCollection and SelectorMethod
+     * Update SelectorCollection if previously empty
+     */
     public static String getSelectorValue(TestObject to) {
         SelectorMethod selectorMethod = to.getSelectorMethod();
         switch (selectorMethod) {
@@ -519,11 +544,11 @@ public class WebUiCommonHelper extends KeywordHelper {
                 return xpathBuilder.build(); 
             case XPATH:
             	String ret =  to.getSelectorCollection().get(selectorMethod);
-            	if(ret == null || ret.isEmpty()){	
+            	if(ret == null){
             		if(to.getXpaths() != null && !to.getXpaths().isEmpty()){
                 		ret = to.getXpaths().get(0).getValue();
-            		}else{
-            			ret = StringUtils.EMPTY;
+                    	// Update SelectorCollection of old TestObject for compatibility
+                		to.setSelectorValue(selectorMethod, ret);
             		}
             	}
             	return ret;
@@ -685,14 +710,11 @@ public class WebUiCommonHelper extends KeywordHelper {
         boolean isSwitchToParentFrame = false;
         try {
             WebDriver webDriver = DriverFactory.getWebDriver();
-            /*
-             * Smart XPath's enabled - only support in commercial
-            Boolean smartXPathsEnabled = RunConfiguration.getAutoApplyNeighborXpaths();
-            */     
+            Boolean smartXPathsEnabled = RunConfiguration.shouldApplySmartXPath();
             final boolean objectInsideShadowDom = testObject.getParentObject() != null
                     && testObject.isParentObjectShadowRoot();
-            By defaultLocator = null;
-            String cssLocator = null;
+            By defaultLocator = null;	
+            String cssLocator = null;	
             String locatorString = null;
             final TestObject parentObject = testObject.getParentObject();
             WebElement shadowRootElement = null;
@@ -728,7 +750,8 @@ public class WebUiCommonHelper extends KeywordHelper {
 
             float timeCount = 0;
             long miliseconds = System.currentTimeMillis();
-            while (timeCount < timeOut) {
+            // Resolve issue3166, don't use WHILE here because if timeout is 0 then WebDriver#findElements will not be called
+            do {
                 try {
                     List<WebElement> webElements = null;
                     if (objectInsideShadowDom) {
@@ -751,17 +774,16 @@ public class WebUiCommonHelper extends KeywordHelper {
                 Thread.sleep(500);
                 timeCount += 0.5;
                 miliseconds = System.currentTimeMillis();
-            }
+            } while (timeCount < timeOut);
 
             // If this code is reached, then no elements were found, try to use other methods
             logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_CANNOT_FIND_WEB_ELEMENT_BY_LOCATOR, locatorString));
-/*            // Only apply Smart XPath to test objects that have selector method of XPath AND if Smart XPath is enabled
-            if(testObject.getSelectorMethod() == SelectorMethod.XPATH){
-                List<WebElement> elementsByOtherMethods = findWebElementsByOtherMethods(webDriver, objectInsideShadowDom, testObject, smartXPathsEnabled);
-                if(smartXPathsEnabled == true)
-                	return elementsByOtherMethods;
+            // Only apply Smart XPath to test objects that have selector method of XPath AND if Smart XPath is enabled
+            if(testObject.getSelectorMethod().equals(SelectorMethod.XPATH) && smartXPathsEnabled){
+                List<WebElement> elementsByOtherMethods = findWebElementsWithSmartXPath(webDriver, objectInsideShadowDom, testObject);
+                return elementsByOtherMethods;
             }
-*/
+
         } catch (TimeoutException e) {
             // timeOut, do nothing
         } catch (InterruptedException e) {
@@ -776,81 +798,157 @@ public class WebUiCommonHelper extends KeywordHelper {
         return Collections.emptyList();
     }
     
-    @SuppressWarnings("unused")
-	private static List<WebElement> findWebElementsByOtherMethods(
-    		WebDriver webDriver, 
-    		boolean objectInsideShadowDom, 
-    		TestObject testObject,
-    		Boolean smartXPathsEnabled){
+	private static List<WebElement> findWebElementsWithSmartXPath(WebDriver webDriver, boolean objectInsideShadowDom,
+			TestObject testObject) {
 
-        return findWebElementsByAutoApplyNeighborXpaths(webDriver, objectInsideShadowDom, testObject, smartXPathsEnabled);
-    }
-    
-    private static List<WebElement> findWebElementsByAutoApplyNeighborXpaths(
-    		WebDriver webDriver, 
-    		boolean objectInsideShadowDom, 
-    		TestObject testObject,
-    		Boolean smartXPathsEnabled){
-  	
-    	if(objectInsideShadowDom){
-    		 return Collections.emptyList();
-    	}    	
-    	
-    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_START);
-    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_TRIGGER);
-    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_LEARN_ABOUT);
-    	logger.logInfo("");
-    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_USING);
+		if (objectInsideShadowDom) {
+			return Collections.emptyList();
+		}
+		
+		SmartXPathController.setLogger(logger);
 
-    	List<WebElement> elementsFoundBeforeNeighborXPaths = new ArrayList<>();
-    	
-    	List<TestObjectXpath> allXPaths = testObject.getXpaths();
-    	
-    	Optional<TestObjectXpath> workingNeighborXPath = 
-    			allXPaths
-    			.stream()
-    			.filter(xpath -> xpath.getName().equals("xpath:neighbor"))
-    			.findFirst();
-    	
-    	// Use Neighbor as the stop condition if exists, otherwise just loop through all XPaths
-    	int firstNeighborXPathIndex = allXPaths.size();
-    	if(workingNeighborXPath.isPresent()){
-    		firstNeighborXPathIndex = allXPaths.indexOf(workingNeighborXPath.get());
-    	}
-		for(int i = 0; i < firstNeighborXPathIndex; i++){
+		SmartXPathController.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_USING);
+
+		Map<TestObjectXpath, List<WebElement>> smartXPathsMap = new HashMap<>();
+		List<TestObjectXpath> allXPaths = testObject.getXpaths();
+		TestObjectXpath selectedSmartXPath = null;
+		String pathToSelectedSmartXPathScreenshot = StringUtils.EMPTY;
+		
+		int index = atomicCounter.getAndIncrement();
+
+		for (int i = 0; i < allXPaths.size(); i++) {
 			TestObjectXpath thisXPath = allXPaths.get(i);
-	   		By byThisXPath =  By.xpath(thisXPath.getValue());
-    		List<WebElement> elementsFoundByThisXPath = webDriver.findElements(byThisXPath);
-    		if(elementsFoundByThisXPath != null 
-    				&& elementsFoundByThisXPath.size() > 0){
-                logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS, 
-                		testObject.getObjectId(), thisXPath.getValue()));
-                elementsFoundBeforeNeighborXPaths = elementsFoundByThisXPath;
-    			break;
-    		}
-		}
-		
-		// Checking useAllNeighbors every time before we want to return
-		// makes sure every desired log is displayed 
-		if(elementsFoundBeforeNeighborXPaths.size() > 0 && smartXPathsEnabled == true){
-			logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION);
-	    	logger.logInfo("");
-	    	logger.logInfo(StringConstants.KW_LOG_INFO_WHERE_TO_TURN_OFF_SMART_XPATHS);
-	    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_END);
-			return elementsFoundBeforeNeighborXPaths;			
-			
-		} else if (elementsFoundBeforeNeighborXPaths.size() == 0){
-			logger.logInfo(StringConstants.KW_LOG_INFO_NOT_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS);
-		}
-		
-    	logger.logInfo("");
-    	logger.logInfo(StringConstants.KW_LOG_INFO_WHERE_TO_TURN_ON_SMART_XPATHS);
-    	logger.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_END);
+			By byThisXPath = By.xpath(thisXPath.getValue());
+			List<WebElement> elementsFoundByThisXPath = null;
+			try {
+				elementsFoundByThisXPath = webDriver.findElements(byThisXPath);
+			} catch (InvalidSelectorException e) {
+				// do nothing
+			}
+			if (elementsFoundByThisXPath != null && elementsFoundByThisXPath.size() > 0) {
 
-    	return Collections.emptyList();    	
+				SmartXPathController.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_THIS_SMART_XPATH,
+						thisXPath.getValue()));
+
+				if (smartXPathsMap.get(thisXPath) == null) {
+					// save the first working XPath
+					if (selectedSmartXPath == null) {
+						selectedSmartXPath = thisXPath;
+					}
+					smartXPathsMap.put(thisXPath, elementsFoundByThisXPath);
+				}
+
+				// By convention all XPath finders must abide
+				// 'xpath:finder_name'
+				String xpathFinder = thisXPath.getName().split(":")[1];
+
+				String screenShotName = testObject.getObjectId() + "_" + xpathFinder;
+
+				// Increase local index for neighbor
+				if (xpathFinder.equals("neighbor")) {
+					screenShotName += "_" + (index++);
+				}
+
+				// Save the first working XPath's screenshot
+				if (pathToSelectedSmartXPathScreenshot.equals(StringUtils.EMPTY)) {
+					pathToSelectedSmartXPathScreenshot = SmartXPathController.takeScreenShot(webDriver,
+							elementsFoundByThisXPath.get(0), screenShotName);
+				} else {
+					SmartXPathController.takeScreenShot(webDriver,
+							elementsFoundByThisXPath.get(0), screenShotName);
+				}
+
+			} else {
+				SmartXPathController.logInfo(MessageFormat.format(
+						StringConstants.KW_LOG_INFO_COULD_NOT_FIND_WEB_ELEMENT_WITH_THIS_SMART_XPATH,
+						thisXPath.getValue()));
+			}
+		}
+
+		if (selectedSmartXPath != null) {
+			List<WebElement> elementsFoundWithSelectedSmartXPath = smartXPathsMap.get(selectedSmartXPath);
+			SmartXPathController.registerBrokenTestObject(testObject, selectedSmartXPath, pathToSelectedSmartXPathScreenshot);
+			SmartXPathController.logInfo(MessageFormat.format(StringConstants.KW_LOG_INFO_SELECT_SMART_XPATH,
+					selectedSmartXPath.getValue()));
+			SmartXPathController.logInfo(StringConstants.KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION);
+			return elementsFoundWithSelectedSmartXPath;
+		} else {
+			SmartXPathController.logInfo(StringConstants.KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS);
+		}
+
+		return Collections.emptyList();
+	}
+    
+	/**
+	 * Take and save screenshot of a web element on the web page WebDriver is
+	 * currently on. The web page's screenshot is first taken and converted into
+	 * a BufferedImage, then the web element's location is retrieved and used to
+	 * sub-image from the BufferedImage. The image (if saved successfully) will
+	 * be under PNG extension.
+	 * 
+	 * @param driver
+	 *            A WebDriver instance that's being used at the time calling
+	 *            this function
+	 * @param ele
+	 *            The web element to be taken screenshot of
+	 * @param name
+	 *            Name of the screenshot
+	 * @param path
+	 *            An absolute path to a folder to which the image will be saved
+	 * @return Path to the newly taken screenshot if exists, an empty string
+	 *         otherwise
+	 * @throws IOException
+	 *             If an exception during I/O occurs
+	 * @throws InterruptedException 
+	 */
+	public static String saveWebElementScreenshot(WebDriver driver, WebElement ele, String name, String path)
+			throws IOException {
+        // Get entire page screenshot
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        BufferedImage fullImg = ImageIO.read(screenshot);
+
+        // Get the location of element on the page
+        Point point = ele.getLocation();
+
+        // Crop the entire page screenshot to get only element screenshot
+        double devicePixelRatio = getDevicePixelRatio(driver);
+        int eleX = (int) Math.round(point.getX() * devicePixelRatio);
+        int eleY = (int) Math.round(point.getY() * devicePixelRatio);
+        int eleWidth = (int) Math.round(ele.getSize().getWidth() * devicePixelRatio);
+        int eleHeight = (int) Math.round(ele.getSize().getHeight() * devicePixelRatio);
+        BufferedImage eleScreenshot = fullImg.getSubimage(eleX, eleY, eleWidth, eleHeight);
+        ImageIO.write(eleScreenshot, "png", screenshot);
+        // Copy the element screenshot to internal folder
+        String screenshotPath = path;
+
+        screenshotPath = screenshotPath.replaceAll("\\\\", "/");
+        if (screenshotPath.endsWith("/")) {
+            screenshotPath += name;
+        } else {
+            screenshotPath += "/" + name;
+        }
+        screenshotPath += ".png";
+        File fileScreenshot = new File(screenshotPath);
+        FileUtils.copyFile(screenshot, fileScreenshot);
+        // Delete temporary image
+        screenshot.deleteOnExit();
+        return screenshotPath;
+	}
+	
+    private static double getDevicePixelRatio(WebDriver driver) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        Object executeScriptValue = js.executeScript("return window.devicePixelRatio;");
+        double devicePixelRatio = 1;
+        try {
+            if (executeScriptValue != null) {
+                devicePixelRatio = Double.valueOf(executeScriptValue.toString());
+            }
+        } catch (NumberFormatException e) {
+            devicePixelRatio = 1;
+        }
+        return devicePixelRatio;
     }
-
-
+	    
     @SuppressWarnings("unused")
 	private static List<WebElement> findWebElementsUsingHeuristicMethod(
             WebDriver webDriver, 
@@ -992,7 +1090,22 @@ public class WebUiCommonHelper extends KeywordHelper {
         return webElements;
     }
 
+    /**
+     * If the TestObject has a cached WebElement then return this object,
+     * otherwise retrieve WebElement from TestObject's properties.
+     * 
+     * @param testObject
+     * @param timeOut
+     * @return {@link WebElement}
+     * @throws WebElementNotFoundException
+     */
     public static WebElement findWebElement(TestObject testObject, int timeOut) throws WebElementNotFoundException {
+        WebElement cachedWebElement = testObject.getCachedWebElement();
+        if (cachedWebElement != null) {
+            logger.logDebug("Using cached web element");
+            return cachedWebElement;
+        }
+        logger.logDebug("Finding web element from Test Object's properties");
         List<WebElement> elements = findWebElements(testObject, timeOut);
         if (elements != null && elements.size() > 0) {
             return elements.get(0);
@@ -1022,7 +1135,7 @@ public class WebUiCommonHelper extends KeywordHelper {
             // make it fail, therefore only warn user about the exception
             logger.logWarning(
                     MessageFormat.format(StringConstants.KW_LOG_WARNING_SWITCHING_TO_DEFAULT_CONTENT_FAILED_BC_OF_X,
-                            ExceptionsUtil.getMessageForThrowable(e)));
+                            ExceptionsUtil.getMessageForThrowable(e)), null, e);
         }
     }
 

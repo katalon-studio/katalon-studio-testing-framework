@@ -74,7 +74,7 @@ public class DeleteAllCookiesKeyword extends WebUIAbstractKeyword {
                 webDriver = DriverFactory.getWebDriver()
             } catch (WebDriverException e) {
                 if (e instanceof BrowserNotOpenedException) {
-                    logger.logWarning(StringConstants.KW_LOG_WARNING_CANNOT_DEL_COOKIES_BC_BROWSER_CLOSED)
+                    logger.logWarning(StringConstants.KW_LOG_WARNING_CANNOT_DEL_COOKIES_BC_BROWSER_CLOSED, null, e)
                 } else {
                     throw e
                 }

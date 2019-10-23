@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
@@ -21,9 +20,11 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.kms.katalon.constants.GlobalStringConstants;
 import com.kms.katalon.core.constants.StringConstants;
+import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.model.FailureHandling;
 import com.kms.katalon.core.model.RunningMode;
 import com.kms.katalon.core.network.ProxyInformation;
+import com.kms.katalon.core.setting.BundleSettingStore;
 import com.kms.katalon.core.setting.VideoRecorderSetting;
 import com.kms.katalon.core.util.internal.JsonUtil;
 
@@ -34,6 +35,8 @@ import com.kms.katalon.core.util.internal.JsonUtil;
 @SuppressWarnings("unchecked")
 public class RunConfiguration {
 	
+	public static final String SMART_XPATH_BUNDLE_ID = "com.katalon.katalon-studio-smart-xpath";
+
 	public static final String OVERRIDING_GLOBAL_VARIABLES = "overridingGlobalVariables";
 
     public static final String REPORT_FOLDER_PATH_PROPERTY = "reportFolder";
@@ -63,6 +66,8 @@ public class RunConfiguration {
     public static final String EXECUTION_PREFS_PROPERTY = StringConstants.CONF_PROPERTY_EXECUTION_PREFS_PROPERTY;
 
     public static final String EXECUTION_TEST_DATA_INFO_PROPERTY = StringConstants.CONF_PROPERTY_TEST_DATA_INFO;
+    
+    public static final String REMOTE_DRIVER_PROPERTY = "Remote";
 
     public static final String EXECUTION_PROPERTY = StringConstants.CONF_PROPERTY_EXEC;
 
@@ -100,6 +105,14 @@ public class RunConfiguration {
     public static final String RECORD_CAPTURED_OBJECTS_FILE = "recordCapturedObjectsCache";
     
     public static final String AUTO_APPLY_NEIGHBOR_XPATHS = "autoApplyNeighborXpaths";
+    
+    public static final String PLUGIN_TEST_LISTENERS = "pluginTestListeners";
+    
+    public static final String LOCAL_SMART_WAIT_MODE = "localSmartWaitEnabled";
+    
+    public static final String GLOBAL_SMART_WAIT_MODE = "globalSmartWaitEnabled";
+    
+    public static final String LOG_TEST_STEPS = "logTestSteps";
     
     private static String settingFilePath;
 
@@ -366,17 +379,17 @@ public class RunConfiguration {
         return getStringProperty(SESSION_SERVER_HOST);
     }
 
-    public static String getExisingSessionSessionId() {
+    public static String getExistingSessionSessionId() {
         return RunConfiguration.getDriverSystemProperty(StringConstants.CONF_PROPERTY_EXISTING_DRIVER,
                 StringConstants.CONF_PROPERTY_EXISTING_SESSION_SESSION_ID);
     }
 
-    public static String getExisingSessionServerUrl() {
+    public static String getExistingSessionServerUrl() {
         return RunConfiguration.getDriverSystemProperty(StringConstants.CONF_PROPERTY_EXISTING_DRIVER,
                 StringConstants.CONF_PROPERTY_EXISTING_SESSION_SERVER_URL);
     }
 
-    public static String getExisingSessionDriverType() {
+    public static String getExistingSessionDriverType() {
         return RunConfiguration.getDriverSystemProperty(StringConstants.CONF_PROPERTY_EXISTING_DRIVER,
                 StringConstants.CONF_PROPERTY_EXISTING_SESSION_DRIVER_TYPE);
     }
@@ -528,20 +541,36 @@ public class RunConfiguration {
         return getStringProperty(RECORD_CAPTURED_OBJECTS_FILE);
     }
     
-    public static Boolean getAutoApplyNeighborXpaths(){
-    	return (Boolean) getExecutionGeneralProperties().get(AUTO_APPLY_NEIGHBOR_XPATHS);
-    }
+	public static Boolean shouldApplySmartXPath() {
+		if (getProperty(SMART_XPATH_BUNDLE_ID) != null) {
+			try {
+				return (Boolean) new BundleSettingStore(getProjectDir(), SMART_XPATH_BUNDLE_ID, true)
+						.getBoolean("SmartXPathEnabled", true);
+			} catch (IOException e) {
+				KeywordLogger.getInstance(RunConfiguration.class).logError(e.getMessage(), null, e);
+			}
+		}
+		return false;
+	}
     
     public static RunningMode getRunningMode() {
         return RunningMode.valueOf(getStringProperty(RUNNING_MODE));
     }
     
-    private static Map<String, Object> getOverridingParameters(){
+    public static Map<String, Object> getOverridingParameters(){
     	Map<String, Object> overridingParameters = (Map<String, Object>) getProperty(OVERRIDING_GLOBAL_VARIABLES);
     	if(overridingParameters == null){
     		return new HashMap<String, Object>();
     	}
     	return overridingParameters;
+    }
+    
+    public static List<String> getPluginTestListeners() {
+        Object testListeners = getProperty(PLUGIN_TEST_LISTENERS);
+        if (testListeners != null) {
+            return (List<String>) testListeners;
+        }
+        return Collections.emptyList();
     }
     
     public static String getOverridingGlobalVariable(String globalVariableName){
