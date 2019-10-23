@@ -16,6 +16,8 @@ public class DatabaseSettings {
     public static final String USER = "USER";
 
     public static final String PASSWORD = "PASSWORD";
+    
+    public static final String DRIVERCLASSNAME = "DRIVERCLASSNAME";
 
     private Properties settings;
 
@@ -28,9 +30,14 @@ public class DatabaseSettings {
             return null;
         }
 
-        if (isSecureUserAccount()) {
-            return new DatabaseConnection(getUrl(), getUser(), getPassword());
-        }
+		if (isSecureUserAccount()) {
+
+			if (getDriverClassName() != null) {
+				return new DatabaseConnection(getUrl(), getUser(), getPassword(), getDriverClassName());
+			} else {
+				return new DatabaseConnection(getUrl(), getUser(), getPassword());
+			}
+		}
 
         return new DatabaseConnection(getUrl());
     }
@@ -49,9 +56,17 @@ public class DatabaseSettings {
     public String getUrl() {
         return settings.getProperty(URL);
     }
+    
+    public String getDriverClassName() {
+        return settings.getProperty(DRIVERCLASSNAME);
+    }
 
     public void setUrl(String url) {
         settings.setProperty(URL, StringUtils.trimToEmpty(url));
+    }
+    
+    public void setDriverClassName(String driverClassName) {
+        settings.setProperty(DRIVERCLASSNAME, StringUtils.trimToEmpty(driverClassName));
     }
 
     public boolean isSecureUserAccount() {

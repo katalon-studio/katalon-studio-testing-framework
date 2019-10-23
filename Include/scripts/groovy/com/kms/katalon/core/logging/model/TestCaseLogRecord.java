@@ -10,6 +10,8 @@ import com.kms.katalon.core.logging.model.TestStatus.TestStatusValue;
 public class TestCaseLogRecord extends AbstractLogRecord {
     private boolean isOptional;
 
+    private String tag;
+
     public TestCaseLogRecord(String name) {
         super(name);
         setType(ILogRecord.LOG_TYPE_TEST_CASE);
@@ -28,6 +30,14 @@ public class TestCaseLogRecord extends AbstractLogRecord {
 
     public void setOptional(boolean isOptional) {
         this.isOptional = isOptional;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Override

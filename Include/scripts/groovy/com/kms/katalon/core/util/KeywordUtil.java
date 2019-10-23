@@ -15,6 +15,7 @@ public class KeywordUtil {
      * @param message fail message
      */
     public static void markFailed(String message) {
+        logger.logFailed(message);
         ErrorCollector.getCollector().addError(new StepFailedException(message));
     }
 

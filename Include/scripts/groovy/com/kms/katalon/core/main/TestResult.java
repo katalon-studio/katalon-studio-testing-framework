@@ -9,6 +9,8 @@ public class TestResult {
     private Object scriptResult;
 
     private String message;
+    
+    private Throwable cause;
 
     public TestStatus getTestStatus() {
         return testStatus;
@@ -44,5 +46,13 @@ public class TestResult {
         result.setMessage("");
 
         return result;
+    }
+
+    public Throwable getCause() {
+        return cause;
+    }
+
+    public void setCause(Throwable cause) {
+        this.cause = cause;
     }
 }

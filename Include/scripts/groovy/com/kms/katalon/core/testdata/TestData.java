@@ -116,5 +116,22 @@ public interface TestData {
      * @throws IOException if any io errors happened
      */
     List<List<Object>> getAllData() throws IOException;
-
+    
+    /**
+     * Used to retrieve custom properties relating to a test data.
+     * Implementing classes should initialize their own maps and 
+     * handle the set/get themselves
+     * @param key a {@link String} that represents the key into the map
+     * @return An {@link Object} indexed by key, or null if not exists
+     */
+    String getProperty(String key);
+    
+    /**
+     * Used to retrieve custom properties relating to a test data.
+     * Implementing classes should initialize their own maps and 
+     * handle the set/get themselves
+     * @param key a {@link String} that represents the key into the map
+     * @param value an {@link Object} that associates with the key
+     */
+    void setProperty(String key, String value);
 }

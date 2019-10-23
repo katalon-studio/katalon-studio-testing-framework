@@ -17,4 +17,8 @@ public class StepErrorException extends RuntimeException {
     public StepErrorException(Throwable t) {
         super(t);
     }
+    
+    public StepErrorException(String message, Throwable t) {
+        super(message, t);
+    }
 }

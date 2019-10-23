@@ -247,6 +247,7 @@ public class ScriptEngine extends GroovyScriptEngine {
                 importCustomizer.addImport(TestDataFactory.class.getSimpleName(), TestDataFactory.class.getName());
                 importCustomizer.addImport(ObjectRepository.class.getSimpleName(), ObjectRepository.class.getName());
                 importCustomizer.addImport(TestCaseFactory.class.getSimpleName(), TestCaseFactory.class.getName());
+                importCustomizer.addImport(RunConfiguration.class.getSimpleName(), RunConfiguration.class.getName());
                 importCustomizer.addStaticImport(TestDataFactory.class.getName(), FIND_TEST_DATA_METHOD_NAME);
                 importCustomizer.addStaticImport(ObjectRepository.class.getName(), FIND_TEST_OBJECT_METHOD_NAME);
                 importCustomizer.addStaticImport(TestCaseFactory.class.getName(), FIND_TEST_CASE_METHOD_NAME);

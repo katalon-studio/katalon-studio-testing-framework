@@ -2,7 +2,6 @@ package com.kms.katalon.core.cucumber.keyword;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 import com.kms.katalon.core.constants.StringConstants;
@@ -26,11 +25,11 @@ import cucumber.api.event.TestStepStarted;
 import cucumber.api.formatter.Formatter;
 
 public class CucumberReporter implements Formatter {
-    
+
     private final KeywordLogger logger = KeywordLogger.getInstance(this.getClass());
-    
+
     public CucumberReporter() {
-        
+
     }
 
     @Override
@@ -71,21 +70,27 @@ public class CucumberReporter implements Formatter {
 
             @Override
             public void receive(TestStepStarted event) {
-                logger.startKeyword(getStepText(event), new HashMap<String, String>(), new Stack<KeywordLogger.KeywordStackElement>());
+                if (event.testStep instanceof PickleStepTestStep) {
+                    logger.startKeyword(getStepText(event), new HashMap<String, String>(),
+                            new Stack<KeywordLogger.KeywordStackElement>());
+                }
             }
         });
         eventPublisher.registerHandlerFor(TestStepFinished.class, new EventHandler<TestStepFinished>() {
 
             @Override
             public void receive(TestStepFinished event) {
-                String name = getStepText(event);
-                Result result = event.result;
-                logResult(name, result);
-                logger.endKeyword(name, new HashMap<String, String>(), new Stack<KeywordLogger.KeywordStackElement>());
+                if (event.testStep instanceof PickleStepTestStep) {
+                    String name = getStepText(event);
+                    Result result = event.result;
+                    logResult(name, result);
+                    logger.endKeyword(name, new HashMap<String, String>(),
+                            new Stack<KeywordLogger.KeywordStackElement>());
+                }
             }
         });
     }
-    
+
     private void logResult(String name, Result result) {
         Type status = result.getStatus();
         if (Type.PASSED.equals(status)) {
@@ -102,9 +107,7 @@ public class CucumberReporter implements Formatter {
                 logger.logMessage(level, name);
             } else {
                 String stackTraceForThrowable = ExceptionsUtil.getStackTraceForThrowable(t);
-                String message = MessageFormat.format(
-                        StringConstants.MAIN_LOG_MSG_FAILED_BECAUSE_OF, 
-                        name,
+                String message = MessageFormat.format(StringConstants.MAIN_LOG_MSG_FAILED_BECAUSE_OF, name,
                         stackTraceForThrowable);
                 logError(t, message);
             }
@@ -116,7 +119,8 @@ public class CucumberReporter implements Formatter {
         if (event.testStep instanceof PickleStepTestStep) {
             text = ((PickleStepTestStep) event.testStep).getStepText();
         } else {
-            text = event.testStep.getStepText();
+            // text = event.testStep.getStepText();
+            text = "";
         }
         return text;
     }
@@ -126,11 +130,12 @@ public class CucumberReporter implements Formatter {
         if (event.testStep instanceof PickleStepTestStep) {
             text = ((PickleStepTestStep) event.testStep).getStepText();
         } else {
-            text = event.testStep.getStepText();
+            // text = event.testStep.getStepText();
+            text = "";
         }
         return text;
     }
-    
+
     private void logError(Throwable t, String message) {
         logger.logMessage(ErrorCollector.fromError(t), message, t);
     }

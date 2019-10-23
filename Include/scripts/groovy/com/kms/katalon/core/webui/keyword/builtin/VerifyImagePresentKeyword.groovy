@@ -83,6 +83,8 @@ public class VerifyImagePresentKeyword extends WebUIAbstractKeyword {
                 String currentDirFilePath = new File(RunConfiguration.getProjectDir()).getAbsolutePath()
                 imagePath = currentDirFilePath + File.separator + imagePath
             }
+
+            ScreenUtil screenUtil = new ScreenUtil()
             exist = screenUtil.isImageExist(imagePath)
             if (exist) {
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_IMG_X_IS_PRESENT, imagePath))

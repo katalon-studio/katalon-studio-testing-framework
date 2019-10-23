@@ -38,18 +38,17 @@ public class DelayKeyword extends AbstractKeyword {
     @CompileStatic
     @Override
     public Object execute(Object ...params) {
-        Object second = (Object) params[0]
+        Number second = (Number) params[0]
         FailureHandling flowControl = (FailureHandling)(params.length > 1 && params[1] instanceof FailureHandling ? params[1] : RunConfiguration.getDefaultFailureHandling())
         delay(second,flowControl)
     }
 
     @CompileStatic
-    public void delay(Object second, FailureHandling flowControl) throws StepFailedException {
+    public void delay(Number second, FailureHandling flowControl) throws StepFailedException {
         KeywordMain.runKeyword({
             logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_DELAYING_BROWSER_IN_SEC, second))
-            int secondIntValue = (int) Integer.valueOf(String.valueOf(second))
             try {
-                Thread.sleep(secondIntValue * 1000)
+                Thread.sleep(second * 1000)
             } catch (InterruptedException e) {
                 // Thread is interrupted, do nothing
             }

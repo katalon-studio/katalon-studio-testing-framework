@@ -4,11 +4,16 @@ import static com.kms.katalon.core.constants.StringConstants.ID_SEPARATOR;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
@@ -65,6 +70,10 @@ public class TestDataFactory {
     private static final String NODE_PASSWORD = "password";
 
     private static final String NODE_SQL_QUERY = "query";
+    
+    private static final String NODE_DRIVER_CLASS_NAME = "driverClassName";
+    
+    private static final String PROPERTIES = "properties";
 
     /**
      * Returns test data id of a its relative id.
@@ -132,33 +141,57 @@ public class TestDataFactory {
             SAXReader reader = new SAXReader();
             Document document = reader.read(dataFile);
             Element testDataElement = document.getRootElement();
-
+            TestData testData;
             String driverName = testDataElement.elementText(DRIVER_NODE);
             switch (TestDataType.fromValue(driverName)) {
                 case EXCEL_FILE:
                     logger.logDebug(StringConstants.XML_LOG_TEST_DATA_READING_EXCEL_DATA);
-                    return readExcelData(testDataElement, projectDir);
+                    testData = readExcelData(testDataElement, projectDir);
+                    break;
                 case INTERNAL_DATA:
                     logger.logDebug(StringConstants.XML_LOG_TEST_DATA_READING_INTERNAL_DATA);
-                    return readInternalData(testDataElement, projectDir, dataFile);
+                    testData = readInternalData(testDataElement, projectDir, dataFile);
+                    break;
                 case CSV_FILE:
                     logger.logDebug(StringConstants.XML_LOG_TEST_DATA_READING_CSV_DATA);
-                    return readCSVData(testDataElement, projectDir);
+                    testData = readCSVData(testDataElement, projectDir);
+                    break;
                 case DB_DATA:
                     logger.logDebug(StringConstants.XML_LOG_TEST_DATA_READING_DB_DATA);
-                    return readDBData(testDataElement, projectDir);
+                    testData = readDBData(testDataElement, projectDir);
+                    break;
                 default:
-                    return null;
+                    testData = null;
+            }
+            if (testData != null) {
+                getPropertiesForTestData(testData, testDataElement);
+                return testData;
             }
         }
         throw new IllegalArgumentException(MessageFormat.format(StringConstants.XML_LOG_ERROR_TEST_DATA_X_NOT_EXISTS,
                 testDataId));
     }
 
+    private static void getPropertiesForTestData(TestData testData, Element testDataElement) {
+        List<?> propertiesElement = testDataElement.elements(PROPERTIES);
+        if (propertiesElement == null || propertiesElement.size() == 0) {
+            return;
+        }
+        Iterator<?> it = propertiesElement.iterator();
+        while(it.hasNext()) {
+            Element entry = (Element) it.next();
+            Element keyValuePair = entry.element("entry");
+            testData.setProperty(keyValuePair.elementText("key"), keyValuePair.elementText("value"));
+        }
+    }
+
     private static String getProjectDir() {
         return new File(RunConfiguration.getProjectDir()).getAbsolutePath();
     }
 
+    /**
+     * @deprecated
+     */
     public static TestData findTestDataForExternalBundleCaller(String testDataId, String projectDir) throws Exception {
         return internallyfindTestData(projectDir, testDataId);
     }
@@ -252,6 +285,7 @@ public class TestDataFactory {
         validateTestDataElement(testDataElement, NODE_SQL_QUERY);
         validateTestDataElement(testDataElement, NODE_GLOBAL_DB_SETTING);
         validateTestDataElement(testDataElement, NODE_SECURE_USER_ACCOUNT);
+        validateTestDataElement(testDataElement, NODE_DRIVER_CLASS_NAME);
         validateTestDataElement(testDataElement, URL_NODE);
 
         String query = testDataElement.element(NODE_SQL_QUERY).getText();
@@ -274,6 +308,7 @@ public class TestDataFactory {
         String sourceUrl = testDataElement.element(URL_NODE).getText();
         String user = null;
         String password = null;
+        String driverClassName = null;
 
         if (StringUtils.isBlank(sourceUrl)) {
             throw new IllegalArgumentException(StringConstants.XML_ERROR_TEST_DATA_CONNECTION_URL_IS_BLANK);
@@ -283,16 +318,22 @@ public class TestDataFactory {
             validateTestDataElement(testDataElement, NODE_USER);
             validateTestDataElement(testDataElement, NODE_PASSWORD);
             user = testDataElement.element(NODE_USER).getText();
+            driverClassName = testDataElement.element(NODE_DRIVER_CLASS_NAME).getText();
             // decrypt password before use
             password = Base64.decode(testDataElement.element(NODE_PASSWORD).getText());
         }
 
+        if(driverClassName != null){
+        	return readDBData(new DatabaseConnection(sourceUrl, user, password, driverClassName), query);
+        }
         return readDBData(new DatabaseConnection(sourceUrl, user, password), query);
-    }
+    }   
 
     private static TestData readDBData(DatabaseConnection dbConnection, String query) throws SQLException {
         logger.logDebug(MessageFormat.format(StringConstants.XML_LOG_TEST_DATA_READING_DB_DATA_WITH_QUERY_X, query));
-        return new DBData(dbConnection, query);
+        dbConnection.getConnection();
+        DBData dbData = new DBData(dbConnection, query);
+        return dbData;
     }
 
     private static void validateTestDataElement(Element testDataElement, String element) {

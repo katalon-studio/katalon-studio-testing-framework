@@ -8,6 +8,10 @@ public class CoreMobileMessageConstants extends NLS {
     public static String KW_LOG_INFO_STARTING_APP_AT;
 
     public static String KW_MSG_UNABLE_TO_START_APP_AT;
+    
+    public static String KW_LOG_INFO_STARTING_APP_WITH_ID;
+
+    public static String KW_MSG_UNABLE_TO_START_APP_WITH_ID;
 
     public static String KW_MSG_APP_FILE_MISSING;
 

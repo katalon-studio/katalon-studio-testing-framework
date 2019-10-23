@@ -68,51 +68,56 @@ public class VerifyElementNotPresentKeyword extends WebUIAbstractKeyword {
         return verifyElementNotPresent(to,timeOut,flowControl)
     }
 
-    @CompileStatic
     public boolean verifyElementNotPresent(TestObject to, int timeOut, FailureHandling flowControl) throws StepFailedException {
         return WebUIKeywordMain.runKeyword({
             boolean isSwitchIntoFrame = false
             try {
-                WebUiCommonHelper.checkTestObjectParameter(to)
-                timeOut = WebUiCommonHelper.checkTimeout(timeOut)
-                isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to, timeOut)
-                boolean elementNotFound = false
-                final By locator = WebUiCommonHelper.buildLocator(to)
-                try {
-                    if (locator != null) {
-                        logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_FINDING_WEB_ELEMENT_W_ID, to.getObjectId(), locator.toString(), timeOut))
-                        elementNotFound = new FluentWait<WebDriver>(DriverFactory.getWebDriver())
-                                .pollingEvery(500, TimeUnit.MILLISECONDS).withTimeout(timeOut, TimeUnit.SECONDS)
-                                .until(new Function<WebDriver, Boolean>() {
-                                    @Override
-                                    public Boolean apply(WebDriver webDriver) {
-                                        try {
-                                            webDriver.findElement(locator)
-                                            return false
-                                        } catch (NoSuchElementException e) {
-                                            return true
+                if(to != null){
+                    WebUiCommonHelper.checkTestObjectParameter(to)
+                    timeOut = WebUiCommonHelper.checkTimeout(timeOut)
+                    isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to, timeOut)
+                    boolean elementNotFound = false
+                    final By locator = WebUiCommonHelper.buildLocator(to)
+                    try {
+                        if (locator != null) {
+                            logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_FINDING_WEB_ELEMENT_W_ID, to.getObjectId(), locator.toString(), timeOut))
+                            elementNotFound = new FluentWait<WebDriver>(DriverFactory.getWebDriver())
+                                    .pollingEvery(500, TimeUnit.MILLISECONDS).withTimeout(timeOut, TimeUnit.SECONDS)
+                                    .until(new Function<WebDriver, Boolean>() {
+                                        @Override
+                                        public Boolean apply(WebDriver webDriver) {
+                                            try {
+                                                webDriver.findElement(locator)
+                                                return false
+                                            } catch (NoSuchElementException e) {
+                                                return true
+                                            }
                                         }
-                                    }
-                                })
-                    } else {
-                        throw new IllegalArgumentException(MessageFormat.format(StringConstants.KW_EXC_WEB_ELEMENT_W_ID_DOES_NOT_HAVE_SATISFY_PROP, to.getObjectId()))
+                                    })
+                        } else {
+                            throw new IllegalArgumentException(MessageFormat.format(StringConstants.KW_EXC_WEB_ELEMENT_W_ID_DOES_NOT_HAVE_SATISFY_PROP, to.getObjectId()))
+                        }
+                    } catch (TimeoutException e) {
+                        // timeOut, do nothing
                     }
-                } catch (TimeoutException e) {
-                    // timeOut, do nothing
-                }
-                if (elementNotFound) {
-                    logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER, to.getObjectId(), locator.toString(), timeOut))
-                    return true
-                } else {
-                    WebUIKeywordMain.stepFailed(MessageFormat.format(StringConstants.KW_MSG_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER, to.getObjectId(), locator.toString(), timeOut), flowControl, null, true)
+                    if (elementNotFound) {
+                        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_WEB_ELEMT_W_ID_IS_NOT_PRESENT_AFTER, to.getObjectId(), locator.toString(), timeOut))
+                        return true
+                    } else {
+                        return false
+                    }
                     return false
+                } else {
+                    return true
                 }
+                
             } catch (WebElementNotFoundException e) {
-                WebUIKeywordMain.stepFailed(ExceptionsUtil.getMessageForThrowable(e), flowControl, null, true)
+                return true
             } finally {
                 if (isSwitchIntoFrame) {
                     WebUiCommonHelper.switchToDefaultContent()
                 }
+
             }
             return false
         }, flowControl, true, (to != null) ? MessageFormat.format(StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_X_IS_NOT_PRESENT, to.getObjectId()) : StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_IS_NOT_PRESENT)

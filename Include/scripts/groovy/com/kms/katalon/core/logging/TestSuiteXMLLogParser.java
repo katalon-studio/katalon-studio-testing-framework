@@ -266,6 +266,9 @@ public class TestSuiteXMLLogParser {
         testCaseLogRecord
                 .setDescription(xmlLogRecord.getProperties().containsKey(StringConstants.XML_LOG_DESCRIPTION_PROPERTY)
                         ? StringEscapeUtils.unescapeJava(xmlLogRecord.getProperties().get(StringConstants.XML_LOG_DESCRIPTION_PROPERTY)) : "");
+        testCaseLogRecord.setTag(xmlLogRecord.getProperties().containsKey(StringConstants.XML_LOG_TAG_PROPERTY)
+                ? StringEscapeUtils.unescapeJava(xmlLogRecord.getProperties().get(StringConstants.XML_LOG_TAG_PROPERTY))
+                : "");
         testCaseLogRecord.setOptional(xmlLogRecord.getProperties().containsKey(StringConstants.XML_LOG_IS_OPTIONAL)
                 ? Boolean.valueOf(xmlLogRecord.getProperties().get(StringConstants.XML_LOG_IS_OPTIONAL)) : false);
         Object object = stack.peekLast();

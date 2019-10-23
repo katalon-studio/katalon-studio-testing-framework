@@ -26,6 +26,6 @@ public class CommentKeyword extends AbstractKeyword {
     @CompileStatic
     public void comment(String message) {
         // Just a comment line, do nothing
-        logger.logDebug(message)
+        logger.logInfo(message)
     }
 }

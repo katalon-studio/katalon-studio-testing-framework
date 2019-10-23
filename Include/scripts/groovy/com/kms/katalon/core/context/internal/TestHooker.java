@@ -1,7 +1,5 @@
 package com.kms.katalon.core.context.internal;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,25 +9,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
-import org.apache.commons.io.FileUtils;
-import org.codehaus.groovy.ast.ASTNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.ast.Parameter;
-import org.codehaus.groovy.ast.builder.AstBuilder;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 
 import com.kms.katalon.core.annotation.AfterTestCase;
 import com.kms.katalon.core.annotation.AfterTestSuite;
 import com.kms.katalon.core.annotation.BeforeTestCase;
+import com.kms.katalon.core.annotation.BeforeTestDataBindToTestCase;
 import com.kms.katalon.core.annotation.BeforeTestSuite;
 import com.kms.katalon.core.constants.CoreMessageConstants;
 import com.kms.katalon.core.logging.ErrorCollector;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.logging.KeywordLogger.KeywordStackElement;
-import com.kms.katalon.core.main.TestCaseMain;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
 import com.kms.katalon.core.util.internal.PrimitiesUtil;
 
@@ -39,18 +34,14 @@ public class TestHooker {
     
     private final KeywordLogger logger = KeywordLogger.getInstance(this.getClass());
 
-    private String sourceFile;
-
     private Map<String, List<MethodNode>> testContextMethods;
-
-    private ClassNode moduleNode;
 
     private GroovyObject testContextClassInstance;
 
     private Class<?> scriptClazz;
 
-    public TestHooker(String sourceFile) {
-        this.sourceFile = sourceFile;
+    public TestHooker(Class<?> scriptClazz) {
+        this.scriptClazz = scriptClazz;
         collectContextMethods();
     }
 
@@ -60,27 +51,19 @@ public class TestHooker {
         testContextMethods.put(AfterTestCase.class.getName(), new ArrayList<>());
         testContextMethods.put(BeforeTestSuite.class.getName(), new ArrayList<>());
         testContextMethods.put(AfterTestSuite.class.getName(), new ArrayList<>());
+        testContextMethods.put(BeforeTestDataBindToTestCase.class.getName(), new ArrayList<>());
     }
 
     public void collectContextMethods() {
         clearContextMethods();
 
-        File file = new File(sourceFile);
-
         try {
-            List<ASTNode> astNodes = new AstBuilder().buildFromString(FileUtils.readFileToString(file));
-            astNodes.stream().filter(node -> node instanceof ClassNode).forEach(mainNode -> {
-                if (mainNode instanceof ClassNode) {
-                    moduleNode = (ClassNode) mainNode;
-                    moduleNode.getAllDeclaredMethods().stream().forEach(method -> {
-                        evaluateTestContextMethod(method);
-                    });
-                }
+            ClassNode classNode = new ClassNode(scriptClazz);
+            classNode.getAllDeclaredMethods().stream().forEach(method -> {
+                evaluateTestContextMethod(method);
             });
         } catch (MultipleCompilationErrorsException e) {
             System.out.println(ExceptionsUtil.getMessageForThrowable(e));
-        } catch (IOException e) {
-            System.err.println(ExceptionsUtil.getMessageForThrowable(e));
         }
     }
 
@@ -103,12 +86,8 @@ public class TestHooker {
     public void invokeContextMethods(String listenerAnnotationName, Object[] injectedObjects) {
         if (testContextClassInstance == null) {
             try {
-                scriptClazz = TestCaseMain.getScriptEngine()
-                        .getExecutingScriptClassLoader()
-                        .parseClass(new File(sourceFile));
                 testContextClassInstance = (GroovyObject) scriptClazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException | CompilationFailedException | IOException
-                    | ClassNotFoundException e) {
+            } catch (InstantiationException | IllegalAccessException | CompilationFailedException e) {
                 System.err.println(ExceptionsUtil.getMessageForThrowable(e));
             }
         }
@@ -133,7 +112,7 @@ public class TestHooker {
             logger.logDebug(MessageFormat.format(CoreMessageConstants.EXEC_LOG_INVOKE_LISTENER_METHOD_COMPLETED,
                     listenerAnnotationName, methodDisplayName));
         } catch (Throwable e) {
-            logger.logError(ExceptionsUtil.getMessageForThrowable(e));
+            logger.logError(ExceptionsUtil.getStackTraceForThrowable(e), null, e);
         } finally {
             while (!keywordStack.isEmpty()) {
                 KeywordStackElement keywordStackElement = keywordStack.pop();

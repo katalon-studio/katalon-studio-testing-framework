@@ -59,10 +59,11 @@ public class CallTestCaseKeyword extends AbstractKeyword {
                         calledTestCase.getTestCaseId(), binding), flowControl, false, false)
                 switch (result.getTestStatus().getStatusValue()) {
                     case TestStatus.TestStatusValue.FAILED:
-                        throw new StepFailedException(MessageFormat.format(StringConstants.KW_MSG_CALL_TC_FAILED, calledTestCase.getTestCaseId()))
+                        throw new StepFailedException(MessageFormat.format(StringConstants.KW_MSG_CALL_TC_FAILED, calledTestCase.getTestCaseId()),
+                            result.getCause())
                         break
                     case TestStatus.TestStatusValue.ERROR:
-                        throw new StepErrorException(MessageFormat.format(StringConstants.KW_MSG_CALL_TC_X_FAILED_BECAUSE_OF_ERROR, calledTestCase.getTestCaseId()))
+                        throw new StepErrorException(MessageFormat.format(StringConstants.KW_MSG_CALL_TC_X_FAILED_BECAUSE_OF_ERROR, calledTestCase.getTestCaseId()), result.getCause())
                         break
                     case TestStatus.TestStatusValue.PASSED:
                         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CALL_TC_X_SUCCESSFULLY, calledTestCase.getTestCaseId()))

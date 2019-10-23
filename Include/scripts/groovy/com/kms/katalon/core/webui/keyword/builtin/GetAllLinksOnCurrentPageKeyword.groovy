@@ -140,7 +140,7 @@ public class GetAllLinksOnCurrentPageKeyword extends WebUIAbstractKeyword {
             return URI.create(url)
         } catch(Exception e) {
             // do nothing
-            logger.logError(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_ERROR_X_IS_AN_INVALID_URL, url, e.getMessage()))
+            logger.logError(MessageFormat.format(CoreWebuiMessageConstants.KW_LOG_ERROR_X_IS_AN_INVALID_URL, url, e.getMessage()), null, e)
             return null
         }
     }

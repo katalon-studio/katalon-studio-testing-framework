@@ -3,6 +3,8 @@ package com.kms.katalon.core.reporting;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.kms.katalon.core.logging.model.ILogRecord;
 import com.kms.katalon.core.logging.model.TestCaseLogRecord;
 import com.kms.katalon.core.logging.model.TestStatus;
@@ -44,7 +46,9 @@ public class JsTestModel extends JsModel {
         // isCritical, skip this
         props.add(new JsModelProperty("isCritical", EMPTY_STRING_INDEX, null));
         // document, skip this
-        props.add(new JsModelProperty("document", EMPTY_STRING_INDEX, null));
+        props.add(new JsModelProperty("document", StringUtils.defaultString(testLog.getDescription()), listStrings));
+        
+        props.add(new JsModelProperty("tag", StringUtils.defaultString(testLog.getTag()), listStrings));
         // tags, skip this
         tags = new JsModel();
 

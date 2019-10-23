@@ -32,13 +32,13 @@ public class BrowserMobProxyManager {
     private static final AtomicLong requestNumber = new AtomicLong(0);
     
     private static void logError(String message, Exception e) {
-        logger.logError(message + ": " + e.getClass().getName() + " - " + e.getMessage());
+        logger.logError(message + ": " + e.getClass().getName() + " - " + e.getMessage(), null, e);
     }
     
     public static final Proxy getWebServiceProxy(Proxy systemProxy) {
         try {
             BrowserMobProxy browserMobProxy = getOrCreateBrowserMobProxy(systemProxy);
-            InetAddress connectableAddress = ClientUtil.getConnectableAddress();
+            InetAddress connectableAddress = InetAddress.getByName("localhost");
             int browserMobProxyPort = browserMobProxy.getPort();
             Proxy proxy = new Proxy(
                     Type.HTTP,
@@ -76,14 +76,16 @@ public class BrowserMobProxyManager {
         }
     }
     
-    public static final void endHar(RequestInformation requestInformation) {
+    public static final File endHar(RequestInformation requestInformation) {
         try {
             BrowserMobProxy browserMobProxy = browserMobProxyLookup.get();
             if (browserMobProxy != null) {
                 
                 requestInformation.setName(String.valueOf(requestNumber.getAndIncrement()));
                 String threadName = Thread.currentThread().getName();
+
                 String directoryPath = RunConfiguration.getReportFolder();
+
                 File directory = new File(directoryPath, "requests" + File.separator + threadName);
                 if (!directory.exists()) {
                     directory.mkdirs();
@@ -112,10 +114,12 @@ public class BrowserMobProxyManager {
                 originalEntries.addAll(newEntries);                
 //                har.writeTo(file);
                 HarFileWriter.write(har, file);
+                return file;
             }
         } catch (Exception e) {
             logError("Cannot close HAR entry", e);
         }
+        return null;
     }
 
     private static BrowserMobProxy getOrCreateBrowserMobProxy(Proxy systemProxy) {

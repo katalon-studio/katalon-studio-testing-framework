@@ -34,9 +34,9 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 
 public class MobileDriverFactory {
-    
+
     private static final KeywordLogger logger = KeywordLogger.getInstance(MobileDriverFactory.class);
-    
+
     private static final String WAIT_FOR_APP_SCRIPT_TRUE = "true;";
 
     private static final String WAIT_FOR_APP_SCRIPT = "waitForAppScript";
@@ -75,14 +75,26 @@ public class MobileDriverFactory {
      * @return the remote web driver url if running Mobile keyword on cloud services
      */
     public static String getRemoteWebDriverServerUrl() {
-        return RunConfiguration.getDriverSystemProperty(MOBILE_DRIVER_PROPERTY, "remoteWebDriverUrl");
+        return RunConfiguration.getDriverSystemProperty(RunConfiguration.REMOTE_DRIVER_PROPERTY, "remoteWebDriverUrl");
     }
 
     /**
      * @return the remote web driver type if running Mobile keyword on cloud services
      */
     public static String getRemoteWebDriverType() {
-        return RunConfiguration.getDriverSystemProperty(MOBILE_DRIVER_PROPERTY, "browserType");
+        return RunConfiguration.getDriverSystemProperty(RunConfiguration.REMOTE_DRIVER_PROPERTY, "browserType");
+    }
+
+    public static MobileDriverType getRemoteMobileDriver() {
+        return MobileDriverType.valueOf(RunConfiguration
+                .getDriverSystemProperty(RunConfiguration.REMOTE_DRIVER_PROPERTY, "remoteMobileDriver"));
+    }
+
+    /**
+     * @return the remote web driver url if running Mobile keyword on cloud services
+     */
+    public static Map<String, Object> getRemoteWebDriverPreferences() {
+        return RunConfiguration.getDriverPreferencesProperties(RunConfiguration.REMOTE_DRIVER_PROPERTY);
     }
 
     /**
@@ -183,15 +195,64 @@ public class MobileDriverFactory {
             MobileDriverType mobileDriverType) {
         DesiredCapabilities desireCapabilities = new DesiredCapabilities();
         for (Entry<String, Object> property : propertyMap.entrySet()) {
-            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_MOBILE_PROPERTY_SETTING,
-                    property.getKey(), property.getValue()));
+            logger.logInfo(MessageFormat.format(StringConstants.KW_LOG_MOBILE_PROPERTY_SETTING, property.getKey(),
+                    property.getValue()));
             desireCapabilities.setCapability(property.getKey(), property.getValue());
         }
         return desireCapabilities;
     }
 
+    private static DesiredCapabilities createCapabilities(MobileDeviceInfo mobileDeviceInfo, String appId) {
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        Map<String, Object> driverPreferences = RunConfiguration.getDriverPreferencesProperties(MOBILE_DRIVER_PROPERTY);
+        // Running app so no browser name
+        if (driverPreferences.containsKey(MobileCapabilityType.BROWSER_NAME)) {
+            driverPreferences.remove(MobileCapabilityType.BROWSER_NAME);
+        }
+        if (driverPreferences != null && mobileDeviceInfo.getDriverType() == MobileDriverType.IOS_DRIVER) {
+            capabilities.setCapability("bundleId", appId);
+            capabilities.setCapability(WAIT_FOR_APP_SCRIPT, WAIT_FOR_APP_SCRIPT_TRUE);
+            try {
+                if (AppiumDriverManager.getXCodeVersion() >= 8) {
+                    capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AppiumDriverManager.XCUI_TEST);
+                    capabilities.setCapability(AppiumDriverManager.REAL_DEVICE_LOGGER,
+                            RunConfiguration.getDeviceConsoleExecutable());
+                    capabilities.setCapability(AppiumDriverManager.WDA_LOCAL_PORT, AppiumDriverManager.getFreePort());
+                }
+            } catch (ExecutionException e) {
+                // XCode version not found, ignore this
+            }
+            if (mobileDeviceInfo.getDeviceId() == null) {
+                capabilities.setCapability(MobileCapabilityType.PLATFORM, getDeviceOS());
+            }
+            capabilities
+                    .merge(convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.IOS_DRIVER));
+        } else if (driverPreferences != null && mobileDeviceInfo.getDriverType() == MobileDriverType.ANDROID_DRIVER) {
+            // Launch Android Settings app at default
+            capabilities.setCapability("appPackage", "com.android.settings");
+            capabilities.setCapability("appActivity", ".Settings");
+            capabilities.setPlatform(Platform.ANDROID);
+            if (isUsingAndroid7OrBigger()) {
+                capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AppiumDriverManager.UIAUTOMATOR2);
+            }
+            capabilities.setCapability("autoGrantPermissions", true);
+            capabilities.setCapability(AppiumDriverManager.SYSTEM_PORT, AppiumDriverManager.nextFreePort(8200, 8299));
+            capabilities.merge(
+                    convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.ANDROID_DRIVER));
+        }
+        if (StringUtils.isNotEmpty(mobileDeviceInfo.getDeviceOS())) {
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, mobileDeviceInfo.getDeviceOS());
+        }
+        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, mobileDeviceInfo.getDeviceName());
+        if (mobileDeviceInfo.getDeviceId() != null) {
+            capabilities.setCapability(MobileCapabilityType.UDID, mobileDeviceInfo.getDeviceId());
+        }
+        capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 1800);
+        return capabilities;
+    }
+
     private static DesiredCapabilities createCapabilities(MobileDriverType osType, String deviceId, String deviceName,
-            String appFile, boolean uninstallAfterCloseApp) {
+            String platformVersion, String appFile, boolean uninstallAfterCloseApp) {
         DesiredCapabilities capabilities = new DesiredCapabilities();
         Map<String, Object> driverPreferences = RunConfiguration.getDriverPreferencesProperties(MOBILE_DRIVER_PROPERTY);
         // Running app so no browser name
@@ -199,8 +260,6 @@ public class MobileDriverFactory {
             driverPreferences.remove(MobileCapabilityType.BROWSER_NAME);
         }
         if (driverPreferences != null && osType == MobileDriverType.IOS_DRIVER) {
-            capabilities
-                    .merge(convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.IOS_DRIVER));
             capabilities.setCapability(WAIT_FOR_APP_SCRIPT, WAIT_FOR_APP_SCRIPT_TRUE);
             try {
                 if (AppiumDriverManager.getXCodeVersion() >= 8) {
@@ -214,17 +273,21 @@ public class MobileDriverFactory {
             }
             if (deviceId == null) {
                 capabilities.setCapability(MobileCapabilityType.PLATFORM, getDeviceOS());
-                capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, getDeviceOSVersion());
             }
+            capabilities
+                    .merge(convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.IOS_DRIVER));
         } else if (driverPreferences != null && osType == MobileDriverType.ANDROID_DRIVER) {
-            capabilities.setCapability("autoGrantPermissions", true);
-            capabilities.merge(
-                    convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.ANDROID_DRIVER));
             capabilities.setPlatform(Platform.ANDROID);
-            capabilities.setCapability("autoGrantPermissions", true);
             if (isUsingAndroid7OrBigger()) {
                 capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AppiumDriverManager.UIAUTOMATOR2);
             }
+            capabilities.setCapability("autoGrantPermissions", true);
+            capabilities.setCapability(AppiumDriverManager.SYSTEM_PORT, AppiumDriverManager.getFreePort());
+            capabilities.merge(
+                    convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.ANDROID_DRIVER));
+        }
+        if (StringUtils.isNotEmpty(platformVersion)) {
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, platformVersion);
         }
         capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, deviceName);
         capabilities.setCapability(MobileCapabilityType.APP, appFile);
@@ -260,6 +323,28 @@ public class MobileDriverFactory {
         return getExistingDriver() != null;
     }
 
+    public static AppiumDriver<?> startMobileDriver(String appId) throws AppiumStartException, IOException,
+            InterruptedException, MobileDriverInitializeException, IOSWebkitStartException {
+        if (isUsingExistingDriver()) {
+            return startExistingBrowser();
+        }
+        MobileDeviceInfo mobileDeviceInfo = MobileDeviceInfo.create(getMobileDriverType(), getDeviceId(),
+                getDeviceName(), getDeviceOS(), getDeviceOSVersion());
+        AppiumDriver<?> driver;
+        String remoteWebUrl = getRemoteWebDriverServerUrl();
+        if (StringUtils.isNotEmpty(remoteWebUrl)) {
+            driver = AppiumDriverManager.createMobileDriver(mobileDeviceInfo.getDriverType(),
+                    createCapabilities(mobileDeviceInfo, appId), new URL(remoteWebUrl));
+        } else {
+            driver = AppiumDriverManager.createMobileDriver(mobileDeviceInfo.getDriverType(),
+                    mobileDeviceInfo.getDeviceId(), createCapabilities(mobileDeviceInfo, appId));
+        }
+        if (driver != null) {
+            saveWebDriverSessionData(driver);
+        }
+        return driver;
+    }
+
     /**
      * Start a new native app mobile driver
      * 
@@ -278,9 +363,18 @@ public class MobileDriverFactory {
         if (isUsingExistingDriver()) {
             return startExistingBrowser();
         }
-        AppiumDriver<?> driver = startMobileDriver(getMobileDriverType(), getDeviceId(), getDeviceName(), appFile,
-                uninstallAfterCloseApp);
-        saveWebDriverSessionData(driver);
+        AppiumDriver<?> driver;
+        String remoteWebUrl = getRemoteWebDriverServerUrl();
+        if (StringUtils.isNotEmpty(remoteWebUrl)) {
+            driver = startRemoteMobileDriver(remoteWebUrl, new DesiredCapabilities(getRemoteWebDriverPreferences()),
+                    getRemoteMobileDriver(), appFile);
+        } else {
+            driver = startLocalMobileDriver(getMobileDriverType(), getDeviceId(), getDeviceName(), getDeviceOSVersion(),
+                    appFile, uninstallAfterCloseApp);
+        }
+        if (driver != null) {
+            saveWebDriverSessionData(driver);
+        }
         return driver;
     }
 
@@ -335,8 +429,8 @@ public class MobileDriverFactory {
     protected static AppiumDriver<?> startExistingBrowser()
             throws MalformedURLException, MobileDriverInitializeException {
         return AppiumDriverManager.startExisitingMobileDriver(
-                MobileDriverType.fromStringValue(RunConfiguration.getExisingSessionDriverType()),
-                RunConfiguration.getExisingSessionSessionId(), RunConfiguration.getExisingSessionServerUrl());
+                MobileDriverType.fromStringValue(RunConfiguration.getExistingSessionDriverType()),
+                RunConfiguration.getExistingSessionSessionId(), RunConfiguration.getExistingSessionServerUrl());
     }
 
     /**
@@ -345,6 +439,7 @@ public class MobileDriverFactory {
      * @param osType the os type for the new mobile driver with type {@link MobileDriverType}
      * @param deviceId id of the device
      * @param deviceName name of the device
+     * @param platformVersion platform version of the device
      * @param appFile absolute path of the application file
      * @param uninstallAfterCloseApp true to un-install the app after execution
      * @return the newly created driver with type {@link AppiumDriver}
@@ -353,20 +448,20 @@ public class MobileDriverFactory {
      * @throws InterruptedException
      * @throws AppiumStartException
      */
-    public static AppiumDriver<?> startMobileDriver(MobileDriverType osType, String deviceId, String deviceName,
-            String appFile, boolean uninstallAfterCloseApp)
+    public static AppiumDriver<?> startLocalMobileDriver(MobileDriverType osType, String deviceId, String deviceName,
+            String platformVersion, String appFile, boolean uninstallAfterCloseApp)
             throws MobileDriverInitializeException, IOException, InterruptedException, AppiumStartException {
         Preconditions.checkArgument(osType != null && StringUtils.isNotEmpty(deviceName),
                 CoreMobileMessageConstants.KW_MSG_DEVICE_MISSING);
         Preconditions.checkArgument(StringUtils.isNotEmpty(appFile),
                 CoreMobileMessageConstants.KW_MSG_APP_FILE_MISSING);
-        String remoteWebUrl = getRemoteWebDriverServerUrl();
-        if (StringUtils.isNotEmpty(remoteWebUrl)) {
-            return AppiumDriverManager.createMobileDriver(osType,
-                    createCapabilities(osType, deviceId, deviceName, appFile, uninstallAfterCloseApp),
-                    new URL(remoteWebUrl));
-        }
         return AppiumDriverManager.createMobileDriver(osType, deviceId,
-                createCapabilities(osType, deviceId, deviceName, appFile, uninstallAfterCloseApp));
+                createCapabilities(osType, deviceId, deviceName, platformVersion, appFile, uninstallAfterCloseApp));
+    }
+
+    public static AppiumDriver<?> startRemoteMobileDriver(String remoteWebUrl, DesiredCapabilities desiredCapabilities,
+            MobileDriverType driverType, String appFile) throws MalformedURLException, MobileDriverInitializeException {
+        desiredCapabilities.setCapability("app", appFile);
+        return AppiumDriverManager.createMobileDriver(driverType, desiredCapabilities, new URL(remoteWebUrl));
     }
 }

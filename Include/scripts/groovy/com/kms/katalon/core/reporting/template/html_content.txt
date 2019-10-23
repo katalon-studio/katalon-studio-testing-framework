@@ -253,14 +253,14 @@ function addExecutionEnvironmentInfo(environment_info) {
         </tr>
         {{if doc()}}
         <tr>
-          <th>Documentation:</th>
+          <th>Description:</th>
           <td class="doc">{{html doc()}}</td>
         </tr>
         {{/if}}
-        {{if tags.length}}
+        {{if tag}}
         <tr>
-          <th>Tags:</th>
-          <td>{{html tags.join(', ')}}</td>
+          <th>Tag:</th>
+          <td>{{html tag}}</td>
         </tr>
         {{/if}}
         {{if timeout}}

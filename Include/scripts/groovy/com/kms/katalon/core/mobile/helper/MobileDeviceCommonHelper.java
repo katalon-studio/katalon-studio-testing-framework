@@ -24,7 +24,7 @@ public class MobileDeviceCommonHelper {
         }
         if (driver instanceof AndroidDriver) {
             AndroidDriver<?> androidDriver = (AndroidDriver<?>) driver;
-            if (androidDriver.isLocked()) {
+            if (androidDriver.isDeviceLocked()) {
                 androidDriver.unlockDevice();
             }
         }

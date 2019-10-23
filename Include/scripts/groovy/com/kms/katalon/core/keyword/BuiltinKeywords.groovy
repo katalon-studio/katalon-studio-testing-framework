@@ -353,25 +353,25 @@ public class BuiltinKeywords {
     /**
      * Delay execution for a specific time (in seconds)
      * @param second
-     *      number of seconds to delay
+     *      number of seconds to delay. Eg: 0.5, 10, 30.
      * @param flowControl
      * @throws StepFailedException
      */
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
-    public static void delay(Object second, FailureHandling flowControl) throws StepFailedException {
+    public static void delay(Number second, FailureHandling flowControl) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_BUILT_IN, "delay", second, flowControl)
     }
 
     /**
      * Delay execution for a specific time (in seconds)
      * @param second
-     *      number of seconds to delay
+     *      number of seconds to delay. Eg: 0.5, 10, 30.
      * @throws StepFailedException
      */
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
-    public static void delay(Object second) throws StepFailedException {
+    public static void delay(Number second) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_BUILT_IN, "delay", second)
     }
 

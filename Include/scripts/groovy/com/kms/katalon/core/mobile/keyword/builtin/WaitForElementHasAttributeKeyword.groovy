@@ -93,7 +93,7 @@ public class WaitForElementHasAttributeKeyword extends MobileAbstractKeyword {
                     return true
                 }
             } catch (TimeoutException e) {
-                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]))
+                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_FAILED_OBJ_X_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]), null, e)
             }
             return false
         }, flowControl, true, (to != null) ? MessageFormat.format(StringConstants.KW_MSG_CANNOT_WAIT_OBJ_X_HAS_ATTRIBUTE_Y, [to.getObjectId(), attributeName] as Object[]) : StringConstants.KW_MSG_CANNOT_WAIT_OBJ_HAS_ATTRIBUTE)

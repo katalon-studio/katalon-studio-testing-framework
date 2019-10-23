@@ -150,7 +150,7 @@ public abstract class ExportTestCaseScript {
 					logger.logPassed("Method '" + method.getName() + "' complete successfully")
 				} catch (Exception e) {
 					logger.logWarning("Error occurred when try to run method '" + method.getName() + "' (Root cause: "
-							+ e.getClass().getName().toString() + " - " + e.getMessage() + ")");
+							+ e.getClass().getName().toString() + " - " + e.getMessage() + ")", null, e);
 				} finally {
                     endAllUnfinishedKeywords(keywordStack);
                     logger.endKeyword(method.getName(), null, keywordStack);

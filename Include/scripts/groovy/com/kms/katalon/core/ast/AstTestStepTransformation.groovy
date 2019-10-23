@@ -54,7 +54,15 @@ public class AstTestStepTransformation implements ASTTransformation {
 
     private static final String RUN_METHOD_NAME = "run"
 
-    private static final String KEYWORD_LOGGER_LOG_NOT_RUN_METHOD_NAME = "logNotRun";
+    private static final String TEST_STEP_UTIL_LOG_NOT_RUN_METHOD = "logNotRun";
+    
+    private static final String TEST_STEP_UTIL_PUBLISH_BEFORE_TEST_STEP_EVENT_METHOD = "publishBeforeTestStepEvent";
+    
+    private static final String TEST_STEP_UTIL_PUBLISH_AFTER_TEST_STEP_EVENT_METHOD = "publishAfterTestStepEvent";
+    
+    private static final String TEST_STEP_UTIL_LOG_ADD_DESCRIPTION_METHOD = "logAddDescription";
+    
+    private static final String TEST_STEP_UTIL_LOG_START_KEYWORD_METHOD = "logStartKeyword";
 
     @CompileStatic
     public void visit(ASTNode[] astNodes, SourceUnit sourceUnit) {
@@ -342,90 +350,79 @@ public class AstTestStepTransformation implements ASTTransformation {
 
     @CompileStatic
     private MethodCallExpression createNewAddDescriptionMethodCall(String comment) {
-        MethodCallExpression loggerGetInstanceMethodCall = getLoggerGetInstanceMethodCall();
         List<Expression> expressionArguments = new ArrayList<Expression>();
-        expressionArguments.add(new ConstantExpression(comment));
-        MethodCallExpression methodCall = new MethodCallExpression(loggerGetInstanceMethodCall,
-                KEYWORD_LOGGER_SET_PENDING_DESCRIPTION_METHOD_NAME, new ArgumentListExpression(expressionArguments))
+        expressionArguments.add(getClassMethodCall())
+        expressionArguments.add(new ConstantExpression(comment))
+        
+        MethodCallExpression methodCall = getTestStepUtilMethodCall(TEST_STEP_UTIL_LOG_ADD_DESCRIPTION_METHOD,
+            expressionArguments)
         return methodCall
     }
 
     @CompileStatic
     private MethodCallExpression createNewStartKeywordMethodCall(String keywordName, Statement statement, Map<Statement, Integer> indexMap, int nestedLevel) {
-        MethodCallExpression loggerGetInstanceMethodCall = getLoggerGetInstanceMethodCall();
-        List<Expression>expressionArguments = new ArrayList<Expression>();
+        List<Expression> expressionArguments = new ArrayList<Expression>();
+        expressionArguments.add(getClassMethodCall())
         expressionArguments.add(new ConstantExpression(keywordName));
         expressionArguments.add(createPropertiesMapExpressionForKeyword(statement, indexMap));
         expressionArguments.add(new ConstantExpression(nestedLevel));
-        MethodCallExpression methodCall = new MethodCallExpression(loggerGetInstanceMethodCall,
-                StringConstants.LOG_START_KEYWORD_METHOD, new ArgumentListExpression(expressionArguments))
+        
+        MethodCallExpression methodCall = getTestStepUtilMethodCall(TEST_STEP_UTIL_LOG_START_KEYWORD_METHOD,
+            expressionArguments)
         return methodCall
-    }
-
-    private MethodCallExpression getLoggerGetInstanceMethodCall() {
-        VariableExpression thisExpression = new VariableExpression("this");
-        MethodCallExpression getClassMethodCall = new MethodCallExpression(
-                thisExpression, "getClass", new ArgumentListExpression(new ArrayList<Expression>()));
-        List<Expression> loggerExpressionArguments = new ArrayList<Expression>();
-        loggerExpressionArguments.add(getClassMethodCall);
-        MethodCallExpression loggerGetInstanceMethodCall = new MethodCallExpression(
-                new ClassExpression(new ClassNode(KeywordLogger.class)), KEYWORD_LOGGER_GET_INSTANCE_METHOD_NAME,
-                new ArgumentListExpression(loggerExpressionArguments));
-        return loggerGetInstanceMethodCall;
     }
 
     private ExpressionStatement createBeforeTestStepMethodCall(def keywordInfo) {
         List<Expression> expressionArguments = new ArrayList<Expression>();
-        MethodCallExpression executionManagerMethodCall = new MethodCallExpression(
-                new ClassExpression(new ClassNode(ExecutionEventManager.class)),
-                "getInstance",
-                new ArgumentListExpression(expressionArguments));
-
-        expressionArguments = new ArrayList<Expression>();
-        expressionArguments.add(new PropertyExpression(
-                new ClassExpression(new ClassNode(ExecutionListenerEvent.class)),
-                new ConstantExpression("BEFORE_TEST_STEP")))
         List<Expression> injectedArguments = new ArrayList()
         for (info in keywordInfo) {
             injectedArguments.add(new ConstantExpression(info))
         }
         expressionArguments.addAll(injectedArguments)
 
-        MethodCallExpression methodCall = new MethodCallExpression(executionManagerMethodCall,
-                "publicEvent", new ArgumentListExpression(expressionArguments))
+        MethodCallExpression methodCall = getTestStepUtilMethodCall(
+            TEST_STEP_UTIL_PUBLISH_BEFORE_TEST_STEP_EVENT_METHOD,
+            expressionArguments)
         return new ExpressionStatement(methodCall)
+    }
+    
+    private MethodCallExpression getClassMethodCall() {
+        VariableExpression thisExpression = new VariableExpression("this");
+        MethodCallExpression getClassMethodCall = new MethodCallExpression(
+                thisExpression, "getClass", new ArgumentListExpression(new ArrayList<Expression>()))
+        return getClassMethodCall
+    }
+    
+    private MethodCallExpression getTestStepUtilMethodCall(String methodName, List<Expression> arguments) {
+        MethodCallExpression methodCall = new MethodCallExpression(
+            new ClassExpression(new ClassNode(TestStepUtil.class)),
+            methodName,
+            new ArgumentListExpression(arguments))
+        return methodCall
     }
 
     private ExpressionStatement createAfterTestStepMethodCall(def keywordInfo) {
         List<Expression> expressionArguments = new ArrayList<Expression>();
-        MethodCallExpression executionManagerMethodCall = new MethodCallExpression(
-                new ClassExpression(new ClassNode(ExecutionEventManager.class)),
-                "getInstance",
-                new ArgumentListExpression(expressionArguments));
-
-        expressionArguments = new ArrayList<Expression>();
-        expressionArguments.add(new PropertyExpression(
-                new ClassExpression(new ClassNode(ExecutionListenerEvent.class)),
-                new ConstantExpression("AFTER_TEST_STEP")))
         List<Expression> injectedArguments = new ArrayList()
-
         for (info in keywordInfo) {
             injectedArguments.add(new ConstantExpression(info))
         }
         expressionArguments.addAll(injectedArguments)
 
-        MethodCallExpression methodCall = new MethodCallExpression(executionManagerMethodCall,
-                "publicEvent", new ArgumentListExpression(expressionArguments))
+        MethodCallExpression methodCall = getTestStepUtilMethodCall(
+            TEST_STEP_UTIL_PUBLISH_AFTER_TEST_STEP_EVENT_METHOD,
+            expressionArguments)
         return new ExpressionStatement(methodCall)
     }
 
     @CompileStatic
     private ExpressionStatement createNewNotRunLogMethodCallStatement(String keywordName) {
-        MethodCallExpression loggerGetInstanceMethodCall = getLoggerGetInstanceMethodCall();
-        List<Expression> expressionArguments = new ArrayList<Expression>();
-        expressionArguments.add(new ConstantExpression("NOT_RUN: " + keywordName));
-        return new ExpressionStatement(new MethodCallExpression(loggerGetInstanceMethodCall,
-                KEYWORD_LOGGER_LOG_NOT_RUN_METHOD_NAME, new ArgumentListExpression(expressionArguments)));
+        List<Expression> expressionArguments = new ArrayList<Expression>()
+        expressionArguments.add(getClassMethodCall())
+        expressionArguments.add(new ConstantExpression(keywordName))
+        MethodCallExpression methodCall = getTestStepUtilMethodCall(TEST_STEP_UTIL_LOG_NOT_RUN_METHOD,
+            expressionArguments)
+        return new ExpressionStatement(methodCall)
     }
 
     @CompileStatic

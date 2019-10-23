@@ -84,7 +84,7 @@ public class WaitForElementPresentKeyword extends WebUIAbstractKeyword {
                     }
                     return true
                 } catch (WebElementNotFoundException e) {
-                    logger.logWarning(MessageFormat.format(StringConstants.KW_MSG_OBJ_IS_NOT_PRESENT_AFTER_X_SEC, [to.getObjectId(), timeOut] as Object[]))
+                    logger.logWarning(MessageFormat.format(StringConstants.KW_MSG_OBJ_IS_NOT_PRESENT_AFTER_X_SEC, [to.getObjectId(), timeOut] as Object[]), null, e)
                     return false
                 }
             } finally {

@@ -3,6 +3,9 @@ package com.kms.katalon.core.webservice.helper;
 import java.net.HttpURLConnection;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.testobject.RequestObject;
@@ -170,6 +173,20 @@ public class WebServiceCommonHelper {
             return length;
         }).sum();
 
+        return headerLength;
+    }
+    
+    public static long calculateHeaderLength(HttpResponse httpResponse) {
+        Header[] headers = httpResponse.getAllHeaders();
+        long headerLength = 0;
+        for (Header header : headers) {
+            String key = header.getName();
+            if (StringUtils.isEmpty(key)) {
+                return 0L;
+            }
+            headerLength += key.getBytes().length;
+            headerLength += header.getValue().getBytes().length;
+        }
         return headerLength;
     }
 }

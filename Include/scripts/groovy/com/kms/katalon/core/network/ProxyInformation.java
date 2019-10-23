@@ -13,8 +13,6 @@ public class ProxyInformation {
 
     private String proxyServerAddress;
     
-    private boolean useMobBrowserProxy;
-    
     private int proxyServerPort;
 
     public String getProxyOption() {
@@ -86,12 +84,4 @@ public class ProxyInformation {
                 + "proxyServerPort=" + proxyServerPort
                 + "}";
     }
-
-	public void setUseMobBrowserProxy(boolean boolean1) {
-		this.useMobBrowserProxy = boolean1;
-	}
-	
-	public boolean getUseMobBroserProxy(){
-		return useMobBrowserProxy;
-	}
 }

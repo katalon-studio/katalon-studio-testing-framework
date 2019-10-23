@@ -1,11 +1,5 @@
 package com.kms.katalon.core.mobile.helper;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.MobileElement;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.Date;
@@ -29,10 +23,21 @@ import com.kms.katalon.core.mobile.keyword.internal.SelectorBuilderHelper;
 import com.kms.katalon.core.model.FailureHandling;
 import com.kms.katalon.core.testobject.TestObject;
 
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.TouchAction;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.touch.LongPressOptions;
+import io.appium.java_client.touch.TapOptions;
+import io.appium.java_client.touch.WaitOptions;
+import io.appium.java_client.touch.offset.ElementOption;
+import io.appium.java_client.touch.offset.PointOption;
+
 public class MobileElementCommonHelper {
-    
+
     private static final KeywordLogger logger = KeywordLogger.getInstance(MobileElementCommonHelper.class);
-    
+
     private static final int ANDROID_SEEKBAR_PADDING = 56;
 
     private static final int DEFAULT_DRAG_AND_DROP_DELAY = 2000;
@@ -91,13 +96,16 @@ public class MobileElementCommonHelper {
     public static void tapAndHold(TestObject to, Number duration, int timeout) throws StepFailedException, Exception {
         boolean useCustomDuration = checkDuration(duration);
         WebElement element = findElementWithCheck(to, timeout);
-        TouchAction longPressAction = new TouchAction(MobileDriverFactory.getDriver());
+        TouchAction<?> longPressAction = new TouchAction<>(MobileDriverFactory.getDriver());
         longPressAction = (useCustomDuration)
-                ? longPressAction.longPress(element, Duration.ofSeconds(gitIntValueForDuration(duration)))
-                : longPressAction.longPress(element);
+                ? longPressAction.longPress(LongPressOptions.longPressOptions()
+                        .withDuration(Duration.ofSeconds(gitIntValueForDuration(duration)))
+                        .withElement(ElementOption.element(element)))
+                : longPressAction
+                        .longPress(LongPressOptions.longPressOptions().withElement(ElementOption.element(element)));
         longPressAction.release().perform();
         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_TAP_AND_HOLD_ON_ELEMENT_X_WITH_DURATION_Y,
-                        to.getObjectId(), getStringForDuration(duration)));
+                to.getObjectId(), getStringForDuration(duration)));
     }
 
     public static boolean checkDuration(Number duration) {
@@ -117,18 +125,21 @@ public class MobileElementCommonHelper {
     public static void tapAndHold(Number x, Number y, Number duration) throws StepFailedException, Exception {
         MobileCommonHelper.checkXAndY(x, y);
         boolean useCustomDuration = checkDuration(duration);
-        TouchAction longPressAction = new TouchAction(MobileDriverFactory.getDriver());
+        TouchAction<?> longPressAction = new TouchAction<>(MobileDriverFactory.getDriver());
         longPressAction = (useCustomDuration)
-                ? longPressAction.longPress(x.intValue(), y.intValue(),
-                        Duration.ofSeconds(gitIntValueForDuration(duration)))
-                : longPressAction.longPress(x.intValue(), y.intValue());
+                ? longPressAction
+                        .longPress(LongPressOptions.longPressOptions()
+                                .withPosition(PointOption.point(x.intValue(), y.intValue()))
+                                .withDuration(Duration.ofSeconds(gitIntValueForDuration(duration))))
+                : longPressAction.longPress(LongPressOptions.longPressOptions()
+                        .withPosition(PointOption.point(x.intValue(), y.intValue())));
         longPressAction.release().perform();
         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_TAP_AND_HOLD_AT_X_Y_WITH_DURATION_Z, x, y,
-                        getStringForDuration(duration)));
+                getStringForDuration(duration)));
     }
 
     private static int gitIntValueForDuration(Number duration) {
-        return Math.round(duration.floatValue() * 1000);
+        return Math.round(duration.floatValue());
     }
 
     public static String getStringForDuration(Number duration) {
@@ -148,7 +159,8 @@ public class MobileElementCommonHelper {
     public static void checkElement(TestObject to, int timeout) throws StepFailedException, Exception {
         WebElement element = findElementWithCheck(to, timeout);
         if (!isElementChecked(element)) {
-            TouchAction tap = new TouchAction(MobileDriverFactory.getDriver()).tap(element, 1, 1);
+            TouchAction<?> tap = new TouchAction<>(MobileDriverFactory.getDriver())
+                    .tap(TapOptions.tapOptions().withElement(ElementOption.element(element, 1, 1)));
             tap.perform();
         }
         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_CHECK_ELEMENT, to.getObjectId()));
@@ -169,7 +181,8 @@ public class MobileElementCommonHelper {
     public static void uncheckElement(TestObject to, int timeout) throws StepFailedException, Exception {
         WebElement element = findElementWithCheck(to, timeout);
         if (isElementChecked(element)) {
-            TouchAction tap = new TouchAction(MobileDriverFactory.getDriver()).tap(element, 1, 1);
+            TouchAction<?> tap = new TouchAction<>(MobileDriverFactory.getDriver())
+                    .tap(TapOptions.tapOptions().withElement(ElementOption.element(element, 1, 1)));
             tap.perform();
         }
         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_UNCHECK_ELEMENT, to.getObjectId()));
@@ -194,7 +207,8 @@ public class MobileElementCommonHelper {
             scrollObject.put("element", ((MobileElement) itemElement).getId());
             driver.executeScript("mobile: scrollTo", scrollObject);
             // Click on element
-            TouchAction tap = new TouchAction(driver).tap(itemElement, 1, 1).release();
+            TouchAction<?> tap = new TouchAction<>(driver)
+                    .tap(TapOptions.tapOptions().withElement(ElementOption.element(itemElement, 1, 1)));
             tap.perform();
         } else if (driver instanceof AndroidDriver) {
             throw new StepFailedException(StringConstants.KW_LOG_FAILED_FEATURE_NOT_AVAILABLE);
@@ -212,17 +226,20 @@ public class MobileElementCommonHelper {
         WebElement fromElement = findElement(fromObj, timeout);
         WebElement toElement = findElement(toObj, timeout);
         AppiumDriver<?> driver = MobileDriverFactory.getDriver();
-        TouchAction dragAndDropAction = new TouchAction(driver);
+        TouchAction<?> dragAndDropAction = new TouchAction<>(driver);
         dragAndDropAction = (driver instanceof AndroidDriver)
-                ? dragAndDropAction.longPress(fromElement).moveTo(toElement).release()
-                : dragAndDropAction.longPress(fromElement)
-                        .waitAction(Duration.ofMillis(DEFAULT_DRAG_AND_DROP_DELAY))
-                        .moveTo(toElement)
-                        .waitAction(Duration.ofMillis(DEFAULT_DRAG_AND_DROP_DELAY))
+                ? dragAndDropAction.longPress(LongPressOptions.longPressOptions()
+                        .withElement(ElementOption.element(fromElement)))
+                        .moveTo(ElementOption.element(toElement)).release()
+                : dragAndDropAction.longPress(LongPressOptions.longPressOptions()
+                        .withElement(ElementOption.element(fromElement)))
+                        .waitAction(WaitOptions.waitOptions(Duration.ofMillis(DEFAULT_DRAG_AND_DROP_DELAY)))
+                        .moveTo(ElementOption.element(toElement))
+                        .waitAction(WaitOptions.waitOptions(Duration.ofMillis(DEFAULT_DRAG_AND_DROP_DELAY)))
                         .release();
         dragAndDropAction.perform();
-        logger.logPassed(MessageFormat
-                .format(StringConstants.KW_LOG_PASSED_DRAG_AND_DROP_ELEMENT_X_TO_ELEMENT_Y, fromObj.getObjectId()));
+        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_DRAG_AND_DROP_ELEMENT_X_TO_ELEMENT_Y,
+                fromObj.getObjectId()));
     }
 
     public static void selectListItemByLabel(TestObject to, String label, int timeout, FailureHandling flowControl)
@@ -245,7 +262,8 @@ public class MobileElementCommonHelper {
         if (itemElements.size() > 0) {
             WebElement itemElement = (WebElement) itemElements.get(0);
             // Click on element
-            TouchAction tap = new TouchAction(driver).tap(itemElement, 1, 1);
+            TouchAction<?> tap = new TouchAction<>(driver)
+                    .tap(TapOptions.tapOptions().withElement(ElementOption.element(itemElement, 1, 1)));
             tap.perform();
         } else {
             throw new StepFailedException(MessageFormat.format(StringConstants.KW_LOG_FAILED_LABELED_ITEM_NOT_FOUND,
@@ -297,35 +315,34 @@ public class MobileElementCommonHelper {
         int startX = element.getLocation().getX();
         int width = element.getSize().getWidth() - (ANDROID_SEEKBAR_PADDING * 2);
         int relativeX = Math.round(width * percentValue);
-        TouchAction tap = new TouchAction(driver)
-                .tap(startX + ANDROID_SEEKBAR_PADDING + relativeX, element.getLocation().getY())
-                .waitAction(Duration.ofMillis(DEFAULT_TAP_DURATION))
-                .release();
+        TouchAction<?> tap = new TouchAction<>(driver)
+                .tap(PointOption.point(startX + ANDROID_SEEKBAR_PADDING + relativeX, element.getLocation().getY()))
+                .waitAction(WaitOptions.waitOptions(Duration.ofMillis(DEFAULT_TAP_DURATION)));
         tap.perform();
     }
 
     public static int getElementLeftPosition(TestObject to, int timeout, FailureHandling flowControl) throws Exception {
         WebElement element = findElementWithCheck(to, timeout);
         Point location = element.getLocation();
-        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_LEFT_POSITION,
-                to.getObjectId(), location.getX()));
+        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_LEFT_POSITION, to.getObjectId(),
+                location.getX()));
         return location.getX();
     }
 
     public static int getElementTopPosition(TestObject to, int timeout, FailureHandling flowControl) throws Exception {
         WebElement element = findElementWithCheck(to, timeout);
         Point location = element.getLocation();
-        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_TOP_POSITION,
-                to.getObjectId(), location.getY()));
+        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_TOP_POSITION, to.getObjectId(),
+                location.getY()));
         return location.getY();
     }
 
     public static void tapAtPosition(Number x, Number y) {
         MobileCommonHelper.checkXAndY(x, y);
 
-        TouchAction tap = new TouchAction(MobileDriverFactory.getDriver()).press(x.intValue(), y.intValue())
-                .waitAction(Duration.ofMillis(DEFAULT_TAP_DURATION))
-                .release();
+        TouchAction<?> tap = new TouchAction<>(MobileDriverFactory.getDriver())
+                .tap(PointOption.point(x.intValue(), y.intValue()))
+                .waitAction(WaitOptions.waitOptions(Duration.ofMillis(DEFAULT_TAP_DURATION)));
         tap.perform();
         logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_TAPPED_AT_X_Y, x, y));
     }
@@ -340,8 +357,7 @@ public class MobileElementCommonHelper {
     public static int getElementHeight(TestObject to, int timeout) throws Exception {
         WebElement element = findElementWithCheck(to, timeout);
         int height = element.getSize().getHeight();
-        logger.logPassed(
-                MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_HEIGHT, to.getObjectId(), height));
+        logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_HAS_HEIGHT, to.getObjectId(), height));
         return height;
     }
 }

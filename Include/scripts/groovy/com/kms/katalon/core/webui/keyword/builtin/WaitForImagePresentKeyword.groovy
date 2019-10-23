@@ -83,6 +83,7 @@ public class WaitForImagePresentKeyword extends WebUIAbstractKeyword {
                 String currentDirFilePath = new File(RunConfiguration.getProjectDir()).getAbsolutePath()
                 imagePath = currentDirFilePath + File.separator + imagePath
             }
+            ScreenUtil screenUtil = new ScreenUtil()
             boolean present = screenUtil.waitForImagePresent(imagePath, timeOutInSeconds)
             if (present) {
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_IMG_X_IS_PRESENT, imagePath))

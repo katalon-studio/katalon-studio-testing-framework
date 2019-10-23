@@ -1,5 +1,7 @@
 package com.kms.katalon.core.util.internal;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.Map;
@@ -70,6 +72,24 @@ public class JsonUtil {
     public static <T> T fromJson(String json, Type typeOfT) throws IllegalArgumentException {
         try {
             return new Gson().fromJson(json, typeOfT);
+        } catch (JsonSyntaxException e) {
+            throw new IllegalArgumentException(MessageFormat.format(StringConstants.EXC_MSG_INVALID_JSON_SYNTAX,
+                    e.getMessage()));
+        }
+    }
+    
+    public static <T> T fromJson(Reader reader, Type typeOfT) throws IllegalArgumentException {
+        try {
+            return new Gson().fromJson(reader, typeOfT);
+        } catch (JsonSyntaxException e) {
+            throw new IllegalArgumentException(MessageFormat.format(StringConstants.EXC_MSG_INVALID_JSON_SYNTAX,
+                    e.getMessage()));
+        }
+    }
+    
+    public static <T> T fromJson(Reader reader, Class<T> classOfT) throws IllegalArgumentException {
+        try {
+            return new Gson().fromJson(reader, classOfT);
         } catch (JsonSyntaxException e) {
             throw new IllegalArgumentException(MessageFormat.format(StringConstants.EXC_MSG_INVALID_JSON_SYNTAX,
                     e.getMessage()));

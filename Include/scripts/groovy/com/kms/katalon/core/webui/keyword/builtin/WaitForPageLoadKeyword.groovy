@@ -67,7 +67,6 @@ public class WaitForPageLoadKeyword extends WebUIAbstractKeyword {
         waitForPageLoad(seconds, flowControl)
     }
 
-    @CompileStatic
     public void waitForPageLoad(int seconds, FailureHandling flowControl) throws StepFailedException {
         WebUIKeywordMain.runKeyword({
             seconds = WebUiCommonHelper.checkTimeout(seconds)

@@ -43,6 +43,12 @@ public class StringConstants {
     
     public static final String WEBSERVICE_METHODS = "webServiceMethods";
     
+    public static final String SETTING_SSL_CLIENT_CERTIFICATE = "network.sslClientCert";
+    
+    public static final String SETTINGS_KEYSTORE = "network.keyStore";
+    
+    public static final String SETTINGS_KEYSTORE_PASSWORD = "network.keyStorePassword";
+    
     public static final String KW_LOG_INFO_VERIFICATION_START = CoreWebserviceMessageConstants.KW_LOG_INFO_VERIFICATION_START;
     
     public static final String KW_LOG_VERIFICATION_STEP_FAILED = CoreWebserviceMessageConstants.KW_LOG_VERIFICATION_STEP_FAILED;

@@ -251,8 +251,15 @@ public class StringConstants {
 
     public static final String COMM_LOG_INFO_CHECKING_NUM_PARAMS = CoreMessageConstants.COMM_LOG_INFO_CHECKING_NUM_PARAMS;
 
+    public static final String KW_LOG_INFO_CONVERT_WEB_ELEMENT_TO_TEST_OBJECT = CoreMessageConstants.KW_LOG_INFO_CONVERT_WEB_ELEMENT_TO_TEST_OBJECT;
+    
+    public static final String KW_LOG_INFO_FAIL_TO_CONVERT_WEB_ELEMENT_TO_TEST_OBJECT = CoreMessageConstants.KW_LOG_INFO_FAIL_TO_CONVERT_WEB_ELEMENT_TO_TEST_OBJECT;
+    
+    
     // XML LOG
     public static final String XML_LOG_DESCRIPTION_PROPERTY = "description";
+    
+    public static final String XML_LOG_TAG_PROPERTY = "tag";
 
     public static final String XML_LOG_ATTACHMENT_PROPERTY = "attachment";
 
@@ -397,6 +404,8 @@ public class StringConstants {
     public static final String CONF_PROPERTY_DEFAULT_FAILURE_HANDLING = "defaultFailureHandling";
         
     public static final String CONF_PROPERTY_PROXY = "proxy";
+    
+    public static final String CONF_PROPERTY_SSL = "ssl";
 
     public static final String CONF_PROPERTY_TEST_DATA_INFO = "testDataInfo";
 
@@ -499,4 +508,12 @@ public class StringConstants {
     
     // TestCaseExecutor
 	public static final String TEST_CASE_SKIPPED = CoreMessageConstants.TEST_CASE_SKIPPED;
+
+	public static final String SMART_XPATH_REPORT_AVAILABLE_OPENING = "=================== Smart XPath Report =======================";
+	
+	public static final String SMART_XPATH_REPORT_AVAILABLE_ENDING = "===============================================================";
+
+	public static final String SMART_XPATH_VISIT_BELOW_LINK = CoreMessageConstants.SMART_XPATH_VISIT_BELOW_LINK;
+	
+	public static final String SMART_XPATH_DOCUMENT = CoreMessageConstants.SMART_XPATH_DOCUMENT;
 }

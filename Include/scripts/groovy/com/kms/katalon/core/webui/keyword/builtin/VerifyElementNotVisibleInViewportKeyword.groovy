@@ -80,7 +80,7 @@ public class VerifyElementNotVisibleInViewportKeyword extends WebUIAbstractKeywo
                     return true
                 }
             } catch (WebElementNotFoundException ex) {
-                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()))
+                logger.logWarning(MessageFormat.format(StringConstants.KW_LOG_WARNING_OBJ_X_IS_NOT_PRESENT, to.getObjectId()), null, ex)
             }
         }, flowControl, true, (to != null) ? MessageFormat.format(StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_X_NOT_VISIBLE_IN_VIEWPORT, to.getObjectId())
         : StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_NOT_VISIBLE_IN_VIEWPORT)

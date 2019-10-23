@@ -3,7 +3,9 @@ package com.kms.katalon.core.testdata;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
@@ -16,10 +18,13 @@ public abstract class AbstractTestData implements TestData {
     protected String sourceUrl;
 
     protected boolean hasHeaders;
+    
+    protected Map<String, String> properties;
 
     protected AbstractTestData(String sourceUrl, boolean hasHeaders) {
         this.sourceUrl = sourceUrl;
         this.hasHeaders = hasHeaders;
+        this.properties = new HashMap<String, String>();
     }
 
     /**
@@ -167,5 +172,15 @@ public abstract class AbstractTestData implements TestData {
     @Override
     public TestDataInfo getDataInfo() {
         return null;
+    }
+    
+    @Override 
+    public String getProperty(String key) {
+        return properties.get(key);
+    }
+    
+    @Override
+    public void setProperty(String key, String value) {
+        properties.put(key, value);
     }
 }

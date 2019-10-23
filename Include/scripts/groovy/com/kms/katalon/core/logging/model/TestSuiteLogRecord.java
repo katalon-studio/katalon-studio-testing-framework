@@ -55,6 +55,22 @@ public class TestSuiteLogRecord extends AbstractLogRecord {
     public int getTotalIncompleteTestCases() {
         return getTotalTestCasesWithTestStatusValue(TestStatusValue.INCOMPLETE);
     }
+    
+    public TestStatusValue getSummaryStatus() {
+        if (getTotalIncompleteTestCases() > 0) {
+            return TestStatusValue.INCOMPLETE;
+        }
+        
+        if (getTotalErrorTestCases() > 0) {
+            return TestStatusValue.ERROR;
+        }
+        
+        if (getTotalFailedTestCases() > 0) {
+            return TestStatusValue.FAILED;
+        }
+        
+        return TestStatusValue.PASSED;
+    }
 
     private int getTotalTestCasesWithTestStatusValue(TestStatusValue testStatusValue) {
         ILogRecord[] childLogRecords = getChildRecords();

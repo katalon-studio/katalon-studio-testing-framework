@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.ift.CellProcessor;
@@ -17,6 +18,7 @@ import org.supercsv.io.ICsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 
 import com.kms.katalon.core.logging.model.ILogRecord;
+import com.kms.katalon.core.logging.model.TestCaseLogRecord;
 import com.kms.katalon.core.logging.model.TestStatus;
 import com.kms.katalon.core.logging.model.TestStatus.TestStatusValue;
 import com.kms.katalon.core.logging.model.TestSuiteLogRecord;
@@ -29,6 +31,7 @@ public class CsvWriter {
             new NotNull(), // Test Name
             new Optional(), // Browser
             new Optional(), // Description
+            new Optional(), // Tag
             new NotNull(), // Start time
             new Optional(), // End Time
             new Optional(), // Duration
@@ -39,6 +42,7 @@ public class CsvWriter {
             new NotNull(), // Suite/Test/Step Name
             new Optional(), // Browser
             new Optional(), // Description
+            new Optional(), // Tag
             new NotNull(), // Start time
             new Optional(), // End Time
             new Optional(), // Duration
@@ -50,6 +54,7 @@ public class CsvWriter {
             "Test Name",
             "Browser",
             "Description",
+            "Tag",
             "Start time",
             "End time",
             "Duration",
@@ -59,6 +64,7 @@ public class CsvWriter {
             "Suite/Test/Step Name",
             "Browser",
             "Description",
+            "Tag",
             "Start time",
             "End time",
             "Duration",
@@ -84,7 +90,7 @@ public class CsvWriter {
             // Test cases
             for (ILogRecord testLog : filteredTestCaseRecords) {
                 // Blank line
-                csvWriter.write(Arrays.asList(new Object[] { "", "", "", "", "", "", "" }), DETAILS_PROCESSORS);
+                csvWriter.write(Arrays.asList(new Object[] { "", "", "", "", "", "", "", "" }), DETAILS_PROCESSORS);
                 // Write test case line
                 writeRecord(csvWriter, testLog, browser);
 
@@ -103,16 +109,25 @@ public class CsvWriter {
 
     private static void writeRecord(ICsvListWriter csvWriter, ILogRecord logRecord, String browserName)
             throws IOException {
+        String tag = "";
+        if (logRecord instanceof TestCaseLogRecord) {
+            tag = StringUtils.defaultString(((TestCaseLogRecord) logRecord).getTag());
+        }
         TestStatus status = logRecord.getStatus();
+        if (logRecord instanceof TestSuiteLogRecord) {
+            status = new TestStatus();
+            status.setStatusValue(((TestSuiteLogRecord) logRecord).getSummaryStatus());
+        }
         List<Object> writtenObjects =
                 Arrays.asList(new Object[] {
                         logRecord.getName(),
                         browserName,
                         logRecord.getDescription(),
+                        tag,
                         DateUtil.getDateTimeFormatted(logRecord.getStartTime()),
                         DateUtil.getDateTimeFormatted(logRecord.getEndTime()),
                         DateUtil.getElapsedTime(logRecord.getStartTime(), logRecord.getEndTime()),
-                        status != null ? status.getStatusValue().name() : TestStatusValue.INCOMPLETE.name() });
+                        status != null ? status.getStatusValue().name() : "" });
         csvWriter.write(writtenObjects, DETAILS_PROCESSORS);
     }
 
@@ -123,6 +138,21 @@ public class CsvWriter {
             csvWriter.writeHeader(header);
             for (Object[] arr : datas) {
                 csvWriter.write(Arrays.asList(arr), SUMMARY_PROCESSORS);
+            }
+        } finally {
+            IOUtils.closeQuietly(csvWriter);
+        }
+    }
+
+    public static void writeArraysToCsv(String[] header, List<Object[]> datas, File csvFile,
+            CellProcessor[] cellProcessor) throws IOException {
+        ICsvListWriter csvWriter = null;
+        try {
+            csvWriter = new CsvListWriter(new OutputStreamWriter(new FileOutputStream(csvFile), StandardCharsets.UTF_8),
+                    CsvPreference.STANDARD_PREFERENCE);
+            csvWriter.writeHeader(header);
+            for (Object[] arr : datas) {
+                csvWriter.write(Arrays.asList(arr), cellProcessor);
             }
         } finally {
             IOUtils.closeQuietly(csvWriter);

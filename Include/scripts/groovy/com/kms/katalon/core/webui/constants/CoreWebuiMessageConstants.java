@@ -5,6 +5,10 @@ import org.eclipse.osgi.util.NLS;
 public class CoreWebuiMessageConstants extends NLS {
     private static final String BUNDLE_NAME = "com.kms.katalon.core.webui.constants.coreWebuiMessages";
 
+	public static String KW_LOG_INFO_SCREENSHOTS_BY_SMART_XPATH_ARE_SAVED;
+	
+	public static String KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT;
+
     public static String COMM_EXC_UNABLE_TO_INIT_RESRC_BUNDLE;
 
     public static String COMM_EXC_RESRC_BUNDLE_IS_NOT_INIT;
@@ -179,10 +183,6 @@ public class CoreWebuiMessageConstants extends NLS {
     
     public static String KW_LOG_INFO_SMART_XPATHS_SUPPORT_START; 
     
-    public static String KW_LOG_INFO_SMART_XPATHS_TRIGGER;
-    
-    public static String KW_LOG_INFO_SMART_XPATHS_LEARN_ABOUT;
-    
     public static String KW_LOG_INFO_SMART_XPATHS_USING;
     
     public static String KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION;
@@ -191,15 +191,11 @@ public class CoreWebuiMessageConstants extends NLS {
     
     public static String KW_LOG_INFO_USING_HEURISTIC_METHOD;
     
-    public static String KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS;
+    public static String KW_LOG_INFO_FOUND_WEB_ELEMENT_WITH_THIS_SMART_XPATH;
     
     public static String KW_LOG_INFO_FINDING_WEB_ELEMENT_USING_HEURISTIC_METHOD;
     
-    public static String KW_LOG_INFO_NOT_FOUND_WEB_ELEMENT_WITH_SMART_XPATHS;
-    
-    public static String KW_LOG_INFO_WHERE_TO_TURN_OFF_SMART_XPATHS;
-    
-    public static String KW_LOG_INFO_WHERE_TO_TURN_ON_SMART_XPATHS;
+    public static String KW_LOG_INFO_COULD_NOT_FIND_WEB_ELEMENT_WITH_THIS_SMART_XPATH;
     
     public static String KW_LOG_INFO_REPORT_FAILURE_WHEN_USING_HEURISTIC_METHOD;
     
@@ -1086,6 +1082,10 @@ public class CoreWebuiMessageConstants extends NLS {
     public static String KW_LOG_PASSED_OBJ_TXT_IS_CLEARED;
 
     public static String KW_MSG_UNABLE_TO_CLEAR_OBJ_TEXT;
+
+	public static String KW_LOG_INFO_SELECT_SMART_XPATH;
+
+	public static String KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS;
 
     static {
         // initialize resource bundle

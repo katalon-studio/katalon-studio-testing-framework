@@ -1,54 +1,33 @@
 package com.kms.katalon.core.mobile.keyword.builtin
 
+import java.text.MessageFormat
+
+import org.apache.commons.lang3.StringUtils
+import org.codehaus.groovy.transform.tailrec.VariableReplacedListener.*
+import org.openqa.selenium.Dimension
+
+import com.kms.katalon.core.annotation.internal.Action
+import com.kms.katalon.core.configuration.RunConfiguration
+import com.kms.katalon.core.exception.StepFailedException
+import com.kms.katalon.core.keyword.internal.SupportLevel
+import com.kms.katalon.core.mobile.constants.StringConstants
+import com.kms.katalon.core.mobile.helper.MobileCommonHelper
+import com.kms.katalon.core.mobile.keyword.*
+import com.kms.katalon.core.mobile.keyword.internal.MobileAbstractKeyword
+import com.kms.katalon.core.mobile.keyword.internal.MobileDriverFactory
+import com.kms.katalon.core.mobile.keyword.internal.MobileKeywordMain
+import com.kms.katalon.core.model.FailureHandling
+
 import groovy.transform.CompileStatic
 import io.appium.java_client.AppiumDriver
 import io.appium.java_client.MobileElement
 import io.appium.java_client.TouchAction
 import io.appium.java_client.android.AndroidDriver
-import io.appium.java_client.android.AndroidKeyCode
-import io.appium.java_client.android.Connection
+import io.appium.java_client.android.connection.ConnectionState
 import io.appium.java_client.ios.IOSDriver
-import io.appium.java_client.remote.HideKeyboardStrategy
-
-import java.text.MessageFormat
-import java.util.concurrent.TimeUnit
-
-import org.apache.commons.io.FileUtils
-import org.apache.commons.lang.StringUtils
-import org.codehaus.groovy.transform.tailrec.VariableReplacedListener.*
-import org.openqa.selenium.Dimension
-import org.openqa.selenium.OutputType
-import org.openqa.selenium.Point
-import org.openqa.selenium.ScreenOrientation
-import org.openqa.selenium.TimeoutException
-import org.openqa.selenium.WebDriverException
-import org.openqa.selenium.WebElement
-import org.openqa.selenium.interactions.touch.TouchActions
-import org.openqa.selenium.remote.mobile.RemoteNetworkConnection
-import org.openqa.selenium.support.ui.FluentWait
-
-import com.google.common.base.Function
-import com.kms.katalon.core.annotation.Keyword
-import com.kms.katalon.core.annotation.internal.Action
-import com.kms.katalon.core.configuration.RunConfiguration
-import com.kms.katalon.core.exception.StepFailedException
-import com.kms.katalon.core.helper.KeywordHelper
-import com.kms.katalon.core.keyword.BuiltinKeywords
-import com.kms.katalon.core.keyword.internal.KeywordExecutor
-import com.kms.katalon.core.keyword.internal.KeywordMain
-import com.kms.katalon.core.keyword.internal.SupportLevel
-import com.kms.katalon.core.logging.KeywordLogger
-import com.kms.katalon.core.mobile.constants.StringConstants
-import com.kms.katalon.core.mobile.helper.MobileCommonHelper
-import com.kms.katalon.core.mobile.helper.MobileDeviceCommonHelper
-import com.kms.katalon.core.mobile.helper.MobileElementCommonHelper
-import com.kms.katalon.core.mobile.helper.MobileGestureCommonHelper
-import com.kms.katalon.core.model.FailureHandling
-import com.kms.katalon.core.testobject.TestObject
-import com.kms.katalon.core.mobile.keyword.*
-import com.kms.katalon.core.mobile.keyword.internal.MobileAbstractKeyword
-import com.kms.katalon.core.mobile.keyword.internal.MobileDriverFactory
-import com.kms.katalon.core.mobile.keyword.internal.MobileKeywordMain
+import io.appium.java_client.touch.TapOptions
+import io.appium.java_client.touch.offset.ElementOption
+import io.appium.java_client.touch.offset.PointOption
 
 @Action(value = "toggleAirplaneMode")
 public class ToggleAirplaneModeKeyword extends MobileAbstractKeyword {
@@ -81,33 +60,102 @@ public class ToggleAirplaneModeKeyword extends MobileAbstractKeyword {
                 }
                 if (driver instanceof AndroidDriver) {
                     AndroidDriver androidDriver = (AndroidDriver) driver
-                    driver.setConnection(isTurnOn ? Connection.AIRPLANE : Connection.ALL);
+                    androidDriver.setConnection(isTurnOn ? new ConnectionState(ConnectionState.AIRPLANE_MODE_MASK)
+                            : new ConnectionState(ConnectionState.WIFI_MASK))
                 } else {
+                    IOSDriver iOSDriver = (IOSDriver) driver
+                    Dimension size = driver.manage().window().getSize()
+
                     String deviceModel = MobileDriverFactory.getDeviceModel()
-                    //ResourceBundle resourceBundle = ResourceBundle.getBundle("resource")
-                    //String[] point = resourceBundle.getString(deviceModel).split(";")
-                    if(MobileCommonHelper.deviceModels.get(deviceModel) == null){
-                        throw new StepFailedException("Device info not found. Please use ideviceinfo -u <udid> to read ProductType of iOS devices")
+                    String deviceOSVersion = MobileDriverFactory.getDeviceOSVersion()
+                    if (StringUtils.containsIgnoreCase(deviceModel, "simulator")) {
+                        logger.logWarning("Toggle Airplane Mode is not available for Simulator")
+                        return
                     }
-                    if(MobileCommonHelper.airPlaneButtonCoords.get(MobileCommonHelper.deviceModels.get(deviceModel)) == null || MobileCommonHelper.airPlaneButtonCoords.get(MobileCommonHelper.deviceModels.get(deviceModel)).equals("")) {
-                        throw new StepFailedException("AirplaneMode button coordinator not found.")
+                    
+                    logger.logDebug("Device model: " + deviceModel)
+                    logger.logDebug("Device version: " + deviceOSVersion)
+                    boolean swipeUpToOpenControlCenter = true
+
+                    if ((getMajorVersion(deviceOSVersion) >= 12)
+                        && (isIPhoneXOrLater(deviceModel) || isIPad(deviceModel))) {
+                        swipeUpToOpenControlCenter = false
                     }
 
-                    String[] point = MobileCommonHelper.airPlaneButtonCoords.get(MobileCommonHelper.deviceModels.get(deviceModel)).split(";")
-                    int x = Integer.parseInt(point[0])
-                    int y = Integer.parseInt(point[1])
-                    Dimension size = driver.manage().window().getSize()
-                    MobileCommonHelper.swipe(driver, 50, size.height, 50, size.height - 300)
-                    Thread.sleep(500)
-                    TouchAction tap = new TouchAction(driver).tap(x, y).release()
-                    tap.perform()
-                    MobileCommonHelper.swipe(driver, 50, 1, 50, size.height)
+                    /**
+                     * https://support.apple.com/en-vn/HT202769#open
+                     */
+                    if (swipeUpToOpenControlCenter) {
+                        logger.logDebug("Swipe up from the bottom middle of the screen")
+                        MobileCommonHelper.swipe(driver,
+                                (size.getWidth() / 2) as int,
+                                size.getHeight(),
+                                (size.getWidth() / 2) as int,
+                                (size.getHeight() / 2) as int)
+                    } else {
+                        logger.logDebug("Swipe down from the upper-right corner of the screen")
+                        MobileCommonHelper.swipe(driver,
+                            size.getWidth(),
+                            0,
+                            size.getWidth(),
+                            (size.getHeight() / 2) as int)
+                    }
+
+                    List toggleAirplaneButtonList = iOSDriver.findElementsByXPath("//XCUIElementTypeSwitch[@visible='true' and @label='Airplane Mode']")
+                    if (toggleAirplaneButtonList == null || toggleAirplaneButtonList.isEmpty()) {
+                        logger.logFailed("Could not find Airplane Mode button at XPATH: //XCUIElementTypeSwitch[@visible='true' and @label='Airplane Mode']")
+                        return
+                    }
+                    MobileElement airplaneButton = toggleAirplaneButtonList.get(0);
+                    boolean isEnabled = airplaneButton.getAttribute("value") == "1" ? true : false
+                    if (isTurnOn != isEnabled) {
+                        TouchAction tapAtAirPlaneButton = new TouchAction(driver)
+                                .tap(TapOptions.tapOptions().withElement(ElementOption.element(airplaneButton, 1, 1)))
+                        tapAtAirPlaneButton.release().perform()
+
+                        logger.logInfo("Airplane Mode switched from " + getSwitchStatus(isEnabled) + " to " + getSwitchStatus(isTurnOn))
+                    } else {
+                        logger.logInfo("Airplane Mode already switched to " + getSwitchStatus(isEnabled))
+                    }
+
+                    PointOption topScreenPoint = PointOption.point(0, 0)
+                    TouchAction touchAtTopScreenAction = new TouchAction(driver)
+                            .tap(TapOptions.tapOptions().withPosition(topScreenPoint))
+                    touchAtTopScreenAction.release().perform()
                 }
                 logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_TOGGLE_AIRPLANE_MODE, mode))
             } finally {
                 driver.context(context)
             }
-
         }, flowControl, true, StringConstants.KW_MSG_CANNOT_TOGGLE_AIRPLANE_MODE)
+    }
+
+    @CompileStatic
+    String getSwitchStatus(boolean status) {
+        return status ? "ON" : "OFF"
+    }
+
+    @CompileStatic
+    int getMajorVersion(String version) {
+        return Integer.parseInt(version.split("\\.")[0])
+    }
+
+    @CompileStatic
+    boolean isIPhoneXOrLater(String deviceModel) {
+        if (!deviceModel.contains("iPhone")) {
+            return false
+        }
+        String[] versionNumbers = deviceModel.replace("iPhone", "").split(",")
+        int majorVersion = Integer.parseInt(versionNumbers[0])
+        int minorVersion = Integer.parseInt(versionNumbers[1])
+        
+        //https://www.theiphonewiki.com/wiki/Models
+        return (majorVersion >= 11 ||
+            (majorVersion == 10 && (minorVersion == 3 || minorVersion == 6)))
+    }
+
+    @CompileStatic
+    boolean isIPad(String deviceModel) {
+        return deviceModel.contains("iPad")
     }
 }

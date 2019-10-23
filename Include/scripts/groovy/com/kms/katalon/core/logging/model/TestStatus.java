@@ -1,5 +1,7 @@
 package com.kms.katalon.core.logging.model;
 
+import java.util.Date;
+
 public class TestStatus {
 
     public enum TestStatusValue {
@@ -16,6 +18,10 @@ public class TestStatus {
     // Default is PASSED
     protected TestStatusValue statusValue = TestStatusValue.PASSED;
 
+    protected Date startTime;
+
+    protected Date endTime;
+
     public String getStackTrace() {
         return stackTrace;
     }
@@ -31,4 +37,21 @@ public class TestStatus {
     public void setStatusValue(TestStatusValue statusValue) {
         this.statusValue = statusValue;
     }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
 }

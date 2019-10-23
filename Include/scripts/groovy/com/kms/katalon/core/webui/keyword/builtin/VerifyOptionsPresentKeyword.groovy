@@ -58,7 +58,7 @@ public class VerifyOptionsPresentKeyword extends WebUIAbstractKeyword {
                     logger.logPassed(MessageFormat.format(CoreWebuiMessageConstants.KW_MSG_TXT_OPTIONS_PRESENT, expectedOptions))
                     return true
                 }
-                WebUIKeywordMain.stepFailed(
+                WebUIKeywordMain.stepFailedWithReason(
                         MessageFormat.format(CoreWebuiMessageConstants.KW_MSG_TXT_OPTIONS_NOT_PRESENT, expectedOptions),
                         flowControl,
                         MessageFormat.format(CoreWebuiMessageConstants.KW_MSG_TXT_OPTIONS_NOT_PRESENT_REASON, expectedOptions, actualOptions),

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.reflect.TypeToken;
+import com.kms.katalon.core.model.SSLClientCertificateSettings;
 import com.kms.katalon.core.setting.BundleSettingStore;
 import com.kms.katalon.core.util.internal.JsonUtil;
 import com.kms.katalon.core.webservice.common.WebServiceMethod;
@@ -37,6 +38,23 @@ public class WebServiceSettingStore extends BundleSettingStore {
     
     public void saveSSLCertificateOption(SSLCertificateOption option) throws IOException {
         setProperty(StringConstants.SETTING_SSL_CERTIFICATE, option.name());
+    }
+    
+    public SSLClientCertificateSettings getClientCertificateSettings() throws IOException {
+        String storedValue = getString(StringConstants.SETTING_SSL_CLIENT_CERTIFICATE, StringUtils.EMPTY);
+        if (!StringUtils.isBlank(storedValue)) {
+            return JsonUtil.fromJson(storedValue, SSLClientCertificateSettings.class);
+        } else {
+            SSLClientCertificateSettings defaultSettings = new SSLClientCertificateSettings();
+            defaultSettings.setKeyStoreFile(StringUtils.EMPTY);
+            defaultSettings.setKeyStorePassword(StringUtils.EMPTY);
+            return defaultSettings;
+        }
+    }
+    
+    public void saveClientCerfiticateSettings(SSLClientCertificateSettings settings) throws IOException {
+        String storedValue = JsonUtil.toJson(settings);
+        setProperty(StringConstants.SETTING_SSL_CLIENT_CERTIFICATE, storedValue);
     }
     
     public List<WebServiceMethod> getWebServiceMethods() throws IOException {
