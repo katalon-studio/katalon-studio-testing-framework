@@ -27,4 +27,5 @@ public class AndroidUIAutomator {
 	public static final String BY_TEXT_CONTAIN = ".textContains(\"%s\")";
 	public static final String BY_TEXT_MATCH = ".textMatches(\"%s\")";
 	public static final String BY_TEXT_START_WITH = ".textStartsWith(\"%s\")";
+	public static final String BY_INDEX = ".index(%s)";
 }

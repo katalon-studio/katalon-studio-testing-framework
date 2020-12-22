@@ -23,15 +23,15 @@ import com.kms.katalon.core.util.internal.TestOpsUtil
 import groovy.transform.CompileStatic
 import io.appium.java_client.AppiumDriver
 
-@Action(value = "takeScreenshot")
-public class TakeScreenshotKeyword extends MobileAbstractKeyword {
+@Action(value = "takeElementScreenshot")
+public class TakeElementScreenshotKeyword extends MobileAbstractKeyword {
 
     @CompileStatic
     @Override
     public SupportLevel getSupportLevel(Object ...params) {
         return super.getSupportLevel(params)
     }
-
+    
     @CompileStatic
     @Override
     public Object execute(Object ...params) {
@@ -40,41 +40,47 @@ public class TakeScreenshotKeyword extends MobileAbstractKeyword {
         }
         
         String fileName = ((String)params[0])
-        boolean isTestOpsVisionCheckPoint = (boolean)params[3]
-        if (isTestOpsVisionCheckPoint) {
-            fileName = TestOpsUtil.replaceTestOpsVisionFileName(fileName.trim())
-        } else if (fileName == null){
+        boolean isTestOpsVisionCheckPoint = (boolean)params[4];
+        if (!isTestOpsVisionCheckPoint && fileName == null) {
             fileName = defaultFileName()
+        } else {
+            fileName = TestOpsUtil.replaceTestOpsVisionFileName(fileName.trim())
         }
-        List<TestObject> ignoredElements = (List<TestObject>)params[1]
-        Color hidingColor = (Color)params[2]
-        FailureHandling flow = params[4] == null ? RunConfiguration.getDefaultFailureHandling()
-                                    : (FailureHandling)params[4]
-        return takeScreenshot(fileName, ignoredElements, hidingColor, isTestOpsVisionCheckPoint, flow)
+        
+        TestObject to = (TestObject)params[1]
+        List<TestObject> ignoredElements = (List<TestObject>)params[2]
+        Color hidingColor = (Color)params[3]
+        FailureHandling flow = params[5] == null ? RunConfiguration.getDefaultFailureHandling()
+                                    : (FailureHandling)params[5]
+        return takeScreenshot(fileName, to, ignoredElements, hidingColor, isTestOpsVisionCheckPoint, flow)
     }
 
     private boolean isValidData(Object[] params) {
-        if (params.length != 5) {
+        if (params.length != 6) {
             return false
         }
-
+        
         if (params[0] != null && !(params[0] instanceof String)) {
             return false;
         }
         
-        if (params[1] != null && !(params[1] instanceof List<TestObject>)) {
+        if (params[1] != null && !(params[1] instanceof TestObject)) {
             return false;
         }
         
-        if (params[2] != null && !(params[2] instanceof Color)) {
+        if (params[2] != null && !(params[2] instanceof List<TestObject>)) {
             return false;
         }
         
-        if (params[3] != null && !(params[3] instanceof Boolean)) {
+        if (params[3] != null && !(params[3] instanceof Color)) {
             return false;
         }
         
-        if (params[4] != null && !(params[4] instanceof FailureHandling)) {
+        if (params[4] != null && !(params[4] instanceof Boolean)) {
+            return false;
+        }
+        
+        if (params[5] != null && !(params[5] instanceof FailureHandling)) {
             return false;
         }
 
@@ -82,35 +88,32 @@ public class TakeScreenshotKeyword extends MobileAbstractKeyword {
     }
 
     private String defaultFileName() {
-        return logger.getLogFolderPath() + File.separator + System.currentTimeMillis() + ".png";
+        return logger.getLogFolderPath() + File.separator + System.currentTimeMillis() + ".png"
     }
 
     @CompileStatic
-    public String takeScreenshot(String fileName, List<TestObject> ignoredElements,
-                Color hidingColor, boolean isTestOpsVisionCheckPoint,
-                FailureHandling flowControl)
+    public String takeScreenshot(String fileName, TestObject to, List<TestObject> ignoredElements, Color hidingColor,
+                boolean isTestOpsVisionCheckPoint, FailureHandling flowControl)
                 throws StepFailedException {
         return MobileKeywordMain.runKeyword({
+            if (isTestOpsVisionCheckPoint && StringUtils.isBlank(fileName)) {
+                MobileKeywordMain.stepFailed(StringConstants.KW_MSG_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY, flowControl, null, true)
+            }
+            
+            if (to == null) {
+                MobileKeywordMain.stepFailed(StringConstants.KW_MSG_SCREENSHOT_EXCEPTION_ELEMENT_NULL, flowControl, null, true)
+            }
+            
             AppiumDriver driver = getAnyAppiumDriver()
             String context = driver.getContext()
-            
             try {
                 internalSwitchToNativeContext(driver)
-                if (isTestOpsVisionCheckPoint) {
-                    if (StringUtils.isBlank(fileName)) {
-                        MobileKeywordMain.stepFailed(StringConstants.KW_MSG_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY, flowControl, null, true)
-                    }
-                    
-                    BufferedImage screenshot = MobileScreenCaptor.takeViewportScreenshot(driver, ignoredElements, hidingColor)
-                    File saveFile = new File(fileName)
-                    PathUtil.ensureDirectory(saveFile, true)
-                    ImageIO.write(screenshot, TestOpsUtil.DEFAULT_IMAGE_EXTENSION, saveFile)
-                } else {
-                    MobileScreenCaptor.takeScreenshot(driver, fileName)
-                }
-                
+                BufferedImage image = MobileScreenCaptor.takeElementScreenshot(driver, to, ignoredElements, hidingColor)
+                File saveFile = new File(fileName)
+                PathUtil.ensureDirectory(saveFile, true)
+                ImageIO.write(image, TestOpsUtil.DEFAULT_IMAGE_EXTENSION, saveFile)
                 Map<String, String> attributes = new HashMap<>()
-                attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY, PathUtil.getRelativePathForLog(fileName));
+                attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY, PathUtil.getRelativePathForLog(fileName))
                 logger.logPassed(StringConstants.KW_LOG_PASSED_SCREENSHOT_IS_TAKEN, attributes)
                 return fileName
             } finally {

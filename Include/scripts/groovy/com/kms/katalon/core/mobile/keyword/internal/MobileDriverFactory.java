@@ -28,7 +28,9 @@ import com.kms.katalon.core.exception.StepFailedException;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.mobile.constants.CoreMobileMessageConstants;
 import com.kms.katalon.core.mobile.constants.StringConstants;
+import com.kms.katalon.core.mobile.driver.AppiumSessionCollector;
 import com.kms.katalon.core.mobile.driver.MobileDriverType;
+import com.kms.katalon.core.mobile.helper.MobileCommonHelper;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
@@ -46,6 +48,8 @@ public class MobileDriverFactory {
     private static final String FULL_RESET = "fullReset";
 
     public static final String MOBILE_DRIVER_PROPERTY = StringConstants.CONF_PROPERTY_MOBILE_DRIVER;
+
+    public static final String REMOTE_DRIVER_PROPERTY = RunConfiguration.REMOTE_DRIVER_PROPERTY;
 
     public static final String EXISTING_DRIVER_PROPERTY = StringConstants.CONF_PROPERTY_EXISTING_DRIVER;
 
@@ -118,12 +122,30 @@ public class MobileDriverFactory {
     }
 
     /**
+     * Get the id of the remote mobile device
+     * 
+     * @return the id of the remote mobile device
+     */
+    public static String getRemoteDeviceId() {
+        return AppiumDriverManager.getDeviceId(REMOTE_DRIVER_PROPERTY);
+    }
+
+    /**
      * Get the name of the current mobile device
      * 
      * @return the name of the current mobile device
      */
     public static String getDeviceName() {
         return AppiumDriverManager.getDeviceName(MOBILE_DRIVER_PROPERTY);
+    }
+
+    /**
+     * Get the name of the remote mobile device
+     * 
+     * @return the name of the remote mobile device
+     */
+    public static String getRemoteDeviceName() {
+        return AppiumDriverManager.getDeviceName(REMOTE_DRIVER_PROPERTY);
     }
 
     /**
@@ -136,12 +158,30 @@ public class MobileDriverFactory {
     }
 
     /**
+     * Get the model of the remote mobile device
+     * 
+     * @return the model of the remote mobile device
+     */
+    public static String getRemoteDeviceModel() {
+        return AppiumDriverManager.getDeviceModel(REMOTE_DRIVER_PROPERTY);
+    }
+
+    /**
      * Get the manufacturer of the current mobile device
      * 
      * @return the manufacturer of the current mobile device
      */
     public static String getDeviceManufacturer() {
         return AppiumDriverManager.getDeviceManufacturer(MOBILE_DRIVER_PROPERTY);
+    }
+
+    /**
+     * Get the manufacturer of the remote mobile device
+     * 
+     * @return the manufacturer of the remote mobile device
+     */
+    public static String getRemoteDeviceManufacturer() {
+        return AppiumDriverManager.getDeviceManufacturer(REMOTE_DRIVER_PROPERTY);
     }
 
     /**
@@ -154,12 +194,30 @@ public class MobileDriverFactory {
     }
 
     /**
+     * Get the os version of the remote mobile device
+     * 
+     * @return the os version of the remote mobile device
+     */
+    public static String getRemoteDeviceOSVersion() {
+        return AppiumDriverManager.getDeviceOSVersion(REMOTE_DRIVER_PROPERTY);
+    }
+
+    /**
      * Get the os of the current mobile device
      * 
      * @return the os of the current mobile device
      */
     public static String getDeviceOS() {
         return AppiumDriverManager.getDeviceOS(MOBILE_DRIVER_PROPERTY);
+    }
+
+    /**
+     * Get the os of the remote mobile device
+     * 
+     * @return the os of the remote mobile device
+     */
+    public static String getRemoteDeviceOS() {
+        return AppiumDriverManager.getDeviceOS(REMOTE_DRIVER_PROPERTY);
     }
 
     /**
@@ -185,9 +243,20 @@ public class MobileDriverFactory {
     }
 
     /**
+     * Sets the current active mobile driver.
+     * 
+     * @param driver the mobile driver to set
+     * @since 7.6.0
+     */
+    public static void setDriver(AppiumDriver<?> driver) {
+        AppiumDriverManager.setDriver(driver);
+    }
+
+    /**
      * Close the current active mobile driver
      */
     public static void closeDriver() {
+        AppiumSessionCollector.removeSession(getDriver());
         AppiumDriverManager.closeDriver();
     }
 
@@ -202,13 +271,21 @@ public class MobileDriverFactory {
         return desireCapabilities;
     }
 
-    private static DesiredCapabilities createCapabilities(MobileDeviceInfo mobileDeviceInfo, String appId) {
+    private static DesiredCapabilities createCapabilities(MobileDeviceInfo mobileDeviceInfo, String appId, String driverConnectorId) {
         DesiredCapabilities capabilities = new DesiredCapabilities();
-        Map<String, Object> driverPreferences = RunConfiguration.getDriverPreferencesProperties(MOBILE_DRIVER_PROPERTY);
+        Map<String, Object> driverPreferences = RunConfiguration.getDriverPreferencesProperties(driverConnectorId);
         // Running app so no browser name
         if (driverPreferences.containsKey(MobileCapabilityType.BROWSER_NAME)) {
             driverPreferences.remove(MobileCapabilityType.BROWSER_NAME);
         }
+        if (StringUtils.isNotEmpty(mobileDeviceInfo.getDeviceOS())) {
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, mobileDeviceInfo.getDeviceOS());
+        }
+        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, mobileDeviceInfo.getDeviceName());
+        if (mobileDeviceInfo.getDeviceId() != null) {
+            capabilities.setCapability(MobileCapabilityType.UDID, mobileDeviceInfo.getDeviceId());
+        }
+        capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 1800);
         if (driverPreferences != null && mobileDeviceInfo.getDriverType() == MobileDriverType.IOS_DRIVER) {
             capabilities.setCapability("bundleId", appId);
             capabilities.setCapability(WAIT_FOR_APP_SCRIPT, WAIT_FOR_APP_SCRIPT_TRUE);
@@ -240,14 +317,6 @@ public class MobileDriverFactory {
             capabilities.merge(
                     convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.ANDROID_DRIVER));
         }
-        if (StringUtils.isNotEmpty(mobileDeviceInfo.getDeviceOS())) {
-            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, mobileDeviceInfo.getDeviceOS());
-        }
-        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, mobileDeviceInfo.getDeviceName());
-        if (mobileDeviceInfo.getDeviceId() != null) {
-            capabilities.setCapability(MobileCapabilityType.UDID, mobileDeviceInfo.getDeviceId());
-        }
-        capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 1800);
         return capabilities;
     }
 
@@ -259,6 +328,17 @@ public class MobileDriverFactory {
         if (driverPreferences.containsKey(MobileCapabilityType.BROWSER_NAME)) {
             driverPreferences.remove(MobileCapabilityType.BROWSER_NAME);
         }
+        if (StringUtils.isNotEmpty(platformVersion)) {
+            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, platformVersion);
+        }
+        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, deviceName);
+        capabilities.setCapability(MobileCapabilityType.APP, appFile);
+        if (deviceId != null) {
+            capabilities.setCapability(MobileCapabilityType.UDID, deviceId);
+        }
+        capabilities.setCapability(FULL_RESET, uninstallAfterCloseApp);
+        capabilities.setCapability(NO_RESET, !uninstallAfterCloseApp);
+        capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 1800);
         if (driverPreferences != null && osType == MobileDriverType.IOS_DRIVER) {
             capabilities.setCapability(WAIT_FOR_APP_SCRIPT, WAIT_FOR_APP_SCRIPT_TRUE);
             try {
@@ -286,17 +366,6 @@ public class MobileDriverFactory {
             capabilities.merge(
                     convertPropertiesMaptoDesireCapabilities(driverPreferences, MobileDriverType.ANDROID_DRIVER));
         }
-        if (StringUtils.isNotEmpty(platformVersion)) {
-            capabilities.setCapability(MobileCapabilityType.PLATFORM_VERSION, platformVersion);
-        }
-        capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, deviceName);
-        capabilities.setCapability(MobileCapabilityType.APP, appFile);
-        if (deviceId != null) {
-            capabilities.setCapability(MobileCapabilityType.UDID, deviceId);
-        }
-        capabilities.setCapability(FULL_RESET, uninstallAfterCloseApp);
-        capabilities.setCapability(NO_RESET, !uninstallAfterCloseApp);
-        capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 1800);
         return capabilities;
     }
 
@@ -328,19 +397,23 @@ public class MobileDriverFactory {
         if (isUsingExistingDriver()) {
             return startExistingBrowser();
         }
-        MobileDeviceInfo mobileDeviceInfo = MobileDeviceInfo.create(getMobileDriverType(), getDeviceId(),
-                getDeviceName(), getDeviceOS(), getDeviceOSVersion());
         AppiumDriver<?> driver;
         String remoteWebUrl = getRemoteWebDriverServerUrl();
         if (StringUtils.isNotEmpty(remoteWebUrl)) {
-            driver = AppiumDriverManager.createMobileDriver(mobileDeviceInfo.getDriverType(),
-                    createCapabilities(mobileDeviceInfo, appId), new URL(remoteWebUrl));
+            MobileDeviceInfo remoteMobileDeviceInfo = MobileDeviceInfo.create(getRemoteMobileDriver(),
+                    getRemoteDeviceId(), getRemoteDeviceName(), getRemoteDeviceOS(), getRemoteDeviceOSVersion());
+            driver = AppiumDriverManager.createMobileDriver(remoteMobileDeviceInfo.getDriverType(),
+                    createCapabilities(remoteMobileDeviceInfo, appId, REMOTE_DRIVER_PROPERTY), new URL(remoteWebUrl));
         } else {
+            MobileDeviceInfo mobileDeviceInfo = MobileDeviceInfo.create(getMobileDriverType(), getDeviceId(),
+                    getDeviceName(), getDeviceOS(), getDeviceOSVersion());
             driver = AppiumDriverManager.createMobileDriver(mobileDeviceInfo.getDriverType(),
-                    mobileDeviceInfo.getDeviceId(), createCapabilities(mobileDeviceInfo, appId));
+                    mobileDeviceInfo.getDeviceId(),
+                    createCapabilities(mobileDeviceInfo, appId, MOBILE_DRIVER_PROPERTY));
         }
         if (driver != null) {
             saveWebDriverSessionData(driver);
+            MobileCommonHelper.setCommonAppiumSessionProperties(driver);
         }
         return driver;
     }
@@ -374,6 +447,7 @@ public class MobileDriverFactory {
         }
         if (driver != null) {
             saveWebDriverSessionData(driver);
+            MobileCommonHelper.setCommonAppiumSessionProperties(driver);
         }
         return driver;
     }

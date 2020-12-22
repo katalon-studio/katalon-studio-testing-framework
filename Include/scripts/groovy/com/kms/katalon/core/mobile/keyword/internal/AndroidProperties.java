@@ -2,6 +2,7 @@ package com.kms.katalon.core.mobile.keyword.internal;
 
 public class AndroidProperties {
 	public static final String ANDROID_INSTANCE = "instance";
+	public static final String ANDROID_INDEX = "index";
 	public static final String ANDROID_TEXT = "text";
 	public static final String ANDROID_RESOURCE_ID = "resource-id";
 	public static final String ANDROID_CLASS = "class";
