@@ -10,8 +10,8 @@ import com.kms.katalon.core.logging.KeywordLogger
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.windows.driver.WindowsDriverFactory
 
-@Action(value = "startApplication")
-public class StartApplicationKeyword extends AbstractKeyword {
+@Action(value = "startApplicationWithTitle")
+public class StartApplicationWithTitleKeyword extends AbstractKeyword {
 
     private KeywordLogger logger = KeywordLogger.getInstance(StartApplicationKeyword.class)
 
@@ -23,13 +23,14 @@ public class StartApplicationKeyword extends AbstractKeyword {
     @Override
     public Object execute(Object ...params) {
         String appFile = (String) params[0]
-        FailureHandling flowControl = (FailureHandling)(params.length > 1 && params[1] instanceof FailureHandling ? params[1] : RunConfiguration.getDefaultFailureHandling())
-        startApplication(appFile, flowControl)
+        String windowTitle = (String) params[1]
+        FailureHandling flowControl = (FailureHandling)(params.length > 2 && params[2] instanceof FailureHandling ? params[2] : RunConfiguration.getDefaultFailureHandling())
+        startApplicationWithTitle(appFile, windowTitle, flowControl)
     }
 
-    public void startApplication(String appFile, FailureHandling flowControl) throws StepFailedException {
+    public void startApplicationWithTitle(String appFile, String windowTitle, FailureHandling flowControl) throws StepFailedException {
         KeywordMain.runKeyword({
-            WindowsDriverFactory.startApplication(appFile, "")
+            WindowsDriverFactory.startApplication(appFile, windowTitle)
             logger.logPassed("The application at location: ${appFile} started.")
         }, flowControl)
     }

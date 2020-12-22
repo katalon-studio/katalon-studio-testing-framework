@@ -1,10 +1,11 @@
 package com.kms.katalon.core.windows.driver;
 
-import java.net.Proxy;
 import java.net.URL;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
+
+import com.kms.katalon.core.network.ProxyInformation;
 
 import io.appium.java_client.windows.WindowsDriver;
 
@@ -21,14 +22,14 @@ public class WindowsSession {
 
     private final DesiredCapabilities initCapabilities;
 
-    private final Proxy proxy;
+    private final ProxyInformation proxyInfo;
     
     public WindowsSession(URL remoteAddressURL, String appFile,
-            DesiredCapabilities initCapabilities, Proxy proxy) {
+            DesiredCapabilities initCapabilities, ProxyInformation proxyInfo) {
         this.remoteAddressURL = remoteAddressURL;
         this.appFile = appFile;
         this.initCapabilities = initCapabilities;
-        this.proxy = proxy;
+        this.proxyInfo = proxyInfo;
     }
 
     public WindowsDriver<WebElement> getApplicationDriver() {
@@ -71,7 +72,7 @@ public class WindowsSession {
         return initCapabilities;
     }
 
-    public Proxy getProxy() {
-        return proxy;
+    public ProxyInformation getProxyInfo() {
+        return proxyInfo;
     }
 }
