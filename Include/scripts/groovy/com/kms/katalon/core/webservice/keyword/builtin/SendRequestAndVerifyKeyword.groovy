@@ -44,7 +44,7 @@ public class SendRequestAndVerifyKeyword extends WebserviceAbstractKeyword {
             WebServiceCommonHelper.checkRequestObject(request)
             HarLogger harLogger = new HarLogger()
             harLogger.initHarFile()
-            ResponseObject responseObject = ServiceRequestFactory.getInstance(request).send(request)
+            ResponseObject responseObject = WebServiceCommonHelper.sendRequest(request)
             harLogger.logHarFile(request, responseObject, RunConfiguration.getReportFolder())
             
             logger.logDebug(StringConstants.KW_LOG_INFO_VERIFICATION_START)

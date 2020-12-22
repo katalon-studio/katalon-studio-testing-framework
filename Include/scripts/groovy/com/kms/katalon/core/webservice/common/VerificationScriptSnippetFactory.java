@@ -32,7 +32,7 @@ public class VerificationScriptSnippetFactory {
         
         URL url = FileLocator.find(FrameworkUtil.getBundle(
                 VerificationScriptSnippetFactory.class),
-                new Path("/resource/snippet/verification_snippet.xml"),
+                new Path("/resources/snippet/verification_snippet.xml"),
                 null);
         
         try {

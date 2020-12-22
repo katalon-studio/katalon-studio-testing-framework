@@ -39,7 +39,7 @@ public class SendRequestKeyword extends WebserviceAbstractKeyword {
                 WebServiceCommonHelper.checkRequestObject(request)
                 HarLogger harLogger = new HarLogger()
                 harLogger.initHarFile()
-                ResponseObject responseObject = ServiceRequestFactory.getInstance(request).send(request)
+                ResponseObject responseObject = WebServiceCommonHelper.sendRequest(request)
                 harLogger.logHarFile(request, responseObject, RunConfiguration.getReportFolder())
                 
                 logger.logPassed(StringConstants.KW_LOG_PASSED_SEND_REQUEST_SUCCESS)

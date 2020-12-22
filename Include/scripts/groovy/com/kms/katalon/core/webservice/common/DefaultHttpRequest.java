@@ -2,7 +2,7 @@ package com.kms.katalon.core.webservice.common;
 
 import java.net.URI;
 
-public class DefaultHttpRequest extends BaseHttpRequest {
+public class DefaultHttpRequest extends HttpUriRequest {
     
     public DefaultHttpRequest(final URI uri) {
         super();

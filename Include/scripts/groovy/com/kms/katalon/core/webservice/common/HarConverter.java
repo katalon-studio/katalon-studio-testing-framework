@@ -16,7 +16,6 @@ import com.kms.katalon.core.testobject.RequestObject;
 import com.kms.katalon.core.testobject.ResponseObject;
 import com.kms.katalon.core.testobject.TestObjectProperty;
 import com.kms.katalon.core.webservice.constants.RequestHeaderConstants;
-import com.kms.katalon.core.webservice.helper.RestRequestMethodHelper;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -158,8 +157,7 @@ public class HarConverter {
         if (RequestHeaderConstants.SOAP.equals(request.getServiceType())) {
             hasBody = !StringUtils.isBlank(request.getSoapBody());
         } else {
-            hasBody = RestRequestMethodHelper.isBodySupported(request.getRestRequestMethod())
-                    && request.getBodyContent() != null;
+            hasBody = request.getBodyContent() != null;
         }
         return hasBody;
     }

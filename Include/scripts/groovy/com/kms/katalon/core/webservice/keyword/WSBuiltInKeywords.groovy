@@ -66,6 +66,39 @@ public class WSBuiltInKeywords extends BuiltinKeywords {
     }
     
     /**
+     * Get the number of expected elements (JSON/XML) in the response (output) of a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @param flowControl
+     * @return the number of expected elements
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static int getElementsCount(ResponseObject response, String locator, FailureHandling flowControl) throws StepErrorException, StepFailedException {
+        return (int) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementsCount", response, locator, flowControl)
+    }
+    
+    /**
+     * Get the number of expected elements (JSON/XML) in the response (output) of a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @return the number of expected elements
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static int getElementsCount(ResponseObject response, String locator) throws StepErrorException, StepFailedException {
+        return (int) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementsCount", response, locator)
+    }
+    
+    /**
      * Verify number of expected elements (JSON/XML) in the response (output) of a web service call 
      * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
      * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it   
@@ -92,6 +125,39 @@ public class WSBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
     public static boolean verifyElementsCount(ResponseObject response, String locator, int count) throws Exception {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "verifyElementsCount", response, locator, count)
+    }
+    
+    /**
+     * Get property value of an element (defined by a locator) in the returned data from a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @param flowControl
+     * @return  property value of the expected element
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static Object getElementPropertyValue(ResponseObject response, String locator, FailureHandling flowControl) throws StepErrorException, StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementPropertyValue", response, locator, flowControl)
+    }
+    
+    /**
+     * Get property value of an element (defined by a locator) in the returned data from a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @return property value of the expected element
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static Object getElementPropertyValue(ResponseObject response, String locator) throws StepErrorException, StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementPropertyValue", response, locator)
     }
 
     /**
@@ -123,6 +189,39 @@ public class WSBuiltInKeywords extends BuiltinKeywords {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "verifyElementPropertyValue", response, locator, value)
     }
 
+    /**
+     * Get text of the element (defined by a locator) which appears in the returned data from a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @param flowControl
+     * @return text of the expected element
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static String getElementText(ResponseObject response, String locator, FailureHandling flowControl) throws StepErrorException, StepFailedException {
+        return (String) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementText", response, locator, flowControl)
+    }
+    
+    /**
+     * Get text of the element (defined by a locator) which appears in the returned data from a web service call
+     * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param locator an expression Katalon will use to go through and look for expected element(s), please refer to our user guide for how to write it
+     * @return text of the expected element
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static String getElementText(ResponseObject response, String locator) throws StepErrorException, StepFailedException {
+        return (String) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getElementText", response, locator)
+    }
+    
     /**
      * Verify that there is an element with expected text appear in the returned data from a web service call
      * @param response the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
@@ -183,6 +282,39 @@ public class WSBuiltInKeywords extends BuiltinKeywords {
         return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "containsString", response, string, useRegex)
     }
 
+    /**
+     * Get status code in the returned data from a web service call
+     *
+     * @param responseObject the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @param flowControl
+     * @return the response status code
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static int getResponseStatusCode(ResponseObject responseObject, FailureHandling flowControl) throws StepErrorException, StepFailedException {
+        return (int) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getResponseStatusCode", responseObject, flowControl)
+    }
+    
+    /**
+     * Get status code in the returned data from a web service call
+     *
+     * @param responseObject the object represents for a HTTP Response, user can get responded content type, data, header properties (sometimes user may want to get cookie from response header)
+     * @return the response status code
+     * @throws StepErrorException
+     * @throws StepFailedException
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static int getResponseStatusCode(ResponseObject responseObject) throws StepErrorException, StepFailedException {
+        return (int) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_WEB_SERVICE, "getResponseStatusCode", responseObject)
+    }
+    
     /**
      * Verify status code in the returned data from a web service call
      * 

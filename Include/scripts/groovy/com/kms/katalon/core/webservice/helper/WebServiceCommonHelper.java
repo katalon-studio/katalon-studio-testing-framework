@@ -1,16 +1,19 @@
 package com.kms.katalon.core.webservice.helper;
 
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.testobject.RequestObject;
 import com.kms.katalon.core.testobject.ResponseObject;
+import com.kms.katalon.core.webservice.common.ServiceRequestFactory;
 import com.kms.katalon.core.webservice.constants.StringConstants;
+import com.kms.katalon.core.webservice.util.WebServiceCommonUtil;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -19,6 +22,54 @@ public class WebServiceCommonHelper {
 	
     private static final KeywordLogger logger = KeywordLogger.getInstance(WebServiceCommonHelper.class);
 
+    public static ResponseObject sendRequest(RequestObject request) throws Exception {
+        configRequestTimeout(request);
+        configRequestResponseSizeLimit(request);
+        ResponseObject responseObject = ServiceRequestFactory.getInstance(request).send(request);
+        return responseObject;
+    }
+    
+    public static void configRequestTimeout(RequestObject request) {
+        if (RunConfiguration.canCustomizeRequestTimeout()) {
+            Map<String, Object> executionSettings = RunConfiguration.getExecutionGeneralProperties();
+
+            if (WebServiceCommonUtil.isUnsetRequestTimeout(request.getConnectionTimeout())) {
+                Object connectionTimeout = executionSettings.get(RunConfiguration.REQUEST_CONNECTION_TIMEOUT);
+                if (connectionTimeout != null) {
+                    int connectionTimeoutIntVal = ((Number) connectionTimeout).intValue();
+                    request.setConnectionTimeout(connectionTimeoutIntVal);
+                }
+            }
+
+            if (WebServiceCommonUtil.isUnsetRequestTimeout(request.getSocketTimeout())) {
+                Object socketTimeout = executionSettings.get(RunConfiguration.REQUEST_SOCKET_TIMEOUT);
+                if (socketTimeout != null) {
+                    int socketTimeoutIntVal = ((Number) socketTimeout).intValue();
+                    request.setSocketTimeout(socketTimeoutIntVal);
+                }
+            }
+        } else {
+            request.setConnectionTimeout(RequestObject.TIMEOUT_UNSET);
+            request.setSocketTimeout(RequestObject.TIMEOUT_UNSET);
+        }
+    }
+
+    public static void configRequestResponseSizeLimit(RequestObject request) {
+        if (RunConfiguration.canCustomizeRequestResponseSizeLimit()) {
+            Map<String, Object> executionSettings = RunConfiguration.getExecutionGeneralProperties();
+
+            if (WebServiceCommonUtil.isUnsetMaxRequestResponseSize(request.getMaxResponseSize())) {
+                Object maxResponseSize = executionSettings.get(RunConfiguration.REQUEST_MAX_RESPONSE_SIZE);
+                if (maxResponseSize != null) {
+                    long maxResponseSizeLongVal = ((Number) maxResponseSize).longValue();
+                    request.setMaxResponseSize(maxResponseSizeLongVal);
+                }
+            }
+        } else {
+            request.setMaxResponseSize(RequestObject.MAX_RESPONSE_SIZE_UNSET);
+        }
+    }
+    
 	public static void checkRequestObject(RequestObject requestObject) throws IllegalArgumentException {
 	    logger.logDebug(StringConstants.KW_LOG_INFO_CHECKING_REQUEST_OBJECT);
 		if (requestObject == null) {

@@ -14,14 +14,17 @@ public class StringConstants {
     public static final String KW_LOG_PASSED_SEND_REQUEST_SUCCESS = CoreWebserviceMessageConstants.KW_LOG_PASSED_SEND_REQUEST_SUCCESS;
     public static final String KW_LOG_PASSED_SEND_REQUEST_AND_VERIFY_SUCCESS = CoreWebserviceMessageConstants.KW_LOG_PASSED_SEND_REQUEST_AND_VERIFY_SUCCESS;
     public static final String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_COUNT = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_COUNT;
+    public static final String KW_LOG_FAILED_CANNOT_GET_ELEMENT_COUNT = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_GET_ELEMENT_COUNT;
     public static final String KW_LOG_PASSED_VERIFY_ELEMENT_COUNT = CoreWebserviceMessageConstants.KW_LOG_PASSED_VERIFY_ELEMENT_COUNT;
     public static final String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_PROPERTY_VALUE = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_PROPERTY_VALUE;
+    public static final String KW_LOG_FAILED_CANNOT_GET_ELEMENT_PROPERTY_VALUE = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_GET_ELEMENT_PROPERTY_VALUE;
     public static final String KW_LOG_PASSED_VERIFY_ELEMENT_PROPERTY_VALUE = CoreWebserviceMessageConstants.KW_LOG_PASSED_VERIFY_ELEMENT_PROPERTY_VALUE;
     public static final String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_TEXT = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_TEXT;
+    public static final String KW_LOG_FAILED_CANNOT_GET_ELEMENT_TEXT = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_GET_ELEMENT_TEXT;
     public static final String KW_LOG_PASSED_VERIFY_ELEMENT_TEXT = CoreWebserviceMessageConstants.KW_LOG_PASSED_VERIFY_ELEMENT_TEXT;
     public static final String KW_LOG_PASSED_CONTAIN_STRING = CoreWebserviceMessageConstants.KW_LOG_PASSED_CONTAIN_STRING;
     public static final String KW_LOG_FAILED_CONTAIN_STRING = CoreWebserviceMessageConstants.KW_LOG_FAILED_CONTAIN_STRING;
-	
+	public static final String KW_LOG_FAILED_CANNOT_GET_RESPONSE_STATUS_CODE = CoreWebserviceMessageConstants.KW_LOG_FAILED_CANNOT_GET_RESPONSE_STATUS_CODE;
     public static final String KW_CATEGORIZE_ELEMENT = "Element";
     public static final String KW_CATEGORIZE_REQUEST = "Request";
     public static final String KW_CATEGORIZE_TEXT = "Text";
@@ -56,4 +59,11 @@ public class StringConstants {
     public static final String KW_LOG_VERIFICATION_STEP_FAILED_BECAUSE_OF_ERROR = CoreWebserviceMessageConstants.KW_LOG_VERIFICATION_STEP_FAILED_BECAUSE_OF_ERROR;
     
     public static final String KW_LOG_VERIFICATION_STEP_PASSED = CoreWebserviceMessageConstants.KW_LOG_VERIFICATION_STEP_PASSED;
+    
+    // Exception Messages
+    public static final String MSG_CONNECTION_TIMEOUT_EXCEPTION = CoreWebserviceMessageConstants.MSG_CONNECTION_TIMEOUT_EXCEPTION;
+
+    public static final String MSG_SOCKET_TIMEOUT_EXCEPTION = CoreWebserviceMessageConstants.MSG_SOCKET_TIMEOUT_EXCEPTION;
+
+    public static final String MSG_RESPONSE_SIZE_LIMIT_EXCEPTION = CoreWebserviceMessageConstants.MSG_RESPONSE_SIZE_LIMIT_EXCEPTION;
 }

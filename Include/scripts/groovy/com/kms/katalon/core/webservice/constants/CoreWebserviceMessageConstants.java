@@ -22,14 +22,20 @@ public class CoreWebserviceMessageConstants extends NLS {
     public static String KW_LOG_PASSED_SEND_REQUEST_AND_VERIFY_SUCCESS;
 
     public static String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_COUNT;
+    
+    public static String KW_LOG_FAILED_CANNOT_GET_ELEMENT_COUNT;
 
     public static String KW_LOG_PASSED_VERIFY_ELEMENT_COUNT;
 
     public static String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_PROPERTY_VALUE;
+    
+    public static String KW_LOG_FAILED_CANNOT_GET_ELEMENT_PROPERTY_VALUE;
 
     public static String KW_LOG_PASSED_VERIFY_ELEMENT_PROPERTY_VALUE;
 
     public static String KW_LOG_FAILED_CANNOT_VERIFY_ELEMENT_TEXT;
+    
+    public static String KW_LOG_FAILED_CANNOT_GET_ELEMENT_TEXT;
 
     public static String KW_LOG_PASSED_VERIFY_ELEMENT_TEXT;
 
@@ -57,6 +63,8 @@ public class CoreWebserviceMessageConstants extends NLS {
     public static String KW_LOG_FAILED_STATUS_CODE_DOES_NOT_MATCH;
 
     public static String KW_MSG_UNABLE_TO_VERIFY_RESPONSE_STATUS_CODE;
+    
+    public static String KW_LOG_FAILED_CANNOT_GET_RESPONSE_STATUS_CODE;
 
     // VerifyResponseStatusCodeInRangeKeyword
     public static String KW_LOG_FAILED_STATUS_CODE_DOES_NOT_MATCH_IN_EXPECTED_RANGE;
@@ -68,6 +76,13 @@ public class CoreWebserviceMessageConstants extends NLS {
     public static String KW_LOG_VERIFICATION_STEP_FAILED_BECAUSE_OF_ERROR;
 
     public static String KW_LOG_VERIFICATION_STEP_PASSED;
+
+    // Exception Messages
+    public static String MSG_CONNECTION_TIMEOUT_EXCEPTION;
+
+    public static String MSG_SOCKET_TIMEOUT_EXCEPTION;
+
+    public static String MSG_RESPONSE_SIZE_LIMIT_EXCEPTION;
     
     static {
         // initialize resource bundle
