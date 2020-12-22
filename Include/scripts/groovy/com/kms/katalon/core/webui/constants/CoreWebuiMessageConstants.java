@@ -5,6 +5,10 @@ import org.eclipse.osgi.util.NLS;
 public class CoreWebuiMessageConstants extends NLS {
     private static final String BUNDLE_NAME = "com.kms.katalon.core.webui.constants.coreWebuiMessages";
 
+    public static String KW_LOG_INFO_INJECTED_INPUT;
+    
+    public static String KW_LOG_INFO_EMITTED_DRAG_AND_DROP_EVENT;
+
 	public static String KW_LOG_INFO_SCREENSHOTS_BY_SMART_XPATH_ARE_SAVED;
 	
 	public static String KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT;
@@ -183,9 +187,13 @@ public class CoreWebuiMessageConstants extends NLS {
     
     public static String KW_LOG_INFO_SMART_XPATHS_SUPPORT_START; 
     
-    public static String KW_LOG_INFO_SMART_XPATHS_USING;
+    public static String KW_LOG_INFO_SELF_HEALING_USING;
     
     public static String KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION;
+    
+    public static String KW_LOG_INFO_DEFAULT_LOCATOR_FAILED_TRY_SELF_HEALING;
+    
+    public static String KW_LOG_INFO_PROPOSE_ALTERNATE_LOCATOR;
     
     public static String KW_LOG_INFO_SMART_XPATHS_SUPPORT_END;
     
@@ -1086,6 +1094,19 @@ public class CoreWebuiMessageConstants extends NLS {
 	public static String KW_LOG_INFO_SELECT_SMART_XPATH;
 
 	public static String KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS;
+
+    // Screenshot keyword
+    public static String KW_LOG_INFO_SCREENSHOT_FULLPAGE_FAIL_HIDE_OBJECT;
+
+    public static String KW_LOG_INFO_SCREENSHOT_FULLPAGE_HIDDEN_COUNTER;
+
+    public static String KW_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY;
+
+    public static String KW_SCREENSHOT_EXCEPTION_ELEMENT_NULL;
+
+    public static String KW_SCREENSHOT_EXCEPTION_AREA_NULL;
+
+    public static String KW_SCREENSHOT_EXCEPTION_AREA_LARGER;
 
     static {
         // initialize resource bundle

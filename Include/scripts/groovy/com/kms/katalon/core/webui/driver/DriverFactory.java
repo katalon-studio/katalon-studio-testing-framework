@@ -14,6 +14,7 @@ import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -47,8 +48,8 @@ import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.remote.UnreachableBrowserException;
-import org.openqa.selenium.remote.http.HttpClient;
 import org.openqa.selenium.remote.http.HttpClient.Factory;
+import org.openqa.selenium.remote.internal.OkHttpClient;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -57,6 +58,9 @@ import com.kms.katalon.core.appium.exception.AppiumStartException;
 import com.kms.katalon.core.appium.exception.MobileDriverInitializeException;
 import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.driver.DriverType;
+import com.kms.katalon.core.event.EventBusSingleton;
+import com.kms.katalon.core.event.TestingEvent;
+import com.kms.katalon.core.event.TestingEventType;
 import com.kms.katalon.core.exception.StepFailedException;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.logging.LogLevel;
@@ -64,7 +68,6 @@ import com.kms.katalon.core.network.ProxyInformation;
 import com.kms.katalon.core.network.ProxyOption;
 import com.kms.katalon.core.util.internal.ProxyUtil;
 import com.kms.katalon.core.webui.common.WebUiCommonHelper;
-import com.kms.katalon.core.webui.constants.CoreWebuiMessageConstants;
 import com.kms.katalon.core.webui.constants.StringConstants;
 import com.kms.katalon.core.webui.driver.firefox.CFirefoxDriver47;
 import com.kms.katalon.core.webui.driver.firefox.CGeckoDriver;
@@ -86,8 +89,21 @@ import com.kms.katalon.selenium.driver.CSafariDriver;
 import io.appium.java_client.MobileCommand;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.AppiumCommandExecutor;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class DriverFactory {
+
+    private static final String KATALON_SAVE_MHTML_ADDON_CHROME_RELATIVE_PATH = File.separator + "Chrome" + File.separator + "katalon-save-mhtml";
+    
+    private static final int DEFAULT_CONNECT_TIMEOUT_IN_SECONDS = 120;
+
+    private static final int DEFAULT_READ_TIMEOUT_IN_SECONDS = 10800;
+
+    private static final int DEFAULT_WRITE_TIMEOUT_IN_SECONDS = 0;
 
     private static final String SMART_WAIT_ADDON_CHROME_RELATIVE_PATH = File.separator + "Chrome" + File.separator + "Smart Wait";
 
@@ -122,6 +138,8 @@ public class DriverFactory {
     private static final String REMOTE_WEB_DRIVER_TYPE_SELENIUM = "Selenium";
 
     public static final String CHROME_DRIVER_PATH_PROPERTY_KEY = "webdriver.chrome.driver";
+    
+    public static final String EDGE_CHROMIUM_DRIVER_PATH_PROPERTY_KEY = "webdriver.edge.driver";
 
     private static final String IE_DRIVER_PATH_PROPERTY_KEY = "webdriver.ie.driver";
 
@@ -132,6 +150,8 @@ public class DriverFactory {
     public static final String IE_DRIVER_PATH_PROPERTY = StringConstants.CONF_PROPERTY_IE_DRIVER_PATH;
 
     public static final String EDGE_DRIVER_PATH_PROPERTY = StringConstants.CONF_PROPERTY_EDGE_DRIVER_PATH;
+    
+    public static final String EDGE_CHROMIUM_DRIVER_PATH_PROPERTY = StringConstants.CONF_PROPERTY_EDGE_CHROMIUM_DRIVER_PATH;
 
     public static final String CHROME_DRIVER_PATH_PROPERTY = StringConstants.CONF_PROPERTY_CHROME_DRIVER_PATH;
 
@@ -142,6 +162,8 @@ public class DriverFactory {
     public static final String DEFAULT_PAGE_LOAD_TIMEOUT = StringConstants.CONF_PROPERTY_DEFAULT_PAGE_LOAD_TIMEOUT;
 
     public static final String ACTION_DELAY = StringConstants.CONF_PROPERTY_ACTION_DELAY;
+    
+    public static final String USE_ACTION_DELAY_IN_SECOND = StringConstants.CONF_PROPERTY_USE_ACTION_DELAY_IN_SECOND;
 
     public static final String IGNORE_PAGE_LOAD_TIMEOUT_EXCEPTION = StringConstants.CONF_PROPERTY_IGNORE_PAGE_LOAD_TIMEOUT_EXCEPTION;
 
@@ -182,10 +204,27 @@ public class DriverFactory {
                     .build();
         }
     };
+    
+    private static final ThreadLocal<EdgeDriverService> localEdgeChromiumDriverServiceStorage = new ThreadLocal<EdgeDriverService>() {
+        @Override
+        protected EdgeDriverService initialValue() {
+            return new EdgeDriverService.Builder().usingDriverExecutable(new File(getEdgeChromiumDriverPath()))
+                    .usingAnyFreePort()
+                    .build();
+        }
+    };
 
     private static InternetExplorerDriverService ieDriverService;
+    
+    private static IDriverConfigurationProvider driverConfigProvider = new DriverConfigurationProvider(logger);
+    
+    public static void setDriverConfigurationProvider(IDriverConfigurationProvider provider) {
+        driverConfigProvider = provider;
+    }
 
-    private static int actionDelay = -1;
+    public static IDriverConfigurationProvider getDriverConfigurationProvider() {
+        return driverConfigProvider;
+    }
 
     /**
      * Open a new web driver based on the execution configuration.
@@ -210,6 +249,10 @@ public class DriverFactory {
                 changeWebDriver(webDriver);
                 switchToSmartWaitWebDriver(webDriver);
             }
+
+            TestingEvent browserOpenedEvent = new TestingEvent(TestingEventType.BROWSER_OPENED, webDriver);
+            EventBusSingleton.getInstance().getEventBus().post(browserOpenedEvent);
+            
             return webDriver;
         } catch (Error e) {
             logger.logMessage(LogLevel.WARNING, e.getMessage(), e);
@@ -220,19 +263,26 @@ public class DriverFactory {
     private static void switchToSmartWaitWebDriver(WebDriver webDriver) {
         try {
             SmartWaitWebDriver smartWaitWebDriver = new SmartWaitWebDriver(webDriver);
-            smartWaitWebDriver.register(new SmartWaitWebEventListener());
+            smartWaitWebDriver.register(new KatalonSmartEventListener());
             DriverFactory.changeWebDriverWithoutLog(smartWaitWebDriver);
         } catch (Exception e) {
             logger.logInfo(e.getMessage());
         }
     }
 
-    private static void changeWebDriver(WebDriver webDriver) {
+    /**
+     * Change the web driver that Katalon uses to execute your test to
+     * the given web driver instance. Note that Katalon will
+     * wrap the given instance into a subclass of {@link EventFiringWebDriver}
+     * 
+     * @param webDriver
+     */
+    public static void changeWebDriver(WebDriver webDriver) {
         changeWebDriverWithoutLog(webDriver);
         logBrowserRunData(webDriver);
         switchToSmartWaitWebDriver(webDriver);
     }
-    
+
     private static void changeWebDriverWithoutLog(WebDriver webDriver) {
         localWebServerStorage.set(webDriver);
         RunConfiguration.storeDriver(webDriver);
@@ -316,7 +366,10 @@ public class DriverFactory {
                 webDriver = WebMobileDriverFactory.createMobileDriver(driver);
                 break;
             case EDGE_DRIVER:
-                webDriver = createNewEdgeDriver(driverPreferenceProps);
+                webDriver = createNewEdgeDriver(desireCapibilities);
+                break;
+            case EDGE_CHROMIUM_DRIVER:
+                webDriver = createNewEdgeChromiumDriver(desireCapibilities);
                 break;
             case REMOTE_FIREFOX_DRIVER:
                 webDriver = createNewRemoteFirefoxDriver(desireCapibilities);
@@ -347,34 +400,70 @@ public class DriverFactory {
         return new CChromeDriver(addCapbilitiesForChrome(desireCapibilities), getActionDelay());
     }
     
-    private static DesiredCapabilities addCapbilitiesForChrome(DesiredCapabilities desireCapibilities) {
+    private static DesiredCapabilities addCapbilitiesForChrome(DesiredCapabilities desiredCapibilities) {
         System.setProperty(CHROME_DRIVER_PATH_PROPERTY_KEY, getChromeDriverPath());
 
         ProxyInformation proxyInformation = RunConfiguration.getProxyInformation();
-        if (ProxyOption.MANUAL_CONFIG.name().equals(proxyInformation.getProxyOption())) {
+        if (proxyInformation.isApplyToDesiredCapabilities()
+                && ProxyOption.valueOf(proxyInformation.getProxyOption()) == ProxyOption.MANUAL_CONFIG) {
             if (WebDriverProxyUtil.isManualSocks(proxyInformation)) {
-                WebDriverPropertyUtil.addArgumentsForChrome(desireCapibilities,
+                WebDriverPropertyUtil.addArgumentsForChrome(desiredCapibilities,
                         "--proxy-server=socks5://" + WebDriverProxyUtil.getProxyString(proxyInformation));
             } else {
-                desireCapibilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
+                desiredCapibilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
             }
         }
-        addSmartWaitExtensionToChrome(desireCapibilities);
-        return desireCapibilities;
+        addKatalonExtensionsToChrome(desiredCapibilities);
+        return desiredCapibilities;
     }
 
-    private static DesiredCapabilities addSmartWaitExtensionToChrome(DesiredCapabilities capabilities) {
-        try {
-            File chromeExtensionFolder = getChromeExtensionFile();
-            WebDriverPropertyUtil.removeArgumentsForChrome(capabilities, WebDriverPropertyUtil.DISABLE_EXTENSIONS);
-            WebDriverPropertyUtil.addArgumentsForChrome(capabilities,
-                    LOAD_EXTENSION_CHROME_PREFIX + chromeExtensionFolder.getCanonicalPath());
-        } catch (Exception e) {
-            logger.logError(ExceptionUtils.getFullStackTrace(e));
+    private static DesiredCapabilities addKatalonExtensionsToChrome(DesiredCapabilities capabilities) {
+        String argumentValue = StringUtils.EMPTY;
+        String pathToTimeCapsuleExtension = StringUtils.EMPTY;
+        String pathToSmartWaitExtension = StringUtils.EMPTY;
+        if (shouldInstallTimeCapsuleExtension()) {
+            pathToTimeCapsuleExtension = installExtensionFromFile(getTimeCapsuleExtensionFile());
         }
+        if (shouldInstallSmartWait()) {
+            pathToSmartWaitExtension = installExtensionFromFile(getChromeExtensionFile());
+        }
+        if (!StringUtils.isEmpty(pathToTimeCapsuleExtension) && !StringUtils.isEmpty(pathToSmartWaitExtension)) {
+            argumentValue = LOAD_EXTENSION_CHROME_PREFIX + pathToTimeCapsuleExtension + "," + pathToSmartWaitExtension;
+        } else if (!StringUtils.isEmpty(pathToTimeCapsuleExtension)) {
+            argumentValue = LOAD_EXTENSION_CHROME_PREFIX + pathToTimeCapsuleExtension;
+        } else {
+            argumentValue = LOAD_EXTENSION_CHROME_PREFIX + pathToSmartWaitExtension;
+        }
+        WebDriverPropertyUtil.addArgumentsForChrome(capabilities, argumentValue);
         return capabilities;
     }
 
+    private static String installExtensionFromFile(File file) {
+        String pathToExtension = StringUtils.EMPTY;
+        try {
+            if (file != null) {
+                pathToExtension = file.getCanonicalPath();
+            }
+        } catch (Exception e) {
+            logger.logError(ExceptionUtils.getFullStackTrace(e));
+        }
+        return pathToExtension;
+    }
+
+
+    private static boolean shouldInstallTimeCapsuleExtension() {
+        return RunConfiguration.shouldApplyTimeCapsule();
+    }
+
+    private static File getTimeCapsuleExtensionFile() {
+        try {
+            return new File(FileUtil.getExtensionsDirectory(), KATALON_SAVE_MHTML_ADDON_CHROME_RELATIVE_PATH);
+        } catch (IOException e) {
+        }
+        return null;
+    }
+
+    
     private static File getChromeExtensionFile() {
         try {
             return new File(FileUtil.getExtensionsDirectory(), SMART_WAIT_ADDON_CHROME_RELATIVE_PATH);
@@ -387,7 +476,15 @@ public class DriverFactory {
         WebDriverPropertyUtil.addArgumentsForChrome(desireCapibilities, "--headless", "disable-gpu");
         return new CChromeDriver(chromeCapbilities, getActionDelay());
     }
-
+    
+//    private static Map<String, Object> getDefaultProxy(String url, String driverType) {
+//        if (StringUtils.isBlank(url) || StringUtils.isBlank(driverType)) {
+//            return WebDriverProxyUtil.getSeleniumProxy(RunConfiguration.getProxyInformation());
+//        } else {
+//            return WebDriverProxyUtil.getSeleniumProxy(RunConfiguration.getProxyInformation(), url, driverType);
+//        }
+//    }
+    
     private static Map<String, Object> getDefaultProxy() {
         return WebDriverProxyUtil.getSeleniumProxy(RunConfiguration.getProxyInformation());
     }
@@ -414,7 +511,9 @@ public class DriverFactory {
         if (remoteWebServerType == null) {
             remoteWebServerType = REMOTE_WEB_DRIVER_TYPE_SELENIUM;
         }
-        if (!desiredCapabilities.getCapabilityNames().contains("proxy") && !isEdgeBrowser(desiredCapabilities)) {
+
+        ProxyInformation proxyInfo = RunConfiguration.getProxyInformation();
+        if (proxyInfo.isApplyToDesiredCapabilities() && !isEdgeBrowser(desiredCapabilities)) {
             desiredCapabilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
         }
 
@@ -445,44 +544,57 @@ public class DriverFactory {
             throws URISyntaxException, IOException, GeneralSecurityException {
         URL url = new URL(remoteWebServerUrl);
         ProxyInformation proxyInfo = RunConfiguration.getProxyInformation();
-        Factory clientFactory = getClientFactoryForRemoteDriverExecutor(ProxyUtil.getProxy(proxyInfo));
+        Factory clientFactory = getClientFactoryForRemoteDriverExecutor(proxyInfo, url);
         AppiumCommandExecutor executor = new AppiumCommandExecutor(MobileCommand.commandRepository, url, clientFactory);
         return executor;
     }
 
     private static HttpCommandExecutor getSeleniumExecutorForRemoteDriver(String remoteWebServerUrl)
             throws URISyntaxException, IOException, GeneralSecurityException {
-
         URL url = new URL(remoteWebServerUrl);
         ProxyInformation proxyInfo = RunConfiguration.getProxyInformation();
-        Factory clientFactory = getClientFactoryForRemoteDriverExecutor(ProxyUtil.getProxy(proxyInfo));
+        Factory clientFactory = getClientFactoryForRemoteDriverExecutor(proxyInfo, url);
         HttpCommandExecutor executor = new HttpCommandExecutor(new HashMap<String, CommandInfo>(), url, clientFactory);
         return executor;
     }
 
-    private static Factory getClientFactoryForRemoteDriverExecutor(Proxy proxy) {
-        return new Factory() {
+    private static Factory getClientFactoryForRemoteDriverExecutor(ProxyInformation proxyInfo, URL url) throws URISyntaxException, IOException {
+        okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder()
+                .connectTimeout(DEFAULT_CONNECT_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(DEFAULT_READ_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(DEFAULT_WRITE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
 
-            private org.openqa.selenium.remote.internal.OkHttpClient.Factory factory;
-            {
-                factory = new org.openqa.selenium.remote.internal.OkHttpClient.Factory();
+        if (StringUtils.isNotBlank(url.getUserInfo())) {
+            String[] userInfo = url.getUserInfo().split(":");
+            if (userInfo != null && userInfo.length == 2) {
+                Authenticator basicAuthenticator = new Authenticator() {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        String credential = Credentials.basic(userInfo[0], userInfo[1]);
+                        return response.request().newBuilder().header("Authorization", credential).build();
+                    }
+                };
+                client = client.authenticator(basicAuthenticator);
             }
+        }
 
-            @Override
-            public HttpClient createClient(URL url) {
-                return Factory.super.createClient(url);
-            }
+        Proxy proxy = proxyInfo != null ? ProxyUtil.getProxy(proxyInfo) : null;
+        if (proxy != null) {
+            String proxyUser = proxyInfo.getUsername();
+            String proxyPassword = proxyInfo.getPassword();
 
-            @Override
-            public void cleanupIdleClients() {
-                factory.cleanupIdleClients();
-            }
+            Authenticator proxyAuthenticator = new Authenticator() {
+                @Override
+                public Request authenticate(Route route, Response response) throws IOException {
+                    String credential = Credentials.basic(proxyUser, proxyPassword);
+                    return response.request().newBuilder().header("Proxy-Authorization", credential).build();
+                }
+            };
 
-            @Override
-            public org.openqa.selenium.remote.internal.OkHttpClient.Builder builder() {
-                return factory.builder().proxy(proxy);
-            }
-        };
+            client = client.proxy(proxy).proxyAuthenticator(proxyAuthenticator);
+        }
+
+        return new RemoteHttpClientFactory(new OkHttpClient(client.build(), url));
     }
 
     private static WebDriver createNewRemoteChromeDriver(DesiredCapabilities desireCapibilities)
@@ -518,21 +630,29 @@ public class DriverFactory {
         return webDriver;
     }
 
-    private static WebDriver createNewEdgeDriver(Map<String, Object> driverPreferenceProps) throws IOException {
+    private static WebDriver createNewEdgeDriver(DesiredCapabilities desiredCapabilities) throws IOException {
         EdgeDriverService edgeService = localEdgeDriverServiceStorage.get();
         if (!edgeService.isRunning()) {
             edgeService.start();
         }
-        DesiredCapabilities desiredCapabilities = WebDriverPropertyUtil.toDesireCapabilities(driverPreferenceProps,
-                DesiredCapabilities.edge(), false);
-        // Edge driver doesn't support proxy: https://docs.microsoft.com/en-us/microsoft-edge/webdriver
-        // desiredCapabilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
+        return new CEdgeDriver(edgeService, desiredCapabilities, getActionDelay());
+    }
+    
+    private static WebDriver createNewEdgeChromiumDriver(DesiredCapabilities desiredCapabilities) throws IOException {
+
+        EdgeDriverService edgeService = localEdgeChromiumDriverServiceStorage.get();
+        if (!edgeService.isRunning()) {
+            edgeService.start();
+        }
+
         return new CEdgeDriver(edgeService, desiredCapabilities, getActionDelay());
     }
 
     private static WebDriver createNewIEDriver(DesiredCapabilities desireCapibilities) {
         desireCapibilities.setCapability(CAP_IE_USE_PER_PROCESS_PROXY, "true");
-        if (!WebDriverProxyUtil.isNoProxy(RunConfiguration.getProxyInformation())) {
+        ProxyInformation proxyInformation = RunConfiguration.getProxyInformation();
+        if (proxyInformation.isApplyToDesiredCapabilities()
+                && !WebDriverProxyUtil.isNoProxy(proxyInformation)) {
             desireCapibilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
         }
 
@@ -543,12 +663,17 @@ public class DriverFactory {
                 .build();
         return new CInternetExplorerDriver(ieDriverService, desireCapibilities, getActionDelay());
     }
-
+    
     private static WebDriver createNewFirefoxDriver(DesiredCapabilities desiredCapabilities) {
         int actionDelay = getActionDelay();
         int firefoxMajorVersion = FirefoxExecutable.getFirefoxVersion(desiredCapabilities);
         addSmartWaitExtensionToFirefox(desiredCapabilities);
-        desiredCapabilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
+
+        ProxyInformation proxyInformation = RunConfiguration.getProxyInformation();
+        if (proxyInformation.isApplyToDesiredCapabilities()) {
+            desiredCapabilities.setCapability(CapabilityType.PROXY, getDefaultProxy());
+        }
+
         if (firefoxMajorVersion >= USING_GECKO_VERSION) {
             return CGeckoDriver.from(desiredCapabilities, actionDelay);
         }
@@ -557,11 +682,36 @@ public class DriverFactory {
         }
         return CGeckoDriver.from(desiredCapabilities, actionDelay);
     }
+
+//    private static WebDriver createNewFirefoxDriver(DesiredCapabilities desiredCapabilities, String url) {
+//        int actionDelay = getActionDelay();
+//        int firefoxMajorVersion = FirefoxExecutable.getFirefoxVersion(desiredCapabilities);
+//        addSmartWaitExtensionToFirefox(desiredCapabilities);
+//        desiredCapabilities.setCapability(CapabilityType.PROXY, getDefaultProxy(url, desiredCapabilities.getBrowserName()));
+//        if (firefoxMajorVersion >= USING_GECKO_VERSION) {
+//            return CGeckoDriver.from(desiredCapabilities, actionDelay);
+//        }
+//        if (firefoxMajorVersion >= USING_MARIONETTEE_VERSION) {
+//            return CFirefoxDriver47.from(desiredCapabilities, actionDelay);
+//        }
+//        return CGeckoDriver.from(desiredCapabilities, actionDelay);
+//    }
+    
+    private static boolean shouldInstallSmartWait() {
+        // Default to false if previously an error occurs in writing the value in RunConfiguration
+        boolean globalSmartWaitEnabled = (boolean) Optional
+                .ofNullable(RunConfiguration.getExecutionProperties().get(RunConfiguration.GLOBAL_SMART_WAIT_MODE))
+                .orElse(false);
+        return globalSmartWaitEnabled;
+    }
+
     
     private static void addSmartWaitExtensionToFirefox(DesiredCapabilities desiredCapabilities) {
-        FirefoxProfile firefoxProfile = new FirefoxProfile();
-        firefoxProfile.addExtension(getFirefoxAddonFile());
-        desiredCapabilities.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
+        if (shouldInstallSmartWait()) {
+            FirefoxProfile firefoxProfile = new FirefoxProfile();
+            firefoxProfile.addExtension(getFirefoxAddonFile());
+            desiredCapabilities.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
+        }
     }
 
     private static File getFirefoxAddonFile() {
@@ -652,7 +802,10 @@ public class DriverFactory {
                         ? ((RemoteWebDriver) webDriver).getCapabilities().getPlatform().toString()
                         : System.getProperty("os.name"));
         logger.logRunData(StringConstants.XML_LOG_SELENIUM_VERSION, new BuildInfo().getReleaseLabel());
-        logger.logRunData("proxyInformation", RunConfiguration.getProxyInformation().toString());
+        
+        ProxyInformation proxyInfo = RunConfiguration.getProxyInformation();
+        proxyInfo.setPassword("******");
+        logger.logRunData("proxyInformation", proxyInfo.toString());
     }
 
     public static String getBrowserVersion(WebDriver webDriver) {
@@ -704,6 +857,12 @@ public class DriverFactory {
                     if (options instanceof DesiredCapabilities) {
                         CChromeDriver chromeDriver = new CChromeDriver((DesiredCapabilities) options, 0);
                         return chromeDriver;
+                    }
+                    break;
+                case EDGE_CHROMIUM_DRIVER:
+                    System.setProperty(EDGE_CHROMIUM_DRIVER_PATH_PROPERTY_KEY, getEdgeChromiumDriverPath());
+                    if (options instanceof DesiredCapabilities) {
+                        webDriver = createNewEdgeChromiumDriver((DesiredCapabilities) options);
                     }
                     break;
                 default:
@@ -970,6 +1129,43 @@ public class DriverFactory {
         }
         return RunConfiguration.getDriverSystemProperty(WEB_UI_DRIVER_PROPERTY, EDGE_DRIVER_PATH_PROPERTY);
     }
+    
+    private static String getEdgeChromiumDriverPath() {
+        if (OSUtil.isWindows()) {
+            if (OSUtil.is64Bit()) {
+                File customDriverLocationWin64 = new File(RunConfiguration.getProjectDir(),
+                        "Include/drivers/edgechromiumdriver_win64/msedgedriver.exe");
+                if (customDriverLocationWin64.exists()) {
+                    logger.logInfo("Custom Edge Chromium driver detected at location: "
+                            + customDriverLocationWin64.getAbsolutePath());
+                    return customDriverLocationWin64.getAbsolutePath();
+                }
+            } else {
+                File customDriverLocationWin32 = new File(RunConfiguration.getProjectDir(),
+                        "Include/drivers/edgechromiumdriver_win32/msedgedriver.exe");
+                if (customDriverLocationWin32.exists()) {
+                    logger.logInfo("Custom Edge Chromium driver detected at location: "
+                            + customDriverLocationWin32.getAbsolutePath());
+                    return customDriverLocationWin32.getAbsolutePath();
+                }
+            }
+        } else if (OSUtil.isMac()) {
+            File customDriverLocationMac = new File(RunConfiguration.getProjectDir(),
+                    "Include/drivers/edgechromiumdriver_mac/msedgedriver");
+            if (customDriverLocationMac.exists()) {
+                String customDriverPath = customDriverLocationMac.getAbsolutePath();
+                try {
+                    logger.logInfo("Custom Edge Chromium driver detected at location: "
+                            + customDriverLocationMac.getAbsolutePath());
+                    FileExcutableUtil.makeFileExecutable(customDriverPath);
+                } catch (IOException e) {
+                    logger.logInfo("Cannot make Edge Chromium driver file : " + customDriverPath + " excutable");
+                }
+                return customDriverPath;
+            }
+        }
+        return RunConfiguration.getDriverSystemProperty(WEB_UI_DRIVER_PROPERTY, EDGE_CHROMIUM_DRIVER_PATH_PROPERTY);
+    }
 
     /**
      * Get the absolute path of the current ChromeDriver
@@ -1152,18 +1348,7 @@ public class DriverFactory {
      * @return the action delay
      */
     public static int getActionDelay() {
-        if (actionDelay == -1) {
-            actionDelay = 0;
-            final Map<String, Object> executionGeneralProperties = RunConfiguration.getExecutionGeneralProperties();
-            if (executionGeneralProperties.containsKey(ACTION_DELAY)) {
-                actionDelay = RunConfiguration.getIntProperty(ACTION_DELAY, executionGeneralProperties);
-            }
-
-            if (RunConfiguration.getPort() > 0) {
-                logger.logInfo(MessageFormat.format(CoreWebuiMessageConstants.KW_MSG_ACTION_DELAY_X, actionDelay));
-            }
-        }
-        return actionDelay;
+        return driverConfigProvider.getActionDelayInMilisecond();
     }
 
     /**
@@ -1255,6 +1440,12 @@ public class DriverFactory {
                             EdgeDriverService edgeDriverService = localEdgeDriverServiceStorage.get();
                             if (edgeDriverService.isRunning()) {
                                 edgeDriverService.stop();
+                            }
+                            break;
+                        case EDGE_CHROMIUM_DRIVER:
+                            EdgeDriverService edgeChromiumDriverService = localEdgeChromiumDriverServiceStorage.get();
+                            if (edgeChromiumDriverService.isRunning()) {
+                                edgeChromiumDriverService.stop();
                             }
                             break;
                         default:

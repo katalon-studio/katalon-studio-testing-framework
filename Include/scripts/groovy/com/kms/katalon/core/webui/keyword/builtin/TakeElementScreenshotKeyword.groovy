@@ -2,6 +2,7 @@ package com.kms.katalon.core.webui.keyword.builtin
 
 import groovy.transform.CompileStatic
 
+import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.TimeUnit
 
@@ -50,8 +51,8 @@ import com.kms.katalon.core.webui.keyword.internal.WebUIAbstractKeyword
 import com.kms.katalon.core.webui.keyword.internal.WebUIKeywordMain
 import com.kms.katalon.core.webui.util.FileUtil
 
-@Action(value = "verifyElementPresent")
-public class VerifyElementPresentKeyword extends WebUIAbstractKeyword {
+@Action(value = "takeElementScreenshot")
+public class TakeElementScreenshotKeyword extends WebUIAbstractKeyword {
 
     @CompileStatic
     @Override
@@ -61,35 +62,60 @@ public class VerifyElementPresentKeyword extends WebUIAbstractKeyword {
 
     @CompileStatic
     @Override
-    public Object execute(Object ...params) {
-        TestObject to = getTestObject(params[0])
-        int timeOut = (int) params[1]
-        FailureHandling flowControl = (FailureHandling)(params.length > 2 && params[2] instanceof FailureHandling ? params[2] : RunConfiguration.getDefaultFailureHandling())
-        return verifyElementPresent(to,timeOut,flowControl)
+    public Object execute(Object... params) {
+        if (!isValidData(params)) {
+            return null
+        }
+
+        String fileName = (String)params[0]
+        boolean isTestOpsVisionCheckPoint = (boolean)params[2]
+        if (!isTestOpsVisionCheckPoint && fileName == null) {
+            fileName = defaultFileName()
+        }
+        TestObject element = (TestObject)params[1]
+        FailureHandling failureHandler = params[3] == null ?
+                RunConfiguration.getDefaultFailureHandling() : (FailureHandling)params[3]
+        return takeScreenshot(fileName, element, isTestOpsVisionCheckPoint, failureHandler)
+    }
+
+    private boolean isValidData(Object... params) {
+        if (params.length != 4) {
+            return false
+        }
+        
+        if (params[0] != null && !(params[0] instanceof String)) {
+            return false;
+        }
+        
+        if (params[1] != null && !(params[1] instanceof TestObject)) {
+            return false;
+        }
+        
+        if (params[2] == null || !(params[2] instanceof Boolean)) {
+            return false;
+        }
+        
+        if (params[3] != null && !(params[3] instanceof FailureHandling)) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    private String defaultFileName() {
+        return logger.getLogFolderPath() + File.separator + System.currentTimeMillis() + ".png";
     }
 
     @CompileStatic
-    public boolean verifyElementPresent(TestObject to, int timeOut, FailureHandling flowControl) throws StepFailedException {
+    public String takeScreenshot(String fileName, TestObject element, boolean isTestOpsVisionElement, FailureHandling flowControl) {
         return WebUIKeywordMain.runKeyword({
-            boolean isSwitchIntoFrame = false
-            try {
-                WebUiCommonHelper.checkTestObjectParameter(to)
-                isSwitchIntoFrame = WebUiCommonHelper.switchToParentFrame(to, timeOut)
-                WebElement foundElement = null
-                foundElement = WebUIAbstractKeyword.findWebElement(to, timeOut)
-                if (foundElement != null) {
-                    logger.logPassed(MessageFormat.format(StringConstants.KW_LOG_PASSED_OBJ_X_IS_PRESENT, to.getObjectId()))
-                }
-                return true
-            } catch (WebElementNotFoundException ex) {
-                WebUIKeywordMain.stepFailed(ExceptionsUtil.getMessageForThrowable(ex), flowControl, null, true)
-            } finally {
-                if (isSwitchIntoFrame) {
-                    WebUiCommonHelper.switchToDefaultContent()
-                }
+            String screenFileName = FileUtil.takeElementScreenshot(fileName, element, isTestOpsVisionElement)
+            if (screenFileName != null) {
+                Map<String, String> attributes = new HashMap<>()
+                attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY, screenFileName)
+                logger.logPassed("Taking screenshot successfully", attributes)
             }
-            return false
-        }, flowControl, true, (to != null) ? MessageFormat.format(StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_X_IS_PRESENT, to.getObjectId())
-        : StringConstants.KW_MSG_CANNOT_VERIFY_OBJ_IS_PRESENT)
+            return screenFileName;
+        }, flowControl, false, StringConstants.KW_LOG_WARNING_CANNOT_TAKE_SCREENSHOT)
     }
 }
