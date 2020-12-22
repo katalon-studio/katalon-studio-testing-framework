@@ -3,6 +3,7 @@ package com.kms.katalon.core.webui.common.internal;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
+import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.webui.driver.DriverFactory;
 
 /**
@@ -13,11 +14,12 @@ public class SmartWait {
     public static void doSmartWait() {
         WebDriver main = DriverFactory.getWebDriver();
         JavascriptExecutor js = (JavascriptExecutor) main;
+        KeywordLogger.getInstance(SmartWait.class).logDebug("Smart Wait Function is triggered");
         try {
             js.executeAsyncScript(WAIT_AJAX_SCRIPT);
             js.executeAsyncScript(WAIT_DOM_SCRIPT);
         } catch (Exception e) {
-            // Ignore exceptions to avoid clogging user's console log
+         // Ignore exceptions to avoid clogging user's console
         }
     }
 

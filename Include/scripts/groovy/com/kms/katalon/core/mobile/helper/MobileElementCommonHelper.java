@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriverException;
@@ -39,6 +40,10 @@ public class MobileElementCommonHelper {
     private static final KeywordLogger logger = KeywordLogger.getInstance(MobileElementCommonHelper.class);
 
     private static final int ANDROID_SEEKBAR_PADDING = 56;
+
+    private static final float MOVE_SEEKBAR_MAX_DIFF_IN_PERCENTAGE = 0.01f;
+
+    private static final int MOVE_SEEKBAR_MAX_RETRY = 2;
 
     private static final int DEFAULT_DRAG_AND_DROP_DELAY = 2000;
 
@@ -294,11 +299,11 @@ public class MobileElementCommonHelper {
             throw new StepFailedException(
                     MessageFormat.format(StringConstants.KW_MSG_FAILED_SET_SLIDER_INVALID_PERCENTAGE_X, percent));
         }
-        WebElement element = findElementWithCheck(to, timeout);
         AppiumDriver<?> driver = MobileDriverFactory.getDriver();
+        WebElement element = findElementWithCheck(to, timeout);
         float percentValue = percent.floatValue() / 100;
         if (driver instanceof AndroidDriver<?>) {
-            moveAndroidSeekbar(percentValue, element, driver);
+            moveAndroidSeekbar(percentValue, ANDROID_SEEKBAR_PADDING, element, to, driver, timeout, MOVE_SEEKBAR_MAX_RETRY);
         } else if (driver instanceof IOSDriver<?>) {
             moveIosUIASlider(percentValue, element);
         }
@@ -310,15 +315,34 @@ public class MobileElementCommonHelper {
         element.sendKeys(String.valueOf(percentValue));
     }
 
-    private static void moveAndroidSeekbar(float percentValue, WebElement element, AppiumDriver<?> driver)
-            throws WebDriverException {
+    private static void moveAndroidSeekbar(float percentValue, int seekbarPadding, WebElement element, TestObject testObject,
+            AppiumDriver<?> driver, int timeout, int numRetry) throws Exception {
         int startX = element.getLocation().getX();
-        int width = element.getSize().getWidth() - (ANDROID_SEEKBAR_PADDING * 2);
+        int width = element.getSize().getWidth() - (seekbarPadding * 2);
         int relativeX = Math.round(width * percentValue);
         TouchAction<?> tap = new TouchAction<>(driver)
-                .tap(PointOption.point(startX + ANDROID_SEEKBAR_PADDING + relativeX, element.getLocation().getY()))
+                .tap(PointOption.point(startX + seekbarPadding + relativeX, element.getLocation().getY()))
                 .waitAction(WaitOptions.waitOptions(Duration.ofMillis(DEFAULT_TAP_DURATION)));
         tap.perform();
+
+        if (numRetry <= 0) {
+            return;
+        }
+
+        element = findElementWithCheck(testObject, timeout);
+        String value = element.getAttribute("text");
+        if (StringUtils.isBlank(value)) {
+            return;
+        }
+
+        float diffInPercentage = Float.parseFloat(value) - percentValue * 100;
+        if (Math.abs(diffInPercentage) < MOVE_SEEKBAR_MAX_DIFF_IN_PERCENTAGE) {
+            return;
+        }
+        int correctPadding = seekbarPadding + (int) ((width * width * diffInPercentage / 100.0f)
+                / (2 * relativeX + 2 * width * diffInPercentage / 100.0f - width));
+
+        moveAndroidSeekbar(percentValue, correctPadding, element, testObject, driver, timeout, numRetry - 1);
     }
 
     public static int getElementLeftPosition(TestObject to, int timeout, FailureHandling flowControl) throws Exception {

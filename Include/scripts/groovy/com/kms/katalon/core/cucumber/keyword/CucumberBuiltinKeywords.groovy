@@ -19,17 +19,44 @@ import com.kms.katalon.core.model.RunningMode
 import com.kms.katalon.core.util.internal.PathUtil
 
 import cucumber.api.cli.Main;
+import cucumber.runtime.formatter.CucumberReporter
 import groovy.transform.CompileStatic
 
 public class CucumberBuiltinKeywords extends BuiltinKeywords {
 
     private static final KeywordLogger logger = KeywordLogger.getInstance(CucumberBuiltinKeywords.class);
+    
+    
+    public static List GLUE = [""]
 
     /**
      * Runs the given Feature file with <code>featureId</code> by invoking
-     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}. 
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
      * </p>
-     * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code> 
+     * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code>
+     * </p>
+     * 
+     * Examples:
+     * <ul>
+     * <li>Example #1: Run a single feature file
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * </ul>
      * 
      * @param relativeFilePath
      * relativeFilePath of Feature file
@@ -45,7 +72,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
     public static CucumberRunnerResult runFeatureFile(String relativeFilePath, FailureHandling flowControl) {
         return KeywordMain.runKeyword({
             if (StringUtils.isEmpty(relativeFilePath)) {
-                throw new IllegalArgumentException("featureRelativeFilePath param must not be null or empty")
+                throw new IllegalArgumentException("relativeFilePath param must not be null or empty")
             }
             String reportDir = RunConfiguration.getReportFolder() + "/cucumber_report/" + System.currentTimeMillis()
             String projectDir = RunConfiguration.getProjectDir()
@@ -54,9 +81,12 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             logger.logInfo(
                 MessageFormat.format("Starting run keyword runFeatureFile: ''{0}'' and extract report to folder: ''{1}''...",
                     relativeFilePath, reportDir))
-            String[] argv = [
-                "-g",
-                "",
+            logger.logDebug('Glue: ' + GLUE)
+            String[] argv = []
+            for (g in GLUE) {
+                argv += ['-g', g]
+            }
+            argv += [
                 projectDir + "/" + relativeFilePath,
                 "--strict",
 //                "--plugin",
@@ -68,7 +98,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
                 "--plugin",
                 "junit:"+ reportDir + "/cucumber.xml",
                 "--plugin",
-                CucumberReporter.class.getName()
+                CucumberReporter.class.getName() + ":" + reportDir + "/k-cucumber.json"
             ]
             if (runningMode == RunningMode.CONSOLE) {
                 argv = argv + ["--monochrome"]
@@ -84,16 +114,41 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             return cucumberResult;
         }, flowControl, "Keyword runFeatureFile was failed");
     }
+
     /**
      * Runs the given Feature file with <code>featureId</code> by invoking
      * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
      * </p>
      * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code>
-     *
+     * </p>
+     * 
+     * Examples:
+     * <ul>
+     * <li>Example #1: Run a single feature file with selected tags
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', ['@foo', 'not @bar'] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file with selected tags and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', ['@foo', 'not @bar'] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * </ul>
+     * 
      * @param relativeFilePath
-     * relativeFilePath of Feature file
+     * relativeFilePath of the feature file
      * @param tags
-     * what tags in the features should be executed
+     * what tags in the features should be executed. Eg: ['@foo', 'not @bar']: Select all foo tags but not bar tags
+     * 
      * @param flowControl
      * an instance {@link FailureHandling} that controls the running flow
      * @return
@@ -106,7 +161,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
     public static CucumberRunnerResult runFeatureFileWithTags(String relativeFilePath, String[] tags, FailureHandling flowControl) {
         return KeywordMain.runKeyword({
             if (StringUtils.isEmpty(relativeFilePath)) {
-                throw new IllegalArgumentException("featureRelativeFilePath param must not be null or empty")
+                throw new IllegalArgumentException("relativeFilePath param must not be null or empty")
             }
             String reportDir = RunConfiguration.getReportFolder() + "/cucumber_report/" + System.currentTimeMillis()
             String projectDir = RunConfiguration.getProjectDir()
@@ -115,10 +170,12 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             logger.logInfo(
                     MessageFormat.format("Starting run keyword runFeatureFile: ''{0}'' and extract report to folder: ''{1}''...",
                     relativeFilePath, reportDir))
-            
-            String[] argv = [
-                "-g",
-                "",
+            logger.logDebug('Glue: ' + GLUE)
+            String[] argv = []
+            for (g in GLUE) {
+                argv += ['-g', g]
+            }
+            argv += [
                 projectDir + "/" + relativeFilePath,
                 "--strict",
                 //                "--plugin",
@@ -130,7 +187,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
                 "--plugin",
                 "junit:"+ reportDir + "/cucumber.xml",
                 "--plugin",
-                CucumberReporter.class.getName()
+                CucumberReporter.class.getName() + ":" + reportDir + "/k-cucumber.json"
             ]
             if (tags != null) {
                 for (String tag in tags) {
@@ -153,10 +210,30 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             return cucumberResult;
         }, flowControl, "Keyword runFeatureFileWithTags was failed");
     }
+
     /**
      * Runs the given Feature file with <code>featureId</code> by invoking
-     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}
-     *
+     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
+     * </p>
+     * Examples:
+     * <ul>
+     * <li>Example #1: Run a single feature file
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * 
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature')
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature')
+     * </pre>
+     * </li>
+     * </ul>
      * @param relativeFilePath
      * relativeFilePath of Feature file
      * @return
@@ -168,14 +245,36 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
     public static CucumberRunnerResult runFeatureFile(String relativeFilePath) {
         return runFeatureFile(relativeFilePath, RunConfiguration.getDefaultFailureHandling());
     }
+
     /**
      * Runs the given Feature file with <code>featureId</code> by invoking
-     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}
-     *
+     * {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
+     * 
+     * <ul>
+     * <li>Example #1: Run a single feature file with selected tags
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file with selected tags and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFile('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * </ul>
+     * 
      * @param relativeFilePath
      * relativeFilePath of Feature file
      * @param tags
-     * what tags in the features should be executed
+     * what tags in the features should be executed. Eg: ['@foo', 'not @bar']: Select all foo tags but not bar tags
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      *
@@ -189,8 +288,30 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
     /**
      * Runs the given Feature folder and its nested sub-folder with <code>folderRelativePath</code>
      * by invoking {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
      * </p>
-     * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code> 
+     * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code>
+     * </p> 
+     * Examples:
+     * <ul>
+     * <li>Example #1: Run all features file in the specified folder
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFolder('Include/features', FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * <li>Example #2: Run all features file in the specified folder and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFolder('Include/features', FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * </ul>
      * 
      * @param folderRelativePath
      * folder relative path that starts from the current project location
@@ -212,9 +333,12 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             logger.logInfo(
                 MessageFormat.format("Starting run keyword runFeatureFolder: ''{0}'' and extract report to folder: ''{1}''...",
                     folderRelativePath, reportDir))
-            String[] argv = [
-                "-g",
-                "",
+            logger.logDebug('Glue: ' + GLUE)
+            String[] argv = []
+            for (g in GLUE) {
+                argv += ['-g', g]
+            }
+            argv += [
                 projectDir + "/" + folderRelativePath,
                 "--strict",
                 "--plugin",
@@ -236,28 +360,48 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             if (runSuccess) {
                 logger.logPassed(MessageFormat.format("All feature files in ''{0}'' were passed", folderRelativePath));
             } else {
-                KeywordMain.stepFailed(MessageFormat.format("Run feature folder ''{0}'' failed", folderRelativePath));
+                KeywordMain.stepFailed(MessageFormat.format("Run feature folder ''{0}'' failed", folderRelativePath), flowControl);
             }
             return cucumberResult;
         }, flowControl, "Keyword runFeatureFolder was failed");
     }
+
     /**
      * Runs the given Feature folder and its nested sub-folder with <code>folderRelativePath</code>
      * by invoking {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
      * </p>
      * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code>
-     *
+     * </p>
+     * <ul>
+     * <li>Example #1: Run a single feature file with selected tags
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFolderWithTags('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file with selected tags and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFolderWithTags('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [], FailureHandling.STOP_ON_FAILURE)
+     * </pre>
+     * </li>
+     * </ul>
+     * 
      * @param folderRelativePath
      * folder relative path that starts from the current project location
      * @param tags
-     * what tags in the features should be executed
+     * what tags in the features should be executed. Eg: ['@foo', 'not @bar']: Select all foo tags but not bar tags
      * @param flowControl
      * an instance {@link FailureHandling} that controls the running flow
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      * @since 7.0.0
      */
-    
     @Keyword
     public static CucumberRunnerResult runFeatureFolderWithTags(String folderRelativePath, String[] tags, FailureHandling flowControl) {
         return KeywordMain.runKeyword({
@@ -270,10 +414,12 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             logger.logInfo(
                     MessageFormat.format("Starting run keyword runFeatureFolder: ''{0}'' and extract report to folder: ''{1}''...",
                     folderRelativePath, reportDir))
-            
-            String[] argv = [
-                "-g",
-                "",
+            logger.logDebug('Glue: ' + GLUE)
+            String[] argv = []
+            for (g in GLUE) {
+                argv += ['-g', g]
+            }
+            argv += [
                 projectDir + "/" + folderRelativePath,
                 "--strict",
                 //                "--plugin",
@@ -285,7 +431,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
                 "--plugin",
                 "junit:"+ reportDir + "/cucumber.xml",
                 "--plugin",
-                CucumberReporter.class.getName()
+                CucumberReporter.class.getName() + ":" + reportDir + "/k-cucumber.json"
             ]
             if (tags != null) {
                 for (String tag in tags) {
@@ -304,7 +450,7 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
             if (runSuccess) {
                 logger.logPassed(MessageFormat.format("All feature files in ''{0}'' were passed", folderRelativePath));
             } else {
-                KeywordMain.stepFailed(MessageFormat.format("Run feature folder ''{0}'' failed", folderRelativePath));
+                KeywordMain.stepFailed(MessageFormat.format("Run feature folder ''{0}'' failed", folderRelativePath), flowControl);
             }
             return cucumberResult;
         }, flowControl, "Keyword runFeatureFolderWithTags was failed");
@@ -312,8 +458,29 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
 
     /**
      * Runs the given Feature folder and its nested sub-folder with <code>folderRelativePath</code>
-     * by invoking {@link cucumber.api.cli.Main#run(String[], ClassLoader)}
-     *
+     * by invoking {@link cucumber.api.cli.Main#run(String[], ClassLoader)}.
+     * If your step definitions are in packages, you can set glue path to help system can detect your step definitions path easier.
+     * </p>
+     * 
+     * Examples</code>:
+     * <ul>
+     * <li>Example #1: Run all features file in the specified folder
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * 
+     * CucumberKW.runFeatureFolder('Include/features')
+     * </pre>
+     * </li>
+     * <li>Example #2: Run all features file in the specified folder and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFolder('Include/features')
+     * </pre>
+     * </li>
+     * </ul>
+     * 
      * @param folderRelativePath
      * folder relative path that starts from current project location
      * @return
@@ -324,19 +491,41 @@ public class CucumberBuiltinKeywords extends BuiltinKeywords {
     public static CucumberRunnerResult runFeatureFolder(String folderRelativePath) {
         return runFeatureFolder(folderRelativePath, RunConfiguration.getDefaultFailureHandling())
     }
+
     /**
      * Runs the given Feature folder and its nested sub-folder with <code>folderRelativePath</code>
      * by invoking {@link cucumber.api.cli.Main#run(String[], ClassLoader)}
-     *
+     *</p>
+     * The generated reports will be extracted in the current report folder with the following path: <code>&lt;report_folder&gt;/cucumber_report/&lt;current_time_stamp&gt;<code>
+     * </p>
+     * <ul>
+     * <li>Example #1: Run a single feature file with selected tags
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.runFeatureFolderWithTags('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [])
+     * </pre>
+     * </li>
+     * <li>Example #2: Run a single feature file with selected tags and the step definitions is in pre-defined packages
+     * <pre>
+     * import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
+     * import com.kms.katalon.core.model.FailureHandling
+     * 
+     * CucumberKW.GLUE = ['mypackage1', 'mypackage2']
+     * CucumberKW.runFeatureFolderWithTags('Include/features/New Feature File.feature', ["@foo", "not @bar"] as [])
+     * </pre>
+     * </li>
+     * </ul>
+     * 
      * @param folderRelativePath
      * folder relative path that starts from current project location
      * @param tags
-     * what tags in the features should be executed
+     * what tags in the features should be executed. Eg: ['@foo', 'not @bar']: Select all foo tags but not bar tags
      * @return
      * an instance of {@link CucumberRunnerResult} that includes status of keyword and report folder location.
      * @since 7.0.0
      */
-    
     @Keyword
     public static CucumberRunnerResult runFeatureFolderWithTags(String folderRelativePath, String[] tags) {
         return runFeatureFolderWithTags(folderRelativePath, tags, RunConfiguration.getDefaultFailureHandling())

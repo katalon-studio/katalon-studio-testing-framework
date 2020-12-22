@@ -186,7 +186,7 @@ public class SheetPOI extends ExcelData {
 
     private int getColumnCount() throws IOException {
         if (columnCount < 0) {
-            for (int rowIndex = 0; rowIndex < getRowNumbers(); rowIndex++) {
+            for (int rowIndex = 0; rowIndex < getTotalRows(); rowIndex++) {
                 int maxColumnRow = getMaxColumn(rowIndex);
                 if (maxColumnRow > columnCount) {
                     columnCount = maxColumnRow;
@@ -234,6 +234,10 @@ public class SheetPOI extends ExcelData {
     public int getRowNumbers() throws IOException {
         int totalRows = getSheet().getLastRowNum() + 1;
         return totalRows - getHeaderRowIdx();
+    }
+
+    private int getTotalRows() {
+        return getSheet().getLastRowNum() + 1;
     }
 
     /**

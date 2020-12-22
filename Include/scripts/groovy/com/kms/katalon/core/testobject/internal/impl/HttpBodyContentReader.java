@@ -63,7 +63,7 @@ public class HttpBodyContentReader {
                                     // convert to absolute path if possible
                                     value = PathUtil.relativeToAbsolutePath(value, projectDir); 
                                 }
-                                return new FormDataBodyParameter(substitutor.replace(p.getName()), value, p.getType());
+                                return new FormDataBodyParameter(substitutor.replace(p.getName()), value, p.getType(), substitutor.replace(p.getContentType()));
                             })
                             .collect(Collectors.toList());
                     return new HttpFormDataBodyContent(bindedFormDataParameters);

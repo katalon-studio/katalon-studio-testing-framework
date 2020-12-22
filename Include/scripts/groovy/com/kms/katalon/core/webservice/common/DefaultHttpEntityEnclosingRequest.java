@@ -7,7 +7,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.protocol.HTTP;
 
-public class DefaultHttpEntityEnclosingRequest extends BaseHttpRequest implements HttpEntityEnclosingRequest {
+public class DefaultHttpEntityEnclosingRequest extends HttpUriRequest implements HttpEntityEnclosingRequest {
     private HttpEntity entity;
     
     public DefaultHttpEntityEnclosingRequest(final URI uri) {

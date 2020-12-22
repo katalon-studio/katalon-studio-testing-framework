@@ -1,6 +1,7 @@
 package com.kms.katalon.core.testobject.internal.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,10 +16,15 @@ import org.dom4j.io.SAXReader;
 
 import com.kms.katalon.core.constants.StringConstants;
 import com.kms.katalon.core.logging.KeywordLogger;
+import com.kms.katalon.core.main.ScriptEngine;
 import com.kms.katalon.core.testobject.TestObjectProperty;
 import com.kms.katalon.core.testobject.WindowsTestObject;
 import com.kms.katalon.core.util.StrSubstitutor;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
+
+import groovy.lang.Binding;
+import groovy.util.ResourceException;
+import groovy.util.ScriptException;
 
 public class WindowsObjectRepository {
 
@@ -28,10 +34,24 @@ public class WindowsObjectRepository {
             Map<String, Object> variables) {
         try {
             WindowsTestObject testObject = new WindowsTestObject(testObjectId);
+            
+            Map<String, Object> variablesStringMap = new HashMap<String, Object>();
+            for (Entry<String, Object> entry : variables.entrySet()) {
+                variablesStringMap.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+
+            try {
+                ScriptEngine scriptEngine = ScriptEngine.getDefault(WindowsObjectRepository.class.getClassLoader());
+                variablesStringMap.put("GlobalVariable", scriptEngine.runScriptWithoutLogging("internal.GlobalVariable", new Binding()));
+            } catch (ClassNotFoundException | ResourceException | ScriptException | IOException e) {
+            }
+            
+            StrSubstitutor strSubtitutor = new StrSubstitutor(variablesStringMap);
 
             Element element = new SAXReader().read(objectFile).getRootElement();
 
             String locator = element.elementText("locator");
+            locator = strSubtitutor.replace(locator);
             testObject.setLocator(locator);
 
             WindowsTestObject.LocatorStrategy locatorStrategy = WindowsTestObject.LocatorStrategy
@@ -48,18 +68,12 @@ public class WindowsObjectRepository {
 
                 objectProperty.setName(propertyName);
                 objectProperty.setValue(propertyValue);
+                
+                properties.add(objectProperty);
             }
 
-            if (!variables.isEmpty()) {
-                Map<String, Object> variablesStringMap = new HashMap<String, Object>();
-                for (Entry<String, Object> entry : variables.entrySet()) {
-                    variablesStringMap.put(String.valueOf(entry.getKey()), entry.getValue());
-                }
-
-                StrSubstitutor strSubtitutor = new StrSubstitutor(variablesStringMap);
-                for (TestObjectProperty objectProperty : properties) {
-                    objectProperty.setValue(strSubtitutor.replace(objectProperty.getValue()));
-                }
+            for (TestObjectProperty objectProperty : properties) {
+                objectProperty.setValue(strSubtitutor.replace(objectProperty.getValue()));
             }
 
             testObject.setProperties(properties);

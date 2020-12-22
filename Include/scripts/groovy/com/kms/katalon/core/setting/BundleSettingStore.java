@@ -37,6 +37,10 @@ public class BundleSettingStore {
         PropertySettingStoreUtil.addNewProperty(key, PropertySettingStoreUtil.getRawValue(value), getPropertyFile());
     }
 
+    public void setProperty(String key, long value) throws IOException {
+        PropertySettingStoreUtil.addNewProperty(key, PropertySettingStoreUtil.getRawValue(value), getPropertyFile());
+    }
+
     public void setProperty(String key, String value) throws IOException {
         PropertySettingStoreUtil.addNewProperty(key, PropertySettingStoreUtil.getRawValue(value), getPropertyFile());
     }

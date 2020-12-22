@@ -33,6 +33,8 @@ public class CoreAppiumMessageConstants extends NLS {
 
     public static String XML_LOG_APPIUM_VERSION;
 
+    public static String XML_LOG_APPIUM_STATUS;
+
     public static String MSG_UNABLE_TO_GET_APPIUM_STATUS;
 
     static {

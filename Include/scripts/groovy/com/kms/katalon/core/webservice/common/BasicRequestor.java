@@ -1,49 +1,24 @@
 package com.kms.katalon.core.webservice.common;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.ssl.KeyMaterial;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.util.EntityUtils;
 
 import com.google.api.client.auth.oauth.OAuthHmacSigner;
 import com.google.api.client.auth.oauth.OAuthParameters;
@@ -52,142 +27,68 @@ import com.google.api.client.auth.oauth.OAuthSigner;
 import com.google.api.client.http.GenericUrl;
 import com.kms.katalon.core.model.SSLClientCertificateSettings;
 import com.kms.katalon.core.network.ProxyInformation;
-import com.kms.katalon.core.network.ProxyOption;
 import com.kms.katalon.core.testobject.ConditionType;
 import com.kms.katalon.core.testobject.RequestObject;
 import com.kms.katalon.core.testobject.ResponseObject;
 import com.kms.katalon.core.testobject.TestObjectProperty;
 import com.kms.katalon.core.testobject.impl.HttpFormDataBodyContent;
 import com.kms.katalon.core.testobject.impl.HttpTextBodyContent;
-import com.kms.katalon.core.util.internal.ProxyUtil;
 import com.kms.katalon.core.webservice.constants.RequestHeaderConstants;
-import com.kms.katalon.core.webservice.exception.WebServiceException;
+import com.kms.katalon.core.webservice.helper.WebServiceCommonHelper;
 import com.kms.katalon.core.webservice.setting.SSLCertificateOption;
 import com.kms.katalon.core.webservice.setting.WebServiceSettingStore;
 
 public abstract class BasicRequestor implements Requestor {
-    private static final String TLS = "TLS";
-    
-    private static final String SOCKET_FACTORY_REGISTRY = "http.socket-factory-registry";
-    
-    protected static PoolingHttpClientConnectionManager connectionManager;
-    
-    static {
-        connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setValidateAfterInactivity(1);
-        connectionManager.setMaxTotal(2000);
-        connectionManager.setDefaultMaxPerRoute(500);
-    }
 
-    private String projectDir;
+    protected String projectDir;
 
     protected ProxyInformation proxyInformation;
+
+    protected WebServiceSettingStore settingStore;
 
     public BasicRequestor(String projectDir, ProxyInformation proxyInformation) {
         this.projectDir = projectDir;
         this.proxyInformation = proxyInformation;
     }
 
-    private SSLCertificateOption getSslCertificateOption() throws IOException {
-        return WebServiceSettingStore.create(projectDir).getSSLCertificateOption();
-    }
-    
-    private SSLClientCertificateSettings getSSLSettings() throws IOException {
-        return WebServiceSettingStore.create(projectDir).getClientCertificateSettings();
-    }
+    public ResponseObject send(RequestObject requestObject) throws Exception {
+        HttpUriRequest httpRequest = buildHttpRequest(requestObject);
 
-    protected TrustManager[] getTrustManagers() throws IOException {
-        if (getSslCertificateOption() == SSLCertificateOption.BYPASS) {
-            return new TrustManager[] { new X509TrustManager() {
-                @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
+        long startTime = System.currentTimeMillis();
+        HttpResponse httpResponse = HttpUtil.sendRequest(
+                httpRequest,
+                requestObject.isFollowRedirects(),
+                proxyInformation,
+                requestObject.getConnectionTimeout(),
+                requestObject.getSocketTimeout(),
+                requestObject.getMaxResponseSize(),
+                getSslCertificateOption(),
+                getSSLSettings());
+        long waitingTime = System.currentTimeMillis() - startTime;
 
-                @Override
-                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                }
+        ResponseObject responseObject = toResponseObject(httpResponse);
+        responseObject.setWaitingTime(waitingTime);
 
-                @Override
-                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                }
-            } };
-        }
-        return new TrustManager[0];
-    }
-    
-    protected KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
-        SSLClientCertificateSettings sslSettings = getSSLSettings();
-        String keyStoreFilePath = sslSettings.getKeyStoreFile();
-        if (!StringUtils.isBlank(keyStoreFilePath)) {
-            File keyStoreFile = new File(keyStoreFilePath);
-            String keyStorePassword = !StringUtils.isBlank(sslSettings.getKeyStorePassword())
-                    ? sslSettings.getKeyStorePassword() : StringUtils.EMPTY;
-            if (keyStoreFile.exists()) {
-                KeyManagerFactory keyManagerFactory = KeyManagerFactory
-                        .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                KeyMaterial km = new KeyMaterial(keyStoreFile, keyStorePassword.toCharArray());
-                keyManagerFactory.init(km.getKeyStore(), keyStorePassword.toCharArray());
-                return keyManagerFactory.getKeyManagers();
-            }
-        }
-        return new KeyManager[0];
+        return responseObject;
     }
 
-    public HostnameVerifier getHostnameVerifier() {
-        return new HostnameVerifier() {
-            @Override
-            public boolean verify(String urlHostName, SSLSession session) {
-                try {
-                    return getSslCertificateOption() == SSLCertificateOption.BYPASS;
-                } catch (IOException e) {
-                    return false;
-                }
-            }
-        };
+    protected abstract HttpUriRequest buildHttpRequest(RequestObject requestObject) throws Exception;
+
+    protected SSLCertificateOption getSslCertificateOption() throws IOException {
+        return getSettingStore().getSSLCertificateOption();
     }
 
-    public Proxy getProxy() throws WebServiceException {
-        Proxy systemProxy = getSystemProxy();
-//        if(proxyInformation.getDisableMobBroserProxy()){
-//            return systemProxy;
-//        }
-//        Proxy proxy = BrowserMobProxyManager.getWebServiceProxy(systemProxy);
-//        return proxy;
-        return systemProxy;
-    }
-
-    private Proxy getSystemProxy() throws WebServiceException {
-        if (proxyInformation == null) {
-            return Proxy.NO_PROXY;
-        }
-        try {
-            return ProxyUtil.getProxy(proxyInformation);
-        } catch (URISyntaxException e) {
-            throw new WebServiceException(e);
-        } catch (IOException e) {
-            throw new WebServiceException(e);
-        }
+    protected SSLClientCertificateSettings getSSLSettings() throws IOException {
+        return getSettingStore().getClientCertificateSettings();
     }
 
     protected void setHttpConnectionHeaders(HttpRequest httpRequest, RequestObject request)
-            throws GeneralSecurityException, IOException {
-        List<TestObjectProperty> complexAuthAttributes = request.getHttpHeaderProperties()
-                .stream()
-                .filter(header -> StringUtils.startsWith(header.getName(), RequestHeaderConstants.AUTH_META_PREFIX))
-                .collect(Collectors.toList());
-        List<TestObjectProperty> headers = new ArrayList<>(request.getHttpHeaderProperties());
-        if (!complexAuthAttributes.isEmpty()) {
-            headers.removeAll(complexAuthAttributes);
-            String authorizationValue = generateAuthorizationHeader(getRequestUrl(request), complexAuthAttributes);
-            if (!authorizationValue.isEmpty()) {
-                headers.add(new TestObjectProperty(RequestHeaderConstants.AUTHORIZATION, ConditionType.EQUALS,
-                        authorizationValue));
-            }
-        }
-        
+            throws GeneralSecurityException,
+            IOException {
+        List<TestObjectProperty> headers = getRequestHeaders(request);
+
         headers.forEach(header -> {
-            if (request.getBodyContent() instanceof HttpFormDataBodyContent 
+            if (request.getBodyContent() instanceof HttpFormDataBodyContent
                     && header.getName().equalsIgnoreCase("Content-Type")) {
                 httpRequest.addHeader(header.getName(), request.getBodyContent().getContentType());
             } else {
@@ -196,13 +97,42 @@ public abstract class BasicRequestor implements Requestor {
         });
     }
 
+    protected List<TestObjectProperty> getRequestHeaders(RequestObject request)
+            throws GeneralSecurityException,
+            IOException {
+        List<TestObjectProperty> headers = new ArrayList<>(request.getHttpHeaderProperties());
+
+        List<TestObjectProperty> complexAuthAttributes = request.getHttpHeaderProperties().stream()
+                .filter(header -> StringUtils.startsWith(header.getName(), RequestHeaderConstants.AUTH_META_PREFIX))
+                .collect(Collectors.toList());
+
+        if (!complexAuthAttributes.isEmpty()) {
+            headers.removeAll(complexAuthAttributes);
+            String authorizationValue = generateAuthorizationHeader(
+                    getRequestUrl(request),
+                    complexAuthAttributes,
+                    request);
+            if (!authorizationValue.isEmpty()) {
+                headers.add(
+                        new TestObjectProperty(
+                                RequestHeaderConstants.AUTHORIZATION,
+                                ConditionType.EQUALS,
+                                authorizationValue));
+            }
+        }
+
+        return headers;
+    }
+
     private String getRequestUrl(RequestObject request) {
         return StringUtils.equals(request.getServiceType(), RequestHeaderConstants.RESTFUL) ? request.getRestUrl()
                 : request.getWsdlAddress();
     }
 
-    private static String generateAuthorizationHeader(String requestUrl, List<TestObjectProperty> complexAuthAttributes)
-            throws GeneralSecurityException, IOException {
+    private static String generateAuthorizationHeader(
+            String requestUrl,
+            List<TestObjectProperty> complexAuthAttributes,
+            RequestObject request) throws GeneralSecurityException, IOException {
         Map<String, String> map = complexAuthAttributes.stream()
                 .collect(Collectors.toMap(TestObjectProperty::getName, TestObjectProperty::getValue));
         String authType = map.get(RequestHeaderConstants.AUTHORIZATION_TYPE);
@@ -211,7 +141,10 @@ public abstract class BasicRequestor implements Requestor {
         }
 
         if (RequestHeaderConstants.AUTHORIZATION_TYPE_OAUTH_1_0.equals(authType)) {
-            return createOAuth1AuthorizationHeaderValue(requestUrl, map);
+            if (StringUtils.equals(request.getServiceType(), RequestHeaderConstants.SOAP)) {
+                return createOAuth1AuthorizationHeaderValue(requestUrl, map, RequestHeaderConstants.POST);
+            }
+            return createOAuth1AuthorizationHeaderValue(requestUrl, map, request.getRestRequestMethod());
         }
 
         // Other authorization type will be handled here
@@ -219,18 +152,20 @@ public abstract class BasicRequestor implements Requestor {
         return StringUtils.EMPTY;
     }
 
-    public static String createOAuth1AuthorizationHeaderValue(String requestUrl, Map<String, String> map)
-            throws GeneralSecurityException, IOException {
+    public static String createOAuth1AuthorizationHeaderValue(
+            String requestUrl,
+            Map<String, String> map,
+            String requestMethod) throws GeneralSecurityException, IOException {
         OAuthParameters params = new OAuthParameters();
-        params.consumerKey = map.getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_CONSUMER_KEY,
-                StringUtils.EMPTY);
+        params.consumerKey = map
+                .getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_CONSUMER_KEY, StringUtils.EMPTY);
 
-        String signatureMethod = map.getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_SIGNATURE_METHOD,
-                StringUtils.EMPTY);
-        String consumerSecret = map.getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_CONSUMER_SECRET,
-                StringUtils.EMPTY);
-        String tokenSecret = map.getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_TOKEN_SECRET,
-                StringUtils.EMPTY);
+        String signatureMethod = map
+                .getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_SIGNATURE_METHOD, StringUtils.EMPTY);
+        String consumerSecret = map
+                .getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_CONSUMER_SECRET, StringUtils.EMPTY);
+        String tokenSecret = map
+                .getOrDefault(RequestHeaderConstants.AUTHORIZATION_OAUTH_TOKEN_SECRET, StringUtils.EMPTY);
         OAuthSigner signer = getSigner(signatureMethod, consumerSecret, tokenSecret);
         if (signer == null) {
             return StringUtils.EMPTY;
@@ -248,12 +183,13 @@ public abstract class BasicRequestor implements Requestor {
         if (StringUtils.isNotBlank(realm)) {
             params.realm = realm;
         }
-        params.computeSignature(RequestHeaderConstants.GET, new GenericUrl(requestUrl));
+        params.computeSignature(requestMethod, new GenericUrl(requestUrl));
         return params.getAuthorizationHeader();
     }
 
     private static OAuthSigner getSigner(String signatureMethod, String consumerSecret, String tokenSecret)
-            throws IOException, GeneralSecurityException {
+            throws IOException,
+            GeneralSecurityException {
         if (StringUtils.equals(signatureMethod, RequestHeaderConstants.SIGNATURE_METHOD_HMAC_SHA1)) {
             OAuthHmacSigner signer = new OAuthHmacSigner();
             signer.clientSharedSecret = consumerSecret;
@@ -273,9 +209,47 @@ public abstract class BasicRequestor implements Requestor {
 
         return null;
     }
-    
-    protected void setBodyContent(HttpResponse httpRequest, StringBuffer sb, ResponseObject responseObject) {
-        String contentTypeHeader = getResponseContentType(httpRequest);
+
+    protected ResponseObject toResponseObject(HttpResponse httpResponse) {
+        long startTime = System.currentTimeMillis();
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        long contentDownloadTime = 0L;
+        String responseBody = StringUtils.EMPTY;
+
+        long bodyLength = 0L;
+
+        HttpEntity responseEntity = httpResponse.getEntity();
+        if (responseEntity != null) {
+            bodyLength = responseEntity.getContentLength();
+            startTime = System.currentTimeMillis();
+            try {
+                responseBody = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                responseBody = ExceptionUtils.getFullStackTrace(e);
+            }
+            contentDownloadTime = System.currentTimeMillis() - startTime;
+        }
+
+        long headerLength = WebServiceCommonHelper.calculateHeaderLength(httpResponse);
+
+        ResponseObject responseObject = new ResponseObject(responseBody);
+        responseObject.setContentType(getResponseContentType(httpResponse));
+        responseObject.setHeaderFields(getResponseHeaderFields(httpResponse));
+        responseObject.setStatusCode(statusCode);
+        responseObject.setResponseBodySize(bodyLength);
+        responseObject.setResponseHeaderSize(headerLength);
+        responseObject.setContentDownloadTime(contentDownloadTime);
+
+        setResponseBodyContent(httpResponse, responseBody, responseObject);
+
+        return responseObject;
+    }
+
+    protected void setResponseBodyContent(
+            HttpResponse httpResponse,
+            String responseBody,
+            ResponseObject responseObject) {
+        String contentTypeHeader = getResponseContentType(httpResponse);
         String contentType = contentTypeHeader;
         String charset = "UTF-8";
         if (contentTypeHeader != null && contentTypeHeader.contains(";")) {
@@ -287,11 +261,11 @@ public abstract class BasicRequestor implements Requestor {
                 if (separatorIdx < 0) {
                     separatorIdx = contentTypeHeader.length();
                 }
-                charset = contentTypeHeader.substring(charsetIdx + "charset=".length(), separatorIdx)
-                        .trim().replace("\"", "");
+                charset = contentTypeHeader.substring(charsetIdx + "charset=".length(), separatorIdx).trim()
+                        .replace("\"", "");
             }
         }
-        HttpTextBodyContent textBodyContent = new HttpTextBodyContent(sb.toString(), charset, contentType);
+        HttpTextBodyContent textBodyContent = new HttpTextBodyContent(responseBody, charset, contentType);
         responseObject.setBodyContent(textBodyContent);
         responseObject.setContentCharset(charset);
     }
@@ -304,39 +278,32 @@ public abstract class BasicRequestor implements Requestor {
             return null;
         }
     }
-    
-    protected void configureProxy(HttpClientBuilder httpClientBuilder, ProxyInformation proxyInformation) {
-        HttpHost httpProxy = new HttpHost(proxyInformation.getProxyServerAddress(),
-                proxyInformation.getProxyServerPort());
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        String username = proxyInformation.getUsername();
-        String password = proxyInformation.getPassword();
-        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-            credentialsProvider.setCredentials(new AuthScope(httpProxy),
-                    new UsernamePasswordCredentials(username, password));
-        }
-        httpClientBuilder.setRoutePlanner(new HttpRoutePlanner() {
 
-            @Override
-            public HttpRoute determineRoute(HttpHost arg0, HttpRequest arg1, HttpContext arg2) throws HttpException {
-                if ((ProxyOption.valueOf(proxyInformation.getProxyOption()).equals(ProxyOption.USE_SYSTEM))) {
-                    return new SystemDefaultRoutePlanner(ProxySelector.getDefault()).determineRoute(arg0, arg1, arg2);
-                } else {
-                    return new DefaultProxyRoutePlanner(httpProxy).determineRoute(arg0, arg1, arg2);
-                }
+    protected Map<String, List<String>> getResponseHeaderFields(HttpResponse httpResponse) {
+        Map<String, List<String>> headerFields = new HashMap<>();
+        Header[] headers = httpResponse.getAllHeaders();
+        for (Header header : headers) {
+            String name = header.getName();
+            if (!headerFields.containsKey(name)) {
+                headerFields.put(name, new ArrayList<>());
             }
-        }).setDefaultCredentialsProvider(credentialsProvider);
+            headerFields.get(name).add(header.getValue());
+        }
+        StatusLine statusLine = httpResponse.getStatusLine();
+        if (statusLine != null) {
+            headerFields.put("#status#", Arrays.asList(String.valueOf(statusLine)));
+        }
+        return headerFields;
     }
-    
-    protected HttpContext getHttpContext() throws KeyManagementException, GeneralSecurityException, IOException {
-        HttpContext httpContext = new BasicHttpContext();
-        SSLContext sc = SSLContext.getInstance(TLS);
-        sc.init(getKeyManagers(), getTrustManagers(), null);
-        Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory> create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", new SSLConnectionSocketFactory(sc))
-                .build();
-        httpContext.setAttribute(SOCKET_FACTORY_REGISTRY, reg);
-        return httpContext;
+
+    public WebServiceSettingStore getSettingStore() {
+        if (settingStore == null) {
+            settingStore = WebServiceSettingStore.create(projectDir);
+        }
+        return settingStore;
+    }
+
+    public void setSettingStore(WebServiceSettingStore store) {
+        this.settingStore = store;
     }
 }

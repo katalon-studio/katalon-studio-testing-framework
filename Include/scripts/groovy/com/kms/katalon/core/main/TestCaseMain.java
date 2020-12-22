@@ -140,7 +140,7 @@ public class TestCaseMain {
                 .format("import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW\n" +
 
                         "CucumberKW.runFeatureFile(''{0}'')", featureFile);
-        return new WSVerificationExecutor(verificationScript, engine, eventManager, true)
+        return new WSVerificationExecutor(null, verificationScript, engine, eventManager, true, true)
                 .execute(FailureHandling.STOP_ON_FAILURE);
     }
 

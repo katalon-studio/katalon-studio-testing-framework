@@ -262,6 +262,8 @@ public class StringConstants {
     public static final String XML_LOG_TAG_PROPERTY = "tag";
 
     public static final String XML_LOG_ATTACHMENT_PROPERTY = "attachment";
+    
+    public static final String XML_LOG_VIDEO_ATTACHMENT_PROPERTY = "video-attachment";
 
     public static final String XML_LOG_NAME_PROPERTY = "name";
 
@@ -508,12 +510,16 @@ public class StringConstants {
     
     // TestCaseExecutor
 	public static final String TEST_CASE_SKIPPED = CoreMessageConstants.TEST_CASE_SKIPPED;
-
-	public static final String SMART_XPATH_REPORT_AVAILABLE_OPENING = "=================== Smart XPath Report =======================";
 	
-	public static final String SMART_XPATH_REPORT_AVAILABLE_ENDING = "===============================================================";
-
-	public static final String SMART_XPATH_VISIT_BELOW_LINK = CoreMessageConstants.SMART_XPATH_VISIT_BELOW_LINK;
+	public static final String SELF_HEALING_REPORT_AVAILABLE_OPENING = "===================== Self-healing Report ====================";
 	
-	public static final String SMART_XPATH_DOCUMENT = CoreMessageConstants.SMART_XPATH_DOCUMENT;
+	public static final String SELF_HEALING_REPORT_AVAILABLE_ENDING = "==============================================================";
+
+	public static final String SELF_HEALING_REPORT_VISIT_INSIGHT_PART = CoreMessageConstants.SELF_HEALING_REPORT_VISIT_INSIGHT_PART;
+	
+	public static final String SELF_HEALING_REFER_TO_DOCUMENT = CoreMessageConstants.SELF_HEALING_REFER_TO_DOCUMENT;
+
+    // Screenshot keyword
+    public static final String UTIL_EXC_FILE_PATH_INVALID = CoreMessageConstants.UTIL_EXC_FILE_PATH_INVALID;
+    public static final String UTIL_EXC_FILE_NOT_NULL = CoreMessageConstants.UTIL_EXC_FILE_NOT_NULL;
 }

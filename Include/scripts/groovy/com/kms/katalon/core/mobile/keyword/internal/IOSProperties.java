@@ -1,6 +1,7 @@
 package com.kms.katalon.core.mobile.keyword.internal;
 
 public class IOSProperties {
+	public static final String IOS_ACCESSIBILITY_ID = "accessibility-id";
 	public static final String IOS_TYPE = "type";
 	public static final String IOS_NAME = "name";
 	public static final String IOS_VALUE = "value";

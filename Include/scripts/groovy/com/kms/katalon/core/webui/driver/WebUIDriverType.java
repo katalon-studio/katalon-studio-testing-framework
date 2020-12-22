@@ -12,6 +12,7 @@ public enum WebUIDriverType implements DriverType {
     ANDROID_DRIVER(StringConstants.ANDROID),
     IOS_DRIVER(StringConstants.IOS),
     EDGE_DRIVER("Edge"),
+    EDGE_CHROMIUM_DRIVER("Edge Chromium"),
     REMOTE_FIREFOX_DRIVER("Remote Firefox"),
     REMOTE_CHROME_DRIVER("Remote Chrome"),
     KOBITON_WEB_DRIVER("Kobiton Device"),

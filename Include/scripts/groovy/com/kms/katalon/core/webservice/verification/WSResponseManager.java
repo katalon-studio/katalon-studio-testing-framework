@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
+import com.google.gson.JsonObject;
 import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.constants.StringConstants;
 import com.kms.katalon.core.testobject.HttpBodyContent;
@@ -41,13 +42,20 @@ public class WSResponseManager {
         if (response == null) {
             String responseObjectJson = (String) RunConfiguration
                     .getProperty(StringConstants.WS_VERIFICATION_RESPONSE_OBJECT);
-
+            
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(HttpBodyContent.class, new HttpBodyContentInstanceCreator()).create();
 
             response = gson.fromJson(responseObjectJson, ResponseObject.class);
-            HttpBodyContent textBodyContent = new HttpTextBodyContent(response.getResponseBodyContent());
-            response.setBodyContent(textBodyContent);
+            String responseText = null;
+            
+            JsonObject jsonObject = gson.fromJson( responseObjectJson, JsonObject.class);
+            responseText = jsonObject.get("responseText").getAsString();
+
+            if (responseText != null) {
+                HttpBodyContent textBodyContent = new HttpTextBodyContent(responseText);
+                response.setBodyContent(textBodyContent);
+            }
         }
 
         return response;

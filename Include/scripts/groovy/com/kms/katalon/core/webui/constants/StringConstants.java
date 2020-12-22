@@ -59,10 +59,12 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
     public static final String CONF_PROPERTY_EDGE_DRIVER_PATH = "edgeDriverPath";
     public static final String CONF_PROPERTY_CHROME_DRIVER_PATH = "chromeDriverPath";
     public static final String CONF_PROPERTY_GECKO_DRIVER_PATH = "geckoDriverPath";
+    public static final String CONF_PROPERTY_EDGE_CHROMIUM_DRIVER_PATH = "edgeChromiumDriverPath";
     public static final String CONF_PROPERTY_WAIT_FOR_IE_HANGING = "waitForIEHanging";
     public static final String CONF_PROPERTY_ENABLE_PAGE_LOAD_TIMEOUT = "enablePageLoadTimeout";
     public static final String CONF_PROPERTY_DEFAULT_PAGE_LOAD_TIMEOUT = "defaultPageLoadTimeout";
     public static final String CONF_PROPERTY_ACTION_DELAY = "actionDelay";
+    public static final String CONF_PROPERTY_USE_ACTION_DELAY_IN_SECOND = "useActionDelayInSecond";
     public static final String CONF_PROPERTY_IGNORE_PAGE_LOAD_TIMEOUT_EXCEPTION = "ignorePageLoadTimeoutException";
 	public static final String CONF_PROPERTY_EXECUTED_BROWSER = XML_LOG_BROWSER_TYPE_PROPERTY;
     public static final String CONF_PROPERTY_REMOTE_WEB_DRIVER_URL = "remoteWebDriverUrl";
@@ -508,8 +510,8 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
     public static final String KW_MSG_CANNOT_GET_VIEWPORT_LEFT_POSITION = CoreWebuiMessageConstants.KW_MSG_CANNOT_GET_VIEWPORT_LEFT_POSITION;
     public static final String KW_LOG_PASSED_GET_VIEWPORT_TOP_POSITION_X = CoreWebuiMessageConstants.KW_LOG_PASSED_GET_VIEWPORT_TOP_POSITION_X;
     public static final String KW_MSG_CANNOT_GET_VIEWPORT_TOP_POSITION = CoreWebuiMessageConstants.KW_MSG_CANNOT_GET_VIEWPORT_TOP_POSITION;
-    
-    
+    public static final String KW_LOG_INFO_INJECTED_INPUT = CoreWebuiMessageConstants.KW_LOG_INFO_INJECTED_INPUT;
+    public static final String KW_LOG_INFO_EMITTED_DRAG_AND_DROP_EVENT = CoreWebuiMessageConstants.KW_LOG_INFO_EMITTED_DRAG_AND_DROP_EVENT;
     public static final String KW_CATEGORIZE_ALERT = "Alert";
     public static final String KW_CATEGORIZE_ATTRIBUTE = "Attribute";
     public static final String KW_CATEGORIZE_BROWSER = "Browser";
@@ -535,8 +537,10 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
 
     public static final String SET_ENCRYPTED_TEXT_KEYWORD = "setEncryptedText";
     
+    public static final String KW_LOG_INFO_DEFAULT_LOCATOR_FAILED_TRY_SELF_HEALING = CoreWebuiMessageConstants.KW_LOG_INFO_DEFAULT_LOCATOR_FAILED_TRY_SELF_HEALING;
+    public static final String KW_LOG_INFO_PROPOSE_ALTERNATE_LOCATOR = CoreWebuiMessageConstants.KW_LOG_INFO_PROPOSE_ALTERNATE_LOCATOR;
     public static final String KW_LOG_INFO_SMART_XPATHS_SUPPORT_START = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_START;
-    public static final String KW_LOG_INFO_SMART_XPATHS_USING = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_USING;
+    public static final String KW_LOG_INFO_SELF_HEALING_USING = CoreWebuiMessageConstants.KW_LOG_INFO_SELF_HEALING_USING;
     public static final String KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_AUTO_UPDATE_AND_CONTINUE_EXECUTION;
     public static final String KW_LOG_INFO_SMART_XPATHS_SUPPORT_END = CoreWebuiMessageConstants.KW_LOG_INFO_SMART_XPATHS_SUPPORT_END;
     public static final String KW_LOG_INFO_USING_HEURISTIC_METHOD = CoreWebuiMessageConstants.KW_LOG_INFO_USING_HEURISTIC_METHOD;
@@ -544,4 +548,12 @@ public class StringConstants extends com.kms.katalon.core.constants.StringConsta
 	public static final String KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT = CoreWebuiMessageConstants.KW_LOG_INFO_COULD_NOT_SAVE_SCREENSHOT;
 	public static final String KW_LOG_INFO_SELECT_SMART_XPATH = CoreWebuiMessageConstants.KW_LOG_INFO_SELECT_SMART_XPATH;
 	public static final String KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS = CoreWebuiMessageConstants.KW_LOG_INFO_COULD_NOT_FIND_ANY_WEB_ELEMENT_WITH_SMART_XPATHS;	
+
+    // Screenshot keyword
+    public static final String KW_LOG_INFO_SCREENSHOT_FULLPAGE_FAIL_HIDE_OBJECT = CoreWebuiMessageConstants.KW_LOG_INFO_SCREENSHOT_FULLPAGE_FAIL_HIDE_OBJECT;
+    public static final String KW_LOG_INFO_SCREENSHOT_FULLPAGE_HIDDEN_COUNTER = CoreWebuiMessageConstants.KW_LOG_INFO_SCREENSHOT_FULLPAGE_HIDDEN_COUNTER;
+    public static final String KW_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY = CoreWebuiMessageConstants.KW_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY;
+    public static final String KW_SCREENSHOT_EXCEPTION_ELEMENT_NULL = CoreWebuiMessageConstants.KW_SCREENSHOT_EXCEPTION_ELEMENT_NULL;
+    public static final String KW_SCREENSHOT_EXCEPTION_AREA_NULL = CoreWebuiMessageConstants.KW_SCREENSHOT_EXCEPTION_AREA_NULL;
+    public static final String KW_SCREENSHOT_EXCEPTION_AREA_LARGER = CoreWebuiMessageConstants.KW_SCREENSHOT_EXCEPTION_AREA_LARGER;
 }

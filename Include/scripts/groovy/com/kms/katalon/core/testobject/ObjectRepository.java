@@ -4,6 +4,7 @@ import static com.kms.katalon.core.constants.StringConstants.ID_SEPARATOR;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,21 +18,26 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.google.common.net.UrlEscapers;
 import com.google.common.reflect.TypeToken;
 import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.constants.StringConstants;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.main.ScriptEngine;
+import com.kms.katalon.core.testobject.MobileTestObject.MobileLocatorStrategy;
 import com.kms.katalon.core.testobject.impl.HttpTextBodyContent;
 import com.kms.katalon.core.testobject.internal.impl.HttpBodyContentReader;
 import com.kms.katalon.core.testobject.internal.impl.WindowsObjectRepository;
 import com.kms.katalon.core.util.StrSubstitutor;
 import com.kms.katalon.core.util.internal.ExceptionsUtil;
 import com.kms.katalon.core.util.internal.JsonUtil;
+import com.kms.katalon.util.URLBuilder;
+import com.kms.katalon.util.collections.NameValuePair;
 
 import groovy.lang.Binding;
 import groovy.util.ResourceException;
@@ -48,6 +54,8 @@ public class ObjectRepository {
     private static final String WEB_SERVICES_TYPE_NAME = "WebServiceRequestEntity";
 
     private static final String WEB_ELEMENT_TYPE_NAME = "WebElementEntity";
+
+    private static final String MOBILE_ELEMENT_TYPE_NAME = "MobileElementEntity";
 
     private static final String WEBELEMENT_FILE_EXTENSION = ".rs";
 
@@ -175,12 +183,12 @@ public class ObjectRepository {
         return readTestObjectFile(testObjectId, objectFile, RunConfiguration.getProjectDir(), variables);
     }
     
-    public static WindowsTestObject findWindowsObject(final String windowsObjectId) {
-        File objectFile = new File(RunConfiguration.getProjectDir(), windowsObjectId + ".wrs");
-        return WindowsObjectRepository.readWindowsTestObjectFile(windowsObjectId, objectFile, RunConfiguration.getProjectDir(), Collections.emptyMap());
+    public static WindowsTestObject findWindowsObject(final String windowsObjectRelativeId) {
+        return findWindowsObject(windowsObjectRelativeId, Collections.emptyMap());
     }
     
-    public static WindowsTestObject findWindowsObject(final String windowsObjectId, Map<String, Object> variables) {
+    public static WindowsTestObject findWindowsObject(final String windowsObjectRelativeId, Map<String, Object> variables) {
+        String windowsObjectId = getTestObjectId(windowsObjectRelativeId);
         File objectFile = new File(RunConfiguration.getProjectDir(), windowsObjectId + ".wrs");
         return WindowsObjectRepository.readWindowsTestObjectFile(windowsObjectId, objectFile, RunConfiguration.getProjectDir(), variables);
     }
@@ -219,6 +227,10 @@ public class ObjectRepository {
 
             if (WEB_SERVICES_TYPE_NAME.equals(elementName)) {
                 return findRequestObject(testObjectId, rootElement, projectDir, variables);
+            }
+            
+            if (MOBILE_ELEMENT_TYPE_NAME.equals(elementName)) {
+                return findMobileTestObject(testObjectId, rootElement, projectDir, variables);
             }
             return null;
         } catch (DocumentException e) {
@@ -331,6 +343,33 @@ public class ObjectRepository {
 
         return testObject;
     }
+    
+    private static MobileTestObject findMobileTestObject(String mobileObjectId, Element reqElement, String projectDir,
+            Map<String, Object> variables) {
+        MobileTestObject mobileTestObject = new MobileTestObject(mobileObjectId);
+        String locator = reqElement.elementText("locator");
+        
+        Map<String, Object> variablesStringMap = new HashMap<String, Object>();
+        for (Entry<String, Object> entry : variables.entrySet()) {
+            variablesStringMap.put(String.valueOf(entry.getKey()), entry.getValue());
+        }
+
+        try {
+            ScriptEngine scriptEngine = ScriptEngine.getDefault(ObjectRepository.class.getClassLoader());
+            variablesStringMap.put("GlobalVariable", scriptEngine.runScriptWithoutLogging("internal.GlobalVariable", new Binding()));
+        } catch (ClassNotFoundException | ResourceException | ScriptException | IOException e) {
+        }
+        
+        StrSubstitutor strSubstitutor = new StrSubstitutor(variablesStringMap);
+
+        mobileTestObject.setMobileLocator(strSubstitutor.replace(locator));
+
+        String locatorStrategyStr = reqElement.elementText("locatorStrategy");
+
+        MobileLocatorStrategy locatorStrategy = MobileTestObject.MobileLocatorStrategy.valueOf(locatorStrategyStr);
+        mobileTestObject.setMobileLocatorStrategy(locatorStrategy);
+        return mobileTestObject;
+    }
 
     @SuppressWarnings("unchecked")
     private static RequestObject findRequestObject(String requestObjectId, Element reqElement, String projectDir,
@@ -381,7 +420,6 @@ public class ObjectRepository {
             mergedVariables.put("GlobalVariable", scriptEngine.runScriptWithoutLogging("internal.GlobalVariable", new Binding()));
         } catch (ClassNotFoundException | ResourceException | ScriptException | IOException e) {
         }
-
         
         StrSubstitutor substitutor = new StrSubstitutor(mergedVariables);
         if ("SOAP".equals(serviceType)) {
@@ -390,35 +428,38 @@ public class ObjectRepository {
             requestObject.setSoapServiceFunction(reqElement.elementText("soapServiceFunction"));
             requestObject.setHttpHeaderProperties(parseProperties(reqElement.elements("httpHeaderProperties"), substitutor));
             requestObject.setSoapBody(substitutor.replace(reqElement.elementText("soapBody")));
+            String useServiceInfoFromWsdlValue = reqElement.elementText("useServiceInfoFromWsdl");
+            if (StringUtils.isNotBlank(useServiceInfoFromWsdlValue)) {
+                requestObject.setUseServiceInfoFromWsdl(Boolean.valueOf(StringEscapeUtils.unescapeXml(useServiceInfoFromWsdlValue)));
+            } else {
+                requestObject.setUseServiceInfoFromWsdl(false);
+            }
+
+            requestObject.setSoapServiceEndpoint(substitutor.replace(reqElement.elementText("soapServiceEndpoint")));
         } else if ("RESTful".equals(serviceType)) {
-            requestObject.setRestUrl(substitutor.replace(reqElement.elementText("restUrl")));
+            String rawUrl = reqElement.elementText("restUrl");
+            String url = buildUrlFromRaw(rawUrl, substitutor);
+            requestObject.setRestUrl(url);
             String requestMethod = reqElement.elementText("restRequestMethod");
             requestObject.setRestRequestMethod(requestMethod);
             requestObject.setRestParameters(parseProperties(reqElement.elements("restParameters")));
             requestObject
                     .setHttpHeaderProperties(parseProperties(reqElement.elements("httpHeaderProperties"), substitutor));
-            requestObject.setHttpBody(reqElement.elementText("httpBody"));
+//            requestObject.setHttpBody(reqElement.elementText("httpBody"));
 
             String httpBodyType = reqElement.elementText("httpBodyType");
-            if (StringUtils.isBlank(httpBodyType)) {
+            String oldVersionBodyContent = reqElement.elementText("httpBody");
+            if (StringUtils.isNotBlank(oldVersionBodyContent)) {
                 // migrated from 5.3.1 (KAT-3200)
                 httpBodyType = "text";
                 String body = reqElement.elementText("httpBody");
                 HttpTextBodyContent httpBodyContent = new HttpTextBodyContent(body);
                 requestObject.setBodyContent(httpBodyContent);
-            } else if (isBodySupported(requestObject)) {
+            } else if (StringUtils.isNotBlank(httpBodyType)) {
                 String httpBodyContent = reqElement.elementText("httpBodyContent");
                 HttpBodyContent bodyContent = HttpBodyContentReader.fromSource(httpBodyType, httpBodyContent,
                         projectDir, substitutor);
                 requestObject.setBodyContent(bodyContent);
-                
-                //Backward compatible with 5.3.1
-//                ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-//                try {
-//                    bodyContent.writeTo(outstream);
-//                    requestObject.setHttpBody(outstream.toString());
-//                } catch (IOException ignored) {
-//                }
             }
         }
         
@@ -431,6 +472,30 @@ public class ObjectRepository {
         requestObject.setFollowRedirects(followRedirects);
         
         return requestObject;
+    }
+    
+    private static String buildUrlFromRaw(String rawUrl, StrSubstitutor substitutor) {
+        URLBuilder urlBuilder = new URLBuilder(rawUrl);
+        
+        List<NameValuePair> rawQueryParams = urlBuilder.getQueryParams();
+
+        List<NameValuePair> processedQueryParams = new ArrayList<>();
+
+        rawQueryParams.stream()
+            .forEach(p -> {
+                String variableExpandedName = substitutor.replace(p.getName());
+                String variableExpandedValue = substitutor.replace(p.getValue());
+                String escapedName = UrlEscapers.urlFormParameterEscaper().escape(variableExpandedName);
+                String escapedValue = UrlEscapers.urlFormParameterEscaper().escape(variableExpandedValue);
+                processedQueryParams.add(new NameValuePair(escapedName, escapedValue));
+            });
+        
+        urlBuilder.setParameters(processedQueryParams);
+        
+        String url = urlBuilder.buildString();
+        url = substitutor.replace(url); //replace the last time if there is still variable expansions in other parts of the URL
+        
+        return url;
     }
     
     @SuppressWarnings("unchecked")

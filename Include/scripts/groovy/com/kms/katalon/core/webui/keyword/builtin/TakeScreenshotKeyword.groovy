@@ -40,6 +40,7 @@ import com.kms.katalon.core.testobject.TestObject
 import com.kms.katalon.core.testobject.TestObjectProperty
 import com.kms.katalon.core.util.internal.ExceptionsUtil
 import com.kms.katalon.core.util.internal.PathUtil
+import com.kms.katalon.core.util.internal.TestOpsUtil
 import com.kms.katalon.core.webui.common.ScreenUtil
 import com.kms.katalon.core.webui.common.WebUiCommonHelper
 import com.kms.katalon.core.webui.constants.StringConstants
@@ -63,20 +64,38 @@ public class TakeScreenshotKeyword extends WebUIAbstractKeyword {
     @CompileStatic
     @Override
     public Object execute(Object... params) {
-        switch (params.length) {
-            case 0:
-                return takeScreenshot(defaultFileName(), RunConfiguration.getDefaultFailureHandling());
-            case 1:
-                if (params[0] instanceof String) {
-                    return takeScreenshot((String) params[0], RunConfiguration.getDefaultFailureHandling());
-                }
-                if (params[0] instanceof FailureHandling) {
-                    return takeScreenshot(defaultFileName(), (FailureHandling) params[0]);
-                }
-                break;
-            case 2:
-                return takeScreenshot((String) params[0], (FailureHandling) params[1]);
+        if (!isValidData(params)) {
+            return null
         }
+
+        String fileName = (String)params[0]
+        boolean isTestOpsVisionCheckPoint = (boolean)params[1]
+        if (!isTestOpsVisionCheckPoint && fileName == null) {
+            fileName = defaultFileName()
+        }
+        FailureHandling flowControl = params[2] == null ?
+                RunConfiguration.getDefaultFailureHandling() : (FailureHandling)params[2]
+        return takeScreenshot(fileName, isTestOpsVisionCheckPoint, flowControl)
+    }
+
+    private boolean isValidData(Object... params) {
+        if (params.length != 3) {
+            return false
+        }
+
+        if (params[0] != null && !(params[0] instanceof String)) {
+            return false;
+        }
+
+        if (params[1] != null && !(params[1] instanceof Boolean)) {
+            return false;
+        }
+
+        if (params[2] != null && !(params[2] instanceof FailureHandling)) {
+            return false;
+        }
+
+        return true;
     }
 
     private String defaultFileName() {
@@ -84,15 +103,16 @@ public class TakeScreenshotKeyword extends WebUIAbstractKeyword {
     }
 
     @CompileStatic
-    public String takeScreenshot(String fileName, FailureHandling flowControl) {
+    public String takeScreenshot(String fileName, boolean isTestOpsVisionCheckPoint, FailureHandling flowControl) {
         return WebUIKeywordMain.runKeyword({
-            String screenFileName = FileUtil.takesScreenshot(fileName)
+            String screenFileName = FileUtil.takesScreenshot(fileName, isTestOpsVisionCheckPoint)
             if (screenFileName != null) {
+                String fileNameForLog = TestOpsUtil.getRelativePathForLog(screenFileName)
                 Map<String, String> attributes = new HashMap<>()
-                attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY, screenFileName)
+                attributes.put(StringConstants.XML_LOG_ATTACHMENT_PROPERTY, fileNameForLog)
                 logger.logPassed("Taking screenshot successfully", attributes)
             }
             return screenFileName;
-        }, flowControl, true, StringConstants.KW_LOG_WARNING_CANNOT_TAKE_SCREENSHOT)
+        }, flowControl, false, StringConstants.KW_LOG_WARNING_CANNOT_TAKE_SCREENSHOT)
     }
 }

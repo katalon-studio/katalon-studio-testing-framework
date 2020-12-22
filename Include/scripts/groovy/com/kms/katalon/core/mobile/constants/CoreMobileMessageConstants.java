@@ -84,16 +84,26 @@ public class CoreMobileMessageConstants extends NLS {
     public static String KW_MSG_FAILED_TO_GET_ELEMENT_TEXT;
 
     public static String KW_LOG_PASSED_TEXT_HAS_BEEN_SET_TO_ELEMENT;
+    
+    public static String KW_LOG_PASSED_ENCRYPTED_TEXT_HAS_BEEN_SET_TO_ELEMENT;
 
     public static String KW_MSG_FAILED_TO_SET_ELEMENT_X_TEXT;
 
     public static String KW_MSG_FAILED_TO_SET_ELEMENT_TEXT;
+    
+    public static String KW_MSG_FAILED_SET_ELEMENT_ENCRYPTED_TEXT;
 
     public static String KW_LOG_PASSED_TAPPED_ON_ELEMENT;
 
     public static String KW_MSG_FAILED_TO_TAP_ON_ELEMENT_X;
 
     public static String KW_MSG_FAILED_TO_TAP_ON_ELEMENT;
+
+    public static String KW_LOG_PASSED_DOUBLE_TAPPED_ON_ELEMENT;
+    
+    public static String KW_MSG_FAILED_TO_DOUBLE_TAP_ON_ELEMENT_X;
+
+    public static String KW_MSG_FAILED_TO_DOUBLE_TAP_ON_ELEMENT;
 
     public static String KW_LOG_PASSED_TAP_AND_HOLD_ON_ELEMENT_X_WITH_DURATION_Y;
 
@@ -106,6 +116,12 @@ public class CoreMobileMessageConstants extends NLS {
     public static String KW_MSG_FAILED_TO_TAP_AND_HOLD_AT_X_Y_WITH_DURATION_Z;
 
     public static String KW_MSG_FAILED_TO_TAP_AND_HOLD_AT_POSITION;
+
+    public static String KW_LOG_PASSED_LONG_PRESSED_ON_ELEMENT;
+
+    public static String KW_MSG_FAILED_TO_LONG_PRESS_ON_ELEMENT_X;
+
+    public static String KW_MSG_FAILED_TO_LONG_PRESS_ON_ELEMENT;
 
     public static String KW_LOG_PASSED_ELEMENT_HAS_ATTR;
 
@@ -393,6 +409,33 @@ public class CoreMobileMessageConstants extends NLS {
     public static String KW_MSG_TEXT_NOT_FOUND;
     
     public static String KW_LOG_TEXT_FOUND_IN_ELEMENTS;
+
+    public static String KW_LOG_PASSED_EXECUTE_MOBILE_COMMAND;
+
+    public static String KW_LOG_FAILED_TO_EXECUTE_MOBILE_COMMAND;
+    
+    // Screenshot keyword
+    public static String KW_MSG_SCREENSHOT_EXCEPTION_FILENAME_NULL_EMPTY;
+
+    public static String KW_MSG_SCREENSHOT_EXCEPTION_ELEMENT_NULL;
+
+    public static String KW_MSG_SCREENSHOT_EXCEPTION_AREA_NULL;
+    
+    public static String KW_LOG_SCREENSHOT_FAILED_HIDE_OBJECT;
+    
+    public static String KW_LOG_SCREENSHOT_HIDDEN_OBJECTS_COUNT;
+    
+    public static String KW_LOG_SCREENSHOT_STATUSBAR_INFO;
+    
+    public static String KW_LOG_SCREENSHOT_STATUSBAR_EXIST;
+    
+    public static String KW_MSG_SCREENSHOT_STATUSBAR_INFO_FAIL;
+    
+    public static String KW_LOG_FAILED_GET_IOS_BUNDLE;
+    
+    public static String KW_LOG_FAILED_GET_IOS_STATUSBAR;
+    
+    public static String KW_LOG_FAILED_GET_ANDROID_STATUSBAR;
     
     static {
         // initialize resource bundle

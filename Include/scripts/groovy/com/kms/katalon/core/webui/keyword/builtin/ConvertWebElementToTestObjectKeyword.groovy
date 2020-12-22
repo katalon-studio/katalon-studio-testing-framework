@@ -38,7 +38,7 @@ import com.kms.katalon.core.testobject.SelectorMethod
 import com.kms.katalon.core.testobject.TestObject
 import com.kms.katalon.core.testobject.TestObjectBuilder
 import com.kms.katalon.core.testobject.TestObjectProperty
-import com.kms.katalon.core.webui.common.XPathBuilder
+import com.kms.katalon.core.common.XPathBuilder
 import com.kms.katalon.core.configuration.RunConfiguration
 
 @Action(value = "convertWebElementToTestObject")

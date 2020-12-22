@@ -1,13 +1,19 @@
 package com.kms.katalon.core.util.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.regex.Pattern;
+
+import com.kms.katalon.core.configuration.RunConfiguration;
+import com.kms.katalon.core.constants.StringConstants;
 
 public class PathUtil {
     private static final String relativeSeparator = "/";
@@ -115,4 +121,68 @@ public class PathUtil {
         }
         return url;
     }
+    
+    
+    /** Get relative path for xml log. The path will start from the report folder.
+     * @param fileName Absolute path of the file.
+     * @return relative path.
+     */
+    public static String getRelativePathForLog(String fileName) {
+        String reportPath = RunConfiguration.getReportFolder();
+        if (!reportPath.endsWith(File.separator)) {
+            reportPath = reportPath + File.separator;
+        }
+        
+        int reportPathIndex = fileName.indexOf(reportPath);
+        if (reportPathIndex != 0) {
+            return fileName;
+        }
+        
+        return fileName.replace(reportPath, "");
+    }
+    
+    /**
+     * Create path for file if not existed. If <b>isFile</b> create path to parent directory of the file.
+     * Or else create directory for the path.
+     * @param file File whose parent need to be created.
+     * @param isFile <b>true</b> if the path in <b><i>file</i></b> file. <b>false</b> if path is directory.
+     * @return File whose path has been created.
+     * @throws IOException 
+     */
+    public static File ensureDirectory(File file, boolean isFile) throws IOException {
+        if (file == null) {
+            throw new IOException(StringConstants.UTIL_EXC_FILE_NOT_NULL);
+        }
+
+        if (file.exists()) {
+            return file;
+        }
+        
+        if (!isValidFile(file)) {
+            throw new IOException(
+                    MessageFormat.format(StringConstants.UTIL_EXC_FILE_PATH_INVALID, file.getAbsolutePath()));
+        }
+        
+        if (isFile) {
+            File parent = file.getParentFile();
+            if (parent == null || parent.exists()) {
+                return file;
+            }
+            parent.mkdirs();
+        } else {
+            file.mkdirs();
+        }
+
+        return file;
+    }
+    
+    private static boolean isValidFile(File file) {
+        try {
+            Paths.get(file.getAbsolutePath());
+            return true;
+        } catch (InvalidPathException e) {
+            return false;
+        }
+    }
+    
 }

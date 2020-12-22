@@ -9,6 +9,8 @@ import java.util.Stack;
 
 import com.kms.katalon.core.constants.StringConstants;
 import com.kms.katalon.core.context.internal.ExecutionEventManager;
+import com.kms.katalon.core.context.internal.ExecutionListenerEvent;
+import com.kms.katalon.core.context.internal.InternalTestCaseContext;
 import com.kms.katalon.core.logging.ErrorCollector;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.logging.KeywordLogger.KeywordStackElement;
@@ -41,17 +43,21 @@ public class WSVerificationExecutor {
 
     private TestCaseBinding testCaseBinding;
 
+    private InternalTestCaseContext testCaseContext;
+
+    private ExecutionEventManager eventManager;
+
+    private boolean isMainTestCase;
+
 
     public WSVerificationExecutor(String verificationScript,
             ScriptEngine engine,
             ExecutionEventManager eventManager,
             boolean doCleanUp) {
         
-        this.engine = engine;
-        this.doCleanUp = doCleanUp;
-        this.script = verificationScript;
+        this(null, verificationScript, engine, eventManager, doCleanUp, false);
     }
-    
+
     public WSVerificationExecutor(
             TestCaseBinding testCaseBinding,
             String verificationScript,
@@ -59,10 +65,25 @@ public class WSVerificationExecutor {
             ExecutionEventManager eventManager,
             boolean doCleanUp) {
         
+        this(null, verificationScript, engine, eventManager, doCleanUp, false);
+    }
+
+    public WSVerificationExecutor(
+            TestCaseBinding testCaseBinding,
+            String verificationScript,
+            ScriptEngine engine,
+            ExecutionEventManager eventManager,
+            boolean doCleanUp,
+            boolean isMainTestCase) {
+        
         this.engine = engine;
         this.doCleanUp = doCleanUp;
         this.script = verificationScript;
         this.testCaseBinding = testCaseBinding;
+        this.eventManager = eventManager;
+        this.isMainTestCase = isMainTestCase;
+        this.testCaseContext = new InternalTestCaseContext("Verification");
+        testCaseContext.setMainTestCase(isMainTestCase);
     }
     
     private void preExecution() {
@@ -99,12 +120,23 @@ public class WSVerificationExecutor {
             preExecution();
             
             logger.startTest("Verification", Collections.emptyMap(), keywordStack);
+            
+            if (isMainTestCase) {
+                testCaseContext.setTestCaseStatus(testResult.getTestStatus().getStatusValue().name());
+                eventManager.publicEvent(ExecutionListenerEvent.BEFORE_TEST_CASE, new Object[] { testCaseContext });
+            }
 
             accessMainPhase();
 
             return testResult;
         } finally {
-        
+            if (isMainTestCase) {
+                testCaseContext.setTestCaseStatus(testResult.getTestStatus().getStatusValue().name());
+                testCaseContext.setMessage(testResult.getMessage());
+    
+                eventManager.publicEvent(ExecutionListenerEvent.AFTER_TEST_CASE, new Object[] { testCaseContext });
+            }
+
             logger.endTest("Verification", Collections.emptyMap());
 
             postExecution();

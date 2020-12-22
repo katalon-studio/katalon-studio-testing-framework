@@ -1,6 +1,7 @@
 package com.kms.katalon.core.testobject;
 
 import java.util.List;
+import java.util.Map;
 
 public class TestObjectBuilder {
     private TestObject testObject;
@@ -46,6 +47,13 @@ public class TestObjectBuilder {
 
     public TestObjectBuilder setSelectorValue(SelectorMethod selectorMethod, String selectorValue) {
         testObject.setSelectorValue(selectorMethod, selectorValue);
+        return this;
+    }
+
+    public TestObjectBuilder withSelectorCollection(Map<SelectorMethod, String> selectorCollection) {
+        selectorCollection.forEach((selectorMethod, selectorValue) -> {
+            setSelectorValue(selectorMethod, selectorValue);
+        });
         return this;
     }
 

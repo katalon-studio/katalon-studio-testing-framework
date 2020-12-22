@@ -9,7 +9,7 @@ import com.kms.katalon.core.keyword.internal.SupportLevel
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.webui.driver.DriverFactory
 import com.kms.katalon.core.webui.driver.SmartWaitWebDriver
-import com.kms.katalon.core.webui.driver.SmartWaitWebEventListener
+import com.kms.katalon.core.webui.driver.KatalonSmartEventListener
 import com.kms.katalon.core.webui.keyword.internal.WebUIAbstractKeyword
 import com.kms.katalon.core.webui.keyword.internal.WebUIKeywordMain
 

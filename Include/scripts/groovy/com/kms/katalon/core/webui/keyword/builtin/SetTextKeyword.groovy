@@ -51,8 +51,8 @@ public class SetTextKeyword extends WebUIAbstractKeyword {
                 WebElement webElement = WebUIAbstractKeyword.findWebElement(to)
                 logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_CLEARING_OBJ_TXT, to.getObjectId()))
                 webElement.clear()
-				
-                // webElement = WebUIAbstractKeyword.findWebElement(to)
+				// Since WebElement.clear() may trigger side effect that makes the element become stale, find it again
+                webElement = WebUIAbstractKeyword.findWebElement(to)
                 String readableText = SeleniumKeysUtil.getReadableText(text)
 				
                 logger.logDebug(MessageFormat.format(StringConstants.KW_LOG_INFO_SETTING_OBJ_TXT_TO_VAL, [to.getObjectId(), readableText] as Object[]))

@@ -4,6 +4,7 @@ import static com.kms.katalon.core.constants.StringConstants.DF_CHARSET;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -12,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.ast.MethodNode;
 import org.codehaus.groovy.control.CompilationFailedException;
 
+import com.google.common.hash.Hashing;
 import com.kms.katalon.core.annotation.SetUp;
 import com.kms.katalon.core.annotation.SetupTestCase;
 import com.kms.katalon.core.annotation.TearDown;
@@ -30,6 +33,10 @@ import com.kms.katalon.core.context.internal.ExecutionEventManager;
 import com.kms.katalon.core.context.internal.ExecutionListenerEvent;
 import com.kms.katalon.core.context.internal.InternalTestCaseContext;
 import com.kms.katalon.core.driver.internal.DriverCleanerCollector;
+import com.kms.katalon.core.execution.TestExecutionDataProvider;
+import com.kms.katalon.core.execution.TestExecutionSocketServer;
+import com.kms.katalon.core.execution.TestExecutionSocketServerEndpoint;
+import com.kms.katalon.core.keyword.internal.KeywordExecutionContext;
 import com.kms.katalon.core.logging.ErrorCollector;
 import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.logging.KeywordLogger.KeywordStackElement;
@@ -77,6 +84,9 @@ public class TestCaseExecutor {
 
     private TestSuiteExecutor testSuiteExecutor;
 
+    private static final int TEST_EXECUTION_WEBSOCKET_PORT = 12954;
+    
+
     public void setTestSuiteExecutor(TestSuiteExecutor testSuiteExecutor) {
         this.testSuiteExecutor = testSuiteExecutor;
     }
@@ -102,6 +112,7 @@ public class TestCaseExecutor {
         keywordStack = new Stack<KeywordLogger.KeywordStackElement>();
         parentErrors = errorCollector.getCoppiedErrors();
         errorCollector.clearErrors();
+        KeywordExecutionContext.setHasHealedSomeObjects(false);
     }
 
     private void onExecutionComplete() {
@@ -177,14 +188,13 @@ public class TestCaseExecutor {
     }
 
     private void postExecution() {
-    	
-		if (RunConfiguration.getProperty(RunConfiguration.SMART_XPATH_BUNDLE_ID) != null) {
-
-			logger.logInfo(StringConstants.SMART_XPATH_REPORT_AVAILABLE_OPENING);
-			logger.logInfo(StringConstants.SMART_XPATH_VISIT_BELOW_LINK);
-			logger.logInfo(StringConstants.SMART_XPATH_DOCUMENT);
-			logger.logInfo(StringConstants.SMART_XPATH_REPORT_AVAILABLE_ENDING);
-			
+        boolean hasHealedSomeObjects = KeywordExecutionContext.hasHealedSomeObjects();
+		if (hasHealedSomeObjects && RunConfiguration.shouldApplySelfHealing()) {
+            logger.logInfo(StringUtils.EMPTY);
+			logger.logInfo(StringConstants.SELF_HEALING_REPORT_AVAILABLE_OPENING);
+			logger.logInfo(StringConstants.SELF_HEALING_REPORT_VISIT_INSIGHT_PART);
+			logger.logInfo(StringConstants.SELF_HEALING_REFER_TO_DOCUMENT);
+			logger.logInfo(StringConstants.SELF_HEALING_REPORT_AVAILABLE_ENDING);
 		}
 
         errorCollector.clearErrors();
@@ -193,6 +203,7 @@ public class TestCaseExecutor {
             BrowserMobProxyManager.shutdownProxy();
         }
     }
+
 
     @SuppressWarnings("unchecked")
     public TestResult execute(FailureHandling flowControl) {
@@ -218,7 +229,14 @@ public class TestCaseExecutor {
             if (testCaseContext.isMainTestCase()) {
                 eventManager.publicEvent(ExecutionListenerEvent.BEFORE_TEST_CASE, new Object[] { testCaseContext });
             }
-            
+
+            if (testSuiteExecutor == null) {
+                openExecutionEndNotifyingClient();
+            }
+            // Expose current test case ID test script
+            RunConfiguration.getExecutionProperties().put(RunConfiguration.CURRENT_TESTCASE,
+                    testCaseContext.getTestCaseId());
+
             // By this point, @BeforeTestCase annotated method has already been called
             if(testCaseContext.isSkipped() == false){
                 testCaseResult = invokeTestSuiteMethod(SetupTestCase.class.getName(), StringConstants.LOG_SETUP_ACTION,
@@ -242,20 +260,60 @@ public class TestCaseExecutor {
         	}
             return testCaseResult;
         } finally {
+
+            // Notify test execution server about test failure here if executing a Test Case
+            if (!testCaseResult.getTestStatus().getStatusValue().equals(TestStatusValue.PASSED)
+                    && RunConfiguration.shouldApplyTimeCapsule()) {
+                notifyTestExecutionSocketServerEndpoint(testCaseContext.getTestCaseId(), logger.getLogFolderPath());
+            }
+
             testCaseContext.setTestCaseStatus(testCaseResult.getTestStatus().getStatusValue().name());
-        	testCaseContext.setMessage(testCaseResult.getMessage());
+            testCaseContext.setMessage(testCaseResult.getMessage());
 
             if (testCaseContext.isMainTestCase()) {
                 eventManager.publicEvent(ExecutionListenerEvent.AFTER_TEST_CASE, new Object[] { testCaseContext });
             }
 
             if (testCaseContext.isMainTestCase()) {
+                if (testCaseContext.isSkipped()) {
+                    logger.logSkipped(testCaseResult.getMessage());
+                }
                 logger.endTest(testCase.getTestCaseId(), null);
             } else {
                 logger.endCalledTest(testCase.getTestCaseId(), null);
             }
 
             postExecution();
+
+        }
+    }
+    
+    private static void openExecutionEndNotifyingClient() {
+        TestExecutionSocketServer.getInstance().start(TestExecutionSocketServerEndpoint.class,
+                TEST_EXECUTION_WEBSOCKET_PORT);
+    }
+    
+    private static String encode(String input) {
+        return Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString();
+    }
+
+    /**
+     * Notify the client socket in browser that it's time to capture the MHTML
+     * of a particular test execution. This method blocks until the handler
+     * finishes processing the MHTML
+     * 
+     * @param testCaseId
+     * @param logFolderPath
+     */
+    private void notifyTestExecutionSocketServerEndpoint(String testCaseId, String logFolderPath) {
+        TestExecutionSocketServerEndpoint client = TestExecutionSocketServer.getInstance().getEndpoint();
+        Map<String, String> data = new HashMap<>();
+        data.put(TestExecutionSocketServerEndpoint.TEST_NAME, testCaseId);
+        data.put(TestExecutionSocketServerEndpoint.TEST_ARTIFACT_FOLDER,
+                StringUtils.isEmpty(logFolderPath) ? RunConfiguration.getProjectDir() : logFolderPath);
+        TestExecutionDataProvider.getInstance().addTestExecutionData(encode(testCaseId), data);
+        if (client != null) {
+            client.notifyExecutionEndedAndWaitForMHTML(data);
         }
     }
 
@@ -295,10 +353,9 @@ public class TestCaseExecutor {
         if (!processSetupPhase()) {
             return;
         }
-
         processExecutionPhase();
     }
-
+    
     private void processExecutionPhase() {
         try {
             // Prepare configuration before execution
@@ -455,20 +512,21 @@ public class TestCaseExecutor {
         if (ignoreIfFailed) {
             startKeywordAttributeMap.put(StringConstants.XML_LOG_IS_IGNORED_IF_FAILED, String.valueOf(ignoreIfFailed));
         }
+        boolean isKeyword = true;
         logger.startKeyword(methodName, actionType, startKeywordAttributeMap, keywordStack);
         try {
             runMethod(getScriptFile(), methodName);
             endAllUnfinishedKeywords(keywordStack);
-            logger.logPassed(MessageFormat.format(StringConstants.MAIN_LOG_PASSED_METHOD_COMPLETED, methodName));
+            logger.logPassed(MessageFormat.format(StringConstants.MAIN_LOG_PASSED_METHOD_COMPLETED, methodName), Collections.emptyMap(), isKeyword);
         } catch (Throwable e) {
             endAllUnfinishedKeywords(keywordStack);
             String message = MessageFormat.format(StringConstants.MAIN_LOG_WARNING_ERROR_OCCURRED_WHEN_RUN_METHOD,
                     methodName, e.getClass().getName(), ExceptionsUtil.getMessageForThrowable(e));
             if (ignoreIfFailed) {
-                logger.logWarning(message, null, e);
+                logger.logWarning(message, null, e, isKeyword);
                 return;
             }
-            logger.logError(message, null, e);
+            logger.logError(message, null, e, isKeyword);
             errorCollector.addError(e);
         } finally {
             logger.endKeyword(methodName, actionType, Collections.emptyMap(), keywordStack);

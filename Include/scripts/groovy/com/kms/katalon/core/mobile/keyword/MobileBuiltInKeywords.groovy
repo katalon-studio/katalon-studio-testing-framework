@@ -8,6 +8,7 @@ import io.appium.java_client.android.AndroidKeyCode
 import io.appium.java_client.ios.IOSDriver
 import io.appium.java_client.remote.HideKeyboardStrategy
 
+import java.awt.Color
 import java.text.MessageFormat
 import java.util.concurrent.TimeUnit
 
@@ -18,6 +19,7 @@ import org.openqa.selenium.Dimension
 import org.openqa.selenium.Keys
 import org.openqa.selenium.OutputType
 import org.openqa.selenium.Point
+import org.openqa.selenium.Rectangle
 import org.openqa.selenium.ScreenOrientation
 import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriverException
@@ -37,6 +39,7 @@ import com.kms.katalon.core.logging.KeywordLogger
 import com.kms.katalon.core.mobile.constants.StringConstants
 import com.kms.katalon.core.mobile.helper.MobileCommonHelper
 import com.kms.katalon.core.mobile.helper.MobileElementCommonHelper
+import com.kms.katalon.core.mobile.keyword.internal.MobileDriverFactory
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testobject.TestObject
 
@@ -198,7 +201,7 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
     public static String takeScreenshot(String fileName, FailureHandling flowControl) throws StepFailedException {
-        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", fileName, flowControl)
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", fileName, null, null, false, flowControl)
     }
 
     /**
@@ -211,7 +214,7 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
     public static String takeScreenshot(String fileName) throws StepFailedException {
-        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", fileName)
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", fileName, null, null, false, null)
     }
 
     /**
@@ -223,7 +226,7 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
     public static String takeScreenshot(FailureHandling flowControl) throws StepFailedException {
-        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", flowControl)
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", null, null, null, false, flowControl)
     }
 
     /**
@@ -234,9 +237,697 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @CompileStatic
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
     public static String takeScreenshot() throws StepFailedException {
-        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot")
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot", null, null, null, false, null)
     }
 
+    /** Take screenshot of current application to send to TestOps Vision.
+     * <p><h5>
+     * Example:
+     * </h5></p>
+     * <p>
+     * <code>
+     * import java.awt.Color
+     * Mobile.takeScreenshotAsCheckpoint('screenshot_demo', [findTestObject('hidden_object1')], Color.Black, FailureHandling.STOP_ON_FAILURE)
+     * </code>
+     * </p>
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName, List<TestObject> ignoredElements,
+            Color hidingColor, FailureHandling flowControl)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, ignoredElements, hidingColor, true, flowControl)
+    }
+    
+    /** Take screenshot of current application to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeScreenshotAsCheckpoint(String, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName, List<TestObject> ignoredElements,
+            Color hidingColor) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, ignoredElements, hidingColor, true, null)
+    }
+    
+    /** Take screenshot of current application to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeScreenshotAsCheckpoint(String, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName, List<TestObject> ignoredElements,
+            FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, ignoredElements, null, true, flowControl)
+    }
+    
+    /** Take screenshot of current application to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeScreenshotAsCheckpoint(String, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName, List<TestObject> ignoredElements)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, ignoredElements, null, true, null)
+    }
+    
+    /** Take screenshot of current application to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeScreenshotAsCheckpoint(String, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName, FailureHandling flowControl)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, null, null, true, flowControl)
+    }
+    
+    /** Take screenshot of current application to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeScreenshotAsCheckpoint(String, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeScreenshotAsCheckpoint(String checkpointName) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeScreenshot",
+            checkpointName, null, null, true, null)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * <p><h5>
+     * Example:
+     * </h5></p>
+     * <p>
+     * <code>
+     * import java.awt.Color
+     * Mobile.takeElementScreenshotAsCheckpoint('screenshot_demo', findTestObject('capture_object'), [findTestObject('hidden_object1')], Color.Black, FailureHandling.STOP_ON_FAILURE)
+     * </code>
+     * </p>
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to,
+            List<TestObject> ignoredElements, Color hidingColor, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, ignoredElements, hidingColor, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to,
+            List<TestObject> ignoredElements, Color hidingColor) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, ignoredElements, hidingColor, true, null)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to,
+            List<TestObject> ignoredElements, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, ignoredElements, null, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to,
+            List<TestObject> ignoredElements) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, ignoredElements, null, true, null)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to,
+            FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, null, null, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific element to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshotAsCheckpoint(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshotAsCheckpoint(String checkpointName, TestObject to)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            checkpointName, to, null, null, true, null)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * <p><h5>
+     * Example:
+     * </h5></p>
+     * <p>
+     * <code>
+     * import java.awt.Color
+     * Mobile.takeElementScreenshot('screenshot_demo.png', findTestObject('capture_object'), [findTestObject('hidden_object1')], Color.Black, FailureHandling.STOP_ON_FAILURE)
+     * </code>
+     * </p>
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to, List<TestObject> ignoredElements,
+            Color hidingColor, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, ignoredElements, hidingColor, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to, List<TestObject> ignoredElements,
+            Color hidingColor) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, ignoredElements, hidingColor, false, null)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to, List<TestObject> ignoredElements,
+            FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, ignoredElements, null, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to, List<TestObject> ignoredElements)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, ignoredElements, null, false, null)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param flowControl FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to, FailureHandling flowControl)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, null, null, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(String fileName, TestObject to) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            fileName, to, null, null, false, null)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @param flowControlthe FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(TestObject to, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot", null,
+            to, null, null, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific web element.
+     * @param to TestObject got from MobileSpy and <i>findTestObject(String to)</i> function.
+     * This cannot be null.
+     * @return  a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeElementScreenshot(String, TestObject, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeElementScreenshot(TestObject to) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeElementScreenshot",
+            null, to, null, null, false, null)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * <p><h5>
+     * Example:
+     * </h5></p>
+     * <p>
+     * <code>
+     * import org.openqa.selenium.Rectangle as Rectangle
+     * import java.awt.Color
+     * Mobile.takeAreaScreenshotAsCheckpoint('checkpoint_area_demo',[findTestObject('hidden_object1')], Color.Black, new Rectangle(x, y, height, width), FailureHandling.STOP_ON_FAILURE)
+     * </code>
+     * </p>
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect,
+        List<TestObject> ignoredElements, Color hidingColor, FailureHandling flowControl)
+        throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, ignoredElements, hidingColor, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshotAsCheckpoint(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect,
+            List<TestObject> ignoredElements, Color hidingColor) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, ignoredElements, hidingColor, true, null)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshotAsCheckpoint(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect,
+            List<TestObject> ignoredElements, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, ignoredElements, null, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshotAsCheckpoint(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect,
+            List<TestObject> ignoredElements) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, ignoredElements, null, true, null)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshotAsCheckpoint(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect,
+            FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, null, null, true, flowControl)
+    }
+    
+    /** Take screenshot of the specific area within current view-port  to send to TestOps Vision.
+     * @param checkpointName Name of the checkpoint which will be appended with TestOps Vision prefix to complete the saved file name.
+     * Checkpoint will be saved in 'keyes' folder in report folder.
+     * Checkpoint's name will be used by TestOps Vision to detect what baseline image this shot is compared with.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshotAsCheckpoint(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshotAsCheckpoint(String checkpointName, Rectangle rect)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            checkpointName, rect, null, null, true, null)
+    }
+    
+    /** Take screenshot of the specific Rectangle in current view-port. If the rectangle is not located within the view-port, this method will fail.
+     * <p><h5>
+     * Example:
+     * </h5></p>
+     * <p>
+     * <code>
+     * import org.openqa.selenium.Rectangle as Rectangle
+     * import java.awt.Color
+     * Mobile.takeAreaScreenshot('screenshot_area_demo.png',[findTestObject('hidden_object1')], Color.Black, new Rectangle(x, y, height, width), FailureHandling.STOP_ON_FAILURE)
+     * </code>
+     * </p>
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect, List<TestObject> ignoredElements,
+            Color hidingColor, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, ignoredElements, hidingColor, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific Rectangle in current view-port. If the rectangle is not located within the view-port, this method will fail.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param hidingColor Color used to paint the overlap layer to hide elements.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect, List<TestObject> ignoredElements,
+            Color hidingColor) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, ignoredElements, hidingColor, false, null)
+    }
+    
+    /** Take screenshot of the specific Rectangle in current view-port. If the rectangle is not located within the view-port, this method will fail.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect, List<TestObject> ignoredElements,
+            FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, ignoredElements, null, false, flowControl)
+    }
+    
+    /** Take screenshot of the specific Rectangle in current view-port. If the rectangle is not located within the view-port, this method will fail.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param ignoredElements List of TestObject that will be hidden. Can be null or empty.
+     * @return a String represents path to the captured image.
+     * @throws StepFailedException
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect, List<TestObject> ignoredElements)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, ignoredElements, null, false, null)
+    }
+    
+    /**
+     * <p>Take screenshot of the specific Rectangle in current view-port. If the rectangle is not located within the view-port, this method will fail.
+     * You have to use Script mode to create the Rectangle object.</p>
+     * <code>
+     * import org.openqa.selenium.Rectangle as Rectangle
+     * Mobile.takeAreaScreenshotAsCheckpoint('screenshot_area_demo.png', new Rectangle(x, y, width, height))
+     * </code>
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect, FailureHandling flowControl)
+            throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, null, null, false, flowControl)
+    }
+    
+    /**
+     * Take screenshot of the specific area. Default FailureHandling is used.
+     * @param fileName Absolute path to the captured file. If fileName if null, default file will be used.
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @return a String represents path to the captured image.
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(String fileName, Rectangle rect) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot",
+            fileName, rect, null, null, false, null)
+    }
+    
+    /**
+     * Take screenshot of the specific area with default filename
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @param flowControl the FailureHandling defines how the test case is run in case this step failed. If it is null, default value will be used.
+     * @return a String represents path to the captured image.
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(Rectangle rect, FailureHandling flowControl) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot", null,
+            rect, null, null, false, flowControl)
+    }
+    
+    /**
+     * Take screenshot of the specific area with default filename and default FailureHandling
+     * @param rect The declared rectangle area that will be captured. The declare rectangle must be inside the current view-port, otherwise this step will fail.
+     * This cannot be null.
+     * @return a String represents path to the captured image.
+     * @since 7.8.0
+     * @see MobileBuiltInKeywords#takeAreaScreenshot(String, Rectangle, List, Color, FailureHandling)
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_UTILITIES)
+    public static String takeAreaScreenshot(Rectangle rect) throws StepFailedException {
+        return KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "takeAreaScreenshot", null,
+            rect, null, null, false, null)
+    }
+    
     /**
      * Simulate opening notification action on mobile devices
      * @param flowControl
@@ -490,6 +1181,62 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     public static void setText(TestObject to, String text, int timeout) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "setText", to, text, timeout)
     }
+    
+    /**
+     * Set encrypted text into an input field. It also clears the previous value of the input field.
+     * To encrypt raw text, go to Help/Encrypt Text.
+     * 
+     * @param to
+     *          represent a mobile element.
+     * 
+     * @param encryptedText
+     *          the encrypted text to set to the mobile element.
+     * 
+     * @param timeout
+     *          system will wait at most timeout (seconds) to return result.
+     * 
+     * @param flowControl
+     *          Optional parameter: Used to control the step if the step failed.
+     *          <ul>
+     *              <li>STOP_ON_FAILURE: throws a StepFailedException if the step failed (default).</li>
+     *              <li>CONTINUE_ON_FAILURE: continue the test if the test failed but the test result is still failed.</li>
+     *              <li>OPTIONAL: continue the test and ignore the test result.</li>
+     *          </ul>
+     * 
+     * @throws StepFailedException
+     *          On KS could not find the specified element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_TEXT)
+    public static void setEncryptedText(TestObject to, String encryptedText, int timeout, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "setEncryptedText", to, encryptedText, timeout, flowControl)
+    }
+    
+    /**
+     * Set encrypted text into an input field. It also clears the previous value of the input field.
+     * To encrypt raw text, go to Help/Encrypt Text.
+     * 
+     * @param to
+     *          Represent a mobile element.
+     * 
+     * @param encryptedText
+     *          The encrypted text to set to the mobile element.
+     * 
+     * @param timeout
+     *          System will wait at most timeout (seconds) to return result.
+     * 
+     * @throws StepFailedException
+     *          On KS could not find the specified element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_TEXT)
+    public static void setEncryptedText(TestObject to, String encryptedText, int timeout) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "setEncryptedText", to, encryptedText, timeout)
+    }
 
     /**
      * Tap on an mobile element
@@ -518,6 +1265,54 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_SCREEN)
     public static void tap(TestObject to, int timeout) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "tap", to, timeout)
+    }
+
+    /**
+     * Performs a double tap action on a mobile element.
+     * 
+     * @param to
+     *      Represent a mobile element.
+     * 
+     * @param timeout
+     *      System will wait at most timeout (seconds) to return result.
+     * 
+     * @param flowControl
+     *          Optional parameter: Used to control the step if the step failed.
+     *          <ul>
+     *              <li>STOP_ON_FAILURE: throws a StepFailedException if the step failed (default).</li>
+     *              <li>CONTINUE_ON_FAILURE: continue the test if the test failed but the test result is still failed.</li>
+     *              <li>OPTIONAL: continue the test and ignore the test result.</li>
+     *          </ul>
+     * 
+     * @throws StepFailedException
+     *          On the mobile element doesn't exist, or KS could not perform a double tap action on the element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_SCREEN)
+    public static void doubleTap(TestObject to, int timeout, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "doubleTap", to, timeout, flowControl)
+    }
+
+    /**
+     * Performs a double tap action on a mobile element.
+     * 
+     * @param to
+     *      Represent a mobile element.
+     * 
+     * @param timeout
+     *      System will wait at most timeout (seconds) to return result.
+     * 
+     * @throws StepFailedException
+     *          On the mobile element doesn't exist, or KS could not perform a double tap action on the element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_SCREEN)
+    public static void doubleTap(TestObject to, int timeout) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "doubleTap", to, timeout)
     }
 
     /**
@@ -551,6 +1346,54 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
     public static void tapAndHold(TestObject to, Number duration, int timeout) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "tapAndHold", to, duration, timeout)
+    }
+
+    /**
+     * Performs a long-press action on a mobile element.
+     * 
+     * @param to
+     *          Represent a mobile element.
+     * 
+     * @param timeout
+     *          System will wait at most timeout (seconds) to return result.
+     * 
+     * @param flowControl
+     *          Optional parameter: Used to control the step if the step failed.
+     *          <ul>
+     *              <li>STOP_ON_FAILURE: throws a StepFailedException if the step failed (default).</li>
+     *              <li>CONTINUE_ON_FAILURE: continue the test if the test failed but the test result is still failed.</li>
+     *              <li>OPTIONAL: continue the test and ignore the test result.</li>
+     *          </ul>
+     * 
+     * @throws StepFailedException
+     *          On the mobile element doesn't exist, or KS could not perform a long-press action on the element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void longPress(TestObject to, int timeout, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "longPress", to, timeout, flowControl)
+    }
+
+    /**
+     * Performs a long-press action on a mobile element.
+     * 
+     * @param to
+     *          Represent a mobile element.
+     * 
+     * @param timeout
+     *          System will wait at most timeout (seconds) to return result.
+     * 
+     * @throws StepFailedException
+     *          On the mobile element doesn't exist, or KS could not perform a long-press action on the element.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void longPress(TestObject to, int timeout) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "longPress", to, timeout)
     }
 
     /**
@@ -1832,5 +2675,241 @@ public class MobileBuiltInKeywords extends BuiltinKeywords {
     @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
     public static void sendKeys(TestObject to, String strokeKeys) throws StepFailedException {
         KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "sendKeys", to, strokeKeys)
+    }
+
+    /**
+     * Executes a native mobile command<br><br>
+     * 
+     * <b>Sample of usage:</b><br>
+     * <ul>
+     *  <li><i>Scroll down the element or the whole screen</i><br>
+     *      {@code Mobile.executeMobileCommand("mobile:scroll", ImmutableMap.of("direction", "down"))}</li>
+     * </ul>
+     * 
+     * @param command
+     *          Mobile command name
+     * 
+     * @param args
+     *          The provided arguments that the command requires for
+     * 
+     * @param flowControl
+     *          Optional parameter: Used to control the step if the step failed.
+     *          <ul>
+     *              <li>STOP_ON_FAILURE: throws a StepFailedException if the step failed (default).</li>
+     *              <li>CONTINUE_ON_FAILURE: continue the test if the test failed but the test result is still failed.</li>
+     *              <li>OPTIONAL: continue the test and ignore the test result.</li>
+     *          </ul>
+     * 
+     * @return The command result
+     * 
+     * @throws StepFailedException
+     *          On failed to execute the mobile command (invalid command, invalid arguments...)
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void executeMobileCommand(String command, Map args, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "executeMobileCommand", command, args, flowControl)
+    }
+
+    /**
+     * Executes a native mobile command<br><br>
+     * 
+     * <b>Sample of usage:</b><br>
+     * <ul>
+     *  <li><i>Scroll down the element or the whole screen</i><br>
+     *      {@code Mobile.executeMobileCommand("mobile:scroll", ImmutableMap.of("direction", "down"))}</li>
+     * </ul>
+     * 
+     * @param command
+     *          Mobile command name
+     * 
+     * @param args
+     *          The provided arguments that the command requires for
+     * 
+     * @return The command result
+     * 
+     * @throws StepFailedException
+     *          On failed to execute the mobile command (invalid command, invalid arguments...)
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static Object executeMobileCommand(String command, Map args) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "executeMobileCommand", command, args)
+    }
+
+    /**
+     * Finds the mobile element that is recognized by the given image.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @param flowControl
+     * Optional parameter: Controls the execution flow if the step failed.
+     * <p>
+     * <ul>
+     * <li>STOP_ON_FAILURE: throws {@link StepFailedException} if the step failed (default).</li>
+     * <li>CONTINUE_ON_FAILURE: continues the test if the test failed but the test result is still failed.</li>
+     * <li>OPTIONAL: continues the test and ignore the test result.</li>
+     * </ul>
+     * @return
+     * The first found WebElement that is recognized by the given image.
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static WebElement findImageElement(String imageFilePath, FailureHandling flowControl) throws StepFailedException {
+        return (WebElement) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "findImageElement", imageFilePath, flowControl)
+    }
+
+    /**
+     * Finds the mobile element that is recognized by the given image.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @return
+     * The first found WebElement that is recognized by the given image.
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static WebElement findImageElement(String imageFilePath) throws StepFailedException {
+        return (WebElement) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "findImageElement", imageFilePath)
+    }
+    
+    /**
+     * Finds all mobile elements that are recognized by the given image.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @param flowControl
+     * Optional parameter: Controls the execution flow if the step failed.
+     * <p>
+     * <ul>
+     * <li>STOP_ON_FAILURE: throws {@link StepFailedException} if the step failed (default).</li>
+     * <li>CONTINUE_ON_FAILURE: continues the test if the test failed but the test result is still failed.</li>
+     * <li>OPTIONAL: continues the test and ignore the test result.</li>
+     * </ul>
+     * @return
+     * A list of WebElement that is recognized by the given image.
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static List findImageElements(String imageFilePath, FailureHandling flowControl) throws StepFailedException {
+        return (List) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "findImageElements", imageFilePath, flowControl)
+    }
+
+    /**
+     * Finds all mobile elements that are recognized by the given image.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @return
+     * A list of WebElement that is recognized by the given image.
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static List findImageElements(String imageFilePath) throws StepFailedException {
+        return (List) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "findImageElements", imageFilePath)
+    }
+
+    /**
+     * Finds the webElement that is recognized by the given image then taps on the found element's location.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @param flowControl
+     * Optional parameter: Controls the execution flow if the step failed.
+     * <p>
+     * <ul>
+     * <li>STOP_ON_FAILURE: throws {@link StepFailedException} if the step failed (default).</li>
+     * <li>CONTINUE_ON_FAILURE: continues the test if the test failed but the test result is still failed.</li>
+     * <li>OPTIONAL: continues the test and ignore the test result.</li>
+     * </ul>
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void tapOnImage(String imageFilePath, FailureHandling flowControl) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "tapOnImage", imageFilePath, flowControl)
+    }
+
+    /**
+     * Finds the mobile element that is recognized by the given image and taps on the found element's location.
+     *  
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     * 
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static void tapOnImage(String imageFilePath) throws StepFailedException {
+        KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "tapOnImage", imageFilePath)
+    }
+    
+    /**
+     * Verifies the given image that presents on the device screen or not.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @param flowControl
+     * Optional parameter: Controls the execution flow if the step failed.
+     * <p>
+     * <ul>
+     * <li>STOP_ON_FAILURE: throws {@link StepFailedException} if the step failed (default).</li>
+     * <li>CONTINUE_ON_FAILURE: continues the test if the test failed but the test result is still failed.</li>
+     * <li>OPTIONAL: continues the test and ignore the test result.</li>
+     * </ul>
+     * @return
+     * true if the image presents. Otherwise, false in-case flowControl is OPTIONAL
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static boolean verifyImagePresent(String imageFilePath, FailureHandling flowControl) throws StepFailedException {
+        return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "verifyImagePresent", imageFilePath, flowControl)
+    }
+   
+    /**
+     * Verifies the given image that presents on the device screen or not.
+     *
+     * @param imageFilePath
+     * Absolute path of the image.
+     * @return
+     * true if the image presents. Otherwise, false in-case the default FailureHandling is OPTIONAL
+     * @throws StepFailedException
+     * If the image file doesn't exist on system file or Katalon Studio could not find the image on the current screen.
+     *
+     * @since 7.2.0
+     */
+    @CompileStatic
+    @Keyword(keywordObject = StringConstants.KW_CATEGORIZE_ELEMENT)
+    public static boolean verifyImagePresent(String imageFilePath) throws StepFailedException {
+        return (boolean) KeywordExecutor.executeKeywordForPlatform(KeywordExecutor.PLATFORM_MOBILE, "verifyImagePresent", imageFilePath)
     }
 }

@@ -4,7 +4,7 @@ public abstract class AbstractVideoRecorder implements IVideoRecorder {
 
     protected VideoConfiguration videoConfig;
 
-    protected long startTime;
+    protected long startTime = 0L;
 
     protected boolean started;
 
@@ -25,5 +25,18 @@ public abstract class AbstractVideoRecorder implements IVideoRecorder {
     @Override
     public String getCurrentVideoLocation() {
         return currentVideoLocation;
+    }
+    
+    @Override
+    public long getStartTime() {
+        return startTime;
+    }
+    
+    @Override
+    public void pause() throws VideoRecorderException {
+    }
+    
+    @Override
+    public void resume() throws VideoRecorderException {
     }
 }

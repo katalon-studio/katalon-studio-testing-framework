@@ -285,7 +285,6 @@ public class TestDataFactory {
         validateTestDataElement(testDataElement, NODE_SQL_QUERY);
         validateTestDataElement(testDataElement, NODE_GLOBAL_DB_SETTING);
         validateTestDataElement(testDataElement, NODE_SECURE_USER_ACCOUNT);
-        validateTestDataElement(testDataElement, NODE_DRIVER_CLASS_NAME);
         validateTestDataElement(testDataElement, URL_NODE);
 
         String query = testDataElement.element(NODE_SQL_QUERY).getText();
@@ -318,15 +317,13 @@ public class TestDataFactory {
             validateTestDataElement(testDataElement, NODE_USER);
             validateTestDataElement(testDataElement, NODE_PASSWORD);
             user = testDataElement.element(NODE_USER).getText();
-            driverClassName = testDataElement.element(NODE_DRIVER_CLASS_NAME).getText();
+            if (testDataElement.element(NODE_DRIVER_CLASS_NAME) != null) {
+            	driverClassName = testDataElement.element(NODE_DRIVER_CLASS_NAME).getText();
+            }
             // decrypt password before use
             password = Base64.decode(testDataElement.element(NODE_PASSWORD).getText());
         }
-
-        if(driverClassName != null){
-        	return readDBData(new DatabaseConnection(sourceUrl, user, password, driverClassName), query);
-        }
-        return readDBData(new DatabaseConnection(sourceUrl, user, password), query);
+        return readDBData(new DatabaseConnection(sourceUrl, user, password, driverClassName), query);
     }   
 
     private static TestData readDBData(DatabaseConnection dbConnection, String query) throws SQLException {

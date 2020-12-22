@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.kms.katalon.core.testobject.HttpBodyContent;
@@ -26,12 +27,13 @@ public class HttpFileBodyContent implements HttpBodyContent {
         if (filePath == null) {
             throw new IllegalArgumentException("filePath cannot be null");
         }
-        file = new File(filePath);
+        String filePathBySystem = FilenameUtils.separatorsToSystem(filePath);
+        file = new File(filePathBySystem);
         if (!file.exists()) {
-            throw new FileNotFoundException(MessageFormat.format("File {0} not found", filePath));
+            throw new FileNotFoundException(MessageFormat.format("File {0} not found", filePathBySystem));
         }
         if (!file.isFile()) {
-            throw new FileNotFoundException(MessageFormat.format("File {0} is not a file", filePath));
+            throw new FileNotFoundException(MessageFormat.format("File {0} is not a file", filePathBySystem));
         }
     }
 

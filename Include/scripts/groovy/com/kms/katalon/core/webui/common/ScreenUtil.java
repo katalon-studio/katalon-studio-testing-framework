@@ -1,6 +1,9 @@
 package com.kms.katalon.core.webui.common;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Comparator;
+import java.util.List;
 
 import org.sikuli.api.DesktopScreenRegion;
 import org.sikuli.api.ImageTarget;
@@ -20,13 +23,14 @@ import com.kms.katalon.core.webui.util.FileUtil;
 public class ScreenUtil {
 
     private ScreenRegion mainScreen;
+
     private double similarity = 0.75; // Default value
 
     public ScreenUtil() {
         mainScreen = new DesktopScreenRegion();
     }
 
-    public ScreenUtil(int similarity) {
+    public ScreenUtil(double similarity) {
         this();
         this.similarity = similarity;
     }
@@ -116,6 +120,50 @@ public class ScreenUtil {
             target.setMinScore(this.similarity);
             ScreenRegion reg = this.mainScreen.find(target);
             return reg;
+        } else {
+            throw new Exception(StringConstants.COMM_EXC_IMG_FILE_DOES_NOT_EXIST);
+        }
+    }
+    
+    /**
+     * Call {@link DesktopScreenRegion#capture()} to
+     * capture the screenshot of the current screen
+     * 
+     * @return
+     */
+    public BufferedImage getScreenRegionImage() {
+        return mainScreen.capture();
+    }
+
+    /**
+     * Get all {@link ScreenRegion} on the screen matching the image specified
+     * in imagePath. The returned array is sorted by matched score in descending
+     * order
+     * 
+     * @param imagePath
+     * Path to target image
+     * @return A list of matched {@link ScreenRegion}
+     * @throws Exception
+     */
+    public List<ScreenRegion> findImages(String imagePath) throws Exception {
+        File imgFile = new File(imagePath);
+        if (imgFile.exists()) {
+            Target target = new ImageTarget(imgFile);
+            target.setMinScore(this.similarity);
+            List<ScreenRegion> regions = this.mainScreen.findAll(target);
+            regions.sort(new Comparator<ScreenRegion>() {
+                @Override
+                public int compare(ScreenRegion o1, ScreenRegion o2) {
+                    double reg1Score = o1.getScore();
+                    double reg2Score = o2.getScore();
+                    if (reg1Score > reg2Score)
+                        return -1;
+                    if (reg1Score < reg2Score)
+                        return 1;
+                    return 0;
+                }
+            });
+            return regions;
         } else {
             throw new Exception(StringConstants.COMM_EXC_IMG_FILE_DOES_NOT_EXIST);
         }

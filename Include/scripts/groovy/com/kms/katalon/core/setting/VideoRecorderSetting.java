@@ -7,9 +7,13 @@ import com.kms.katalon.core.helper.screenrecorder.VideoQuality;
 public class VideoRecorderSetting {
     private boolean enable;
 
+    private boolean useBrowserRecorder;
+
     private VideoFileFormat videoFormat;
 
     private VideoQuality videoQuality;
+
+    private boolean recordAllTestCases;
 
     private boolean allowedRecordIfFailed;
 
@@ -19,6 +23,8 @@ public class VideoRecorderSetting {
         enable = false;
         videoFormat = VideoFileFormat.AVI;
         videoQuality = VideoQuality.LOW;
+        useBrowserRecorder = false;
+        recordAllTestCases = false;
         allowedRecordIfPassed = false;
         allowedRecordIfFailed = true;
     }
@@ -29,6 +35,22 @@ public class VideoRecorderSetting {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    public boolean isUseBrowserRecorder() {
+        return useBrowserRecorder;
+    }
+
+    public void setUseBrowserRecorder(boolean useBrowserRecorder) {
+        this.useBrowserRecorder = useBrowserRecorder;
+    }
+
+    public boolean isRecordAllTestCases() {
+        return recordAllTestCases;
+    }
+
+    public void setRecordAllTestCases(boolean recordAllTestCases) {
+        this.recordAllTestCases = recordAllTestCases;
     }
 
     public VideoQuality getVideoQuality() {

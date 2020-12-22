@@ -43,6 +43,8 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
 
     private ScheduledThreadPoolExecutor screenTimer;
 
+    private long tempStartTime;
+
     private Runnable screenTimerCommand;
 
     private ScheduledThreadPoolExecutor mouseTimer;
@@ -201,6 +203,7 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
     @Override
     public void start() throws VideoRecorderException {
         startTime = System.currentTimeMillis();
+        tempStartTime = System.currentTimeMillis();
         interrupted = true;
         screenTimer = createTimerExecutor(videoConfig.getScreenRate(), screenTimerCommand);
         mouseTimer = createTimerExecutor(videoConfig.getMouseRate(), mouseTimerCommand);
@@ -285,7 +288,7 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
             while (!mouseCaptures.isEmpty() && (mouseCaptures.get(0).time < now)) {
                 MouseCapture mc = mouseCaptures.remove(0);
                 long mcTime = mc.time;
-                if (mcTime <= startTime) {
+                if (mcTime <= tempStartTime) {
                     continue;
                 }
 
@@ -295,7 +298,7 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
 
                 synchronized (this.sync) {
                     if (movieWriter.isVFRSupported() && mcLocation.equals(prevMouseLoc)
-                            && (mcTime - startTime <= videoConfig.getMaxFrameDuration())) {
+                            && (mcTime - tempStartTime <= videoConfig.getMaxFrameDuration())) {
                         return;
                     }
 
@@ -310,12 +313,12 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
                     }
 
                     try {
-                        movieWriter.writeFrame(0, videoImg, mcTime - startTime);
+                        movieWriter.writeFrame(0, videoImg, mcTime - tempStartTime);
                     } catch (IOException e) {
                         throw new VideoRecorderException(e);
                     }
 
-                    startTime = mcTime;
+                    tempStartTime = mcTime;
 
                     int endDestRectX = startDestRectX + cursorImage.getWidth() - 1;
                     int endDestRectY = startDestRectY + cursorImage.getHeight() - 1;
@@ -342,13 +345,13 @@ public class ATUVideoRecorder extends AbstractVideoRecorder {
 
         synchronized (this.sync) {
             try {
-                movieWriter.writeFrame(0, videoImg, now - startTime);
+                movieWriter.writeFrame(0, videoImg, now - tempStartTime);
             } catch (IOException e) {
                 throw new VideoRecorderException(e);
             }
         }
 
-        startTime = now;
+        tempStartTime = now;
     }
 
     private void grabMouse() {

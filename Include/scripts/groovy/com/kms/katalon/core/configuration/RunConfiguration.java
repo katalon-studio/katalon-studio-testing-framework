@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,19 +15,21 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.kms.katalon.constants.GlobalStringConstants;
 import com.kms.katalon.core.constants.StringConstants;
-import com.kms.katalon.core.logging.KeywordLogger;
 import com.kms.katalon.core.model.FailureHandling;
 import com.kms.katalon.core.model.RunningMode;
 import com.kms.katalon.core.network.ProxyInformation;
-import com.kms.katalon.core.setting.BundleSettingStore;
 import com.kms.katalon.core.setting.VideoRecorderSetting;
+import com.kms.katalon.core.testobject.SelectorMethod;
 import com.kms.katalon.core.util.internal.JsonUtil;
+import com.kms.katalon.util.CryptoUtil;
 
 /**
  * Provides access to execution properties and settings
@@ -34,8 +37,22 @@ import com.kms.katalon.core.util.internal.JsonUtil;
  */
 @SuppressWarnings("unchecked")
 public class RunConfiguration {
+    
+    public static final String CURRENT_TESTCASE = "current_testcase";
 	
 	public static final String SMART_XPATH_BUNDLE_ID = "com.katalon.katalon-studio-smart-xpath";
+	
+	public static final String ALLOW_USING_SELF_HEALING = "allowUsingSelfHealing";
+	
+	public static final String ALLOW_USING_TIME_CAPSULE = "allowUsingTimeCapsule";
+
+    public static final String EXCLUDE_KEYWORDS = "excludeKeywords";
+
+    public static final String SELF_HEALING_ENABLE = "selfHealingEnabled";
+
+    public static final String TIME_CAPSULE_ENABLE = "timeCapsuleEnabled";
+
+    public static final String METHODS_PRIORITY_ORDER = "methodsPriorityOrder";
 
 	public static final String OVERRIDING_GLOBAL_VARIABLES = "overridingGlobalVariables";
 
@@ -113,6 +130,24 @@ public class RunConfiguration {
     public static final String GLOBAL_SMART_WAIT_MODE = "globalSmartWaitEnabled";
     
     public static final String LOG_TEST_STEPS = "logTestSteps";
+
+    public static final String XPATHS_PRIORITY = "xpathsPriority";
+
+    public static final String ALLOW_CUSTOMIZE_REQUEST_TIMEOUT = "allowCustomizeRequestTimeout";
+
+    public static final String REQUEST_CONNECTION_TIMEOUT = "requestConnectionTimeout";
+
+    public static final String REQUEST_SOCKET_TIMEOUT = "requestSocketTimeout";
+
+    public static final String ALLOW_CUSTOMIZE_REQUEST_RESPONSE_SIZE_LIMIT = "allowCustomizeRequestResponseSizeLimit";
+
+    public static final String REQUEST_MAX_RESPONSE_SIZE = "maxResponseSize";
+    
+    public static final String VM_ARGUMENTS = "vmArguments";
+    
+    public static final String TC_RETRY_FAILED_EXECUTIONS_ONLY = "retryFailedExecutionsOnlyTcBinding";
+    
+    public static final String TC_RETRY_IMMEDIATELY_BINDINGS = "retryImmediatelyTcBinding";
     
     private static String settingFilePath;
 
@@ -484,7 +519,16 @@ public class RunConfiguration {
             return null;
         }
         Gson gson = new Gson();
-        return gson.fromJson((String) generalProperties.get(PROXY_PROPERTY), ProxyInformation.class);
+        ProxyInformation proxyInfo = gson.fromJson((String) generalProperties.get(PROXY_PROPERTY),
+                ProxyInformation.class);
+        String password = proxyInfo.getPassword();
+        if (!StringUtils.isEmpty(password)) {
+            try {
+                CryptoUtil.CrytoInfo cryptoInfo = CryptoUtil.getDefault(password);
+                proxyInfo.setPassword(CryptoUtil.decode(cryptoInfo));
+            } catch (GeneralSecurityException | IOException ignored) {}
+        }
+        return proxyInfo;
     }
 
     public static boolean shouldTerminateDriverAfterTestCase() {
@@ -540,19 +584,47 @@ public class RunConfiguration {
     public static String getCapturedObjectsCacheFile() {
         return getStringProperty(RECORD_CAPTURED_OBJECTS_FILE);
     }
-    
-	public static Boolean shouldApplySmartXPath() {
-		if (getProperty(SMART_XPATH_BUNDLE_ID) != null) {
-			try {
-				return (Boolean) new BundleSettingStore(getProjectDir(), SMART_XPATH_BUNDLE_ID, true)
-						.getBoolean("SmartXPathEnabled", true);
-			} catch (IOException e) {
-				KeywordLogger.getInstance(RunConfiguration.class).logError(e.getMessage(), null, e);
-			}
-		}
-		return false;
+
+	public static Boolean shouldApplySelfHealing() {
+	    try {
+	        boolean isSelfHealingEnabled = (boolean) getExecutionGeneralProperties().get(SELF_HEALING_ENABLE);
+	        boolean allowUsingSmartXPath = (boolean) getProperty(ALLOW_USING_SELF_HEALING);
+	        return isSelfHealingEnabled && allowUsingSmartXPath;
+	    } catch (Exception exception) {
+	        return false;
+	    }
 	}
-    
+	
+    public static Boolean shouldApplyTimeCapsule() {
+        try {
+            boolean isTimeCapsuleEnabled = (boolean) getExecutionGeneralProperties().get(TIME_CAPSULE_ENABLE);
+            boolean allowUsingTimeCapsule = (boolean) getProperty(ALLOW_USING_TIME_CAPSULE);
+            return isTimeCapsuleEnabled && allowUsingTimeCapsule;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    public static List<Pair<SelectorMethod, Boolean>> getMethodsPriorityOrder() {
+        Map<String, Object> generalProperties = getExecutionGeneralProperties();
+        List<LinkedTreeMap<String, Object>> rawMethodsPriorityOrder = (List<LinkedTreeMap<String, Object>>) generalProperties
+                .get(METHODS_PRIORITY_ORDER);
+
+        List<Pair<SelectorMethod, Boolean>> methodsPriorityOrder = new ArrayList<Pair<SelectorMethod, Boolean>>();
+        rawMethodsPriorityOrder.stream().forEachOrdered(rawMethod -> {
+            String key = (String) rawMethod.get("left");
+            Pair<SelectorMethod, Boolean> method = Pair.of(SelectorMethod.valueOf(key), (Boolean) rawMethod.get("right"));
+            methodsPriorityOrder.add(method);
+        });
+        return methodsPriorityOrder;
+    }
+
+    public static List<String> getExcludedKeywordsFromSelfHealing() {
+        Map<String, Object> generalProperties = getExecutionGeneralProperties();
+        List<String> excludeKeywords = (List<String>) generalProperties.get(EXCLUDE_KEYWORDS);
+        return excludeKeywords;
+    }
+
     public static RunningMode getRunningMode() {
         return RunningMode.valueOf(getStringProperty(RUNNING_MODE));
     }
@@ -579,5 +651,26 @@ public class RunConfiguration {
     		return String.valueOf(object);
     	}
     	return null;
+    }
+
+    public static List<Pair<String, Boolean>> getXPathsPriority() {
+        List<LinkedTreeMap<String, Object>> rawXPathsPriority = (List<LinkedTreeMap<String, Object>>) getExecutionGeneralProperties()
+                .getOrDefault(XPATHS_PRIORITY, Collections.emptyList());
+        List<Pair<String, Boolean>> xpathPriority = new ArrayList<Pair<String, Boolean>>();
+
+        rawXPathsPriority.stream().forEachOrdered(rawXPath -> {
+            Pair<String, Boolean> xpath = Pair.of((String) rawXPath.get("left"), (Boolean) rawXPath.get("right"));
+            xpathPriority.add(xpath);
+        });
+
+        return xpathPriority;
+    }
+    
+    public static boolean canCustomizeRequestTimeout() {
+        return Boolean.TRUE.equals(getProperty(ALLOW_CUSTOMIZE_REQUEST_TIMEOUT));
+    }
+    
+    public static boolean canCustomizeRequestResponseSizeLimit() {
+        return Boolean.TRUE.equals(getProperty(ALLOW_CUSTOMIZE_REQUEST_RESPONSE_SIZE_LIMIT));
     }
 }

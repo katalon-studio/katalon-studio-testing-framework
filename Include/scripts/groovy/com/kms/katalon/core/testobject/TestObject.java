@@ -33,7 +33,7 @@ public class TestObject implements SelectorCollector, ITestObject {
     public TestObject(String objectId) {
         this.properties = new ArrayList<TestObjectProperty>();
         this.xpaths = new ArrayList<TestObjectXpath>();
-        this.selectorCollection = new HashMap<>();
+        this.selectorCollection = new HashMap<SelectorMethod, String>();
         this.objectId = objectId;
     }
 

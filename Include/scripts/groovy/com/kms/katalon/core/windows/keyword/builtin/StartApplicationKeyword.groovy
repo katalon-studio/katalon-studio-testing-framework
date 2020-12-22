@@ -29,7 +29,7 @@ public class StartApplicationKeyword extends AbstractKeyword {
 
     public void startApplication(String appFile, FailureHandling flowControl) throws StepFailedException {
         KeywordMain.runKeyword({
-            WindowsDriverFactory.startApplication(appFile)
+            WindowsDriverFactory.startApplication(appFile, "")
             logger.logPassed("The application at location: ${appFile} started.")
         }, flowControl)
     }

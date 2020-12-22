@@ -307,9 +307,18 @@ public class CoreMessageConstants extends NLS {
     
     //TestCaseExecutor
 	
-	public static String SMART_XPATH_VISIT_BELOW_LINK;
+	public static String SELF_HEALING_REPORT_VISIT_INSIGHT_PART;
 
-	public static String SMART_XPATH_DOCUMENT;
+	public static String SELF_HEALING_REFER_TO_DOCUMENT;
+
+    // Screenshot keyword
+    public static String UTIL_EXC_FILE_PATH_INVALID;
+
+    public static String UTIL_EXC_FILE_NOT_NULL;
+
+    public static String MSG_ERR_NO_DRIVER_FOUND;
+
+    public static String MSG_ERR_FFMPEG_NOT_INSTALLED;
 
     static {
         // initialize resource bundle

@@ -7,12 +7,14 @@ import com.kms.katalon.core.keyword.internal.AbstractKeyword
 import com.kms.katalon.core.keyword.internal.KeywordMain
 import com.kms.katalon.core.keyword.internal.SupportLevel
 import com.kms.katalon.core.logging.KeywordLogger
+import com.kms.katalon.core.windows.constants.StringConstants
 import com.kms.katalon.core.model.FailureHandling
 import com.kms.katalon.core.testobject.WindowsTestObject
 import com.kms.katalon.core.windows.driver.WindowsDriverFactory
 import com.kms.katalon.core.windows.keyword.helper.WindowsActionHelper
 
 import io.appium.java_client.windows.WindowsDriver
+import org.openqa.selenium.WebElement
 
 @Action(value = "setText")
 public class SetTextKeyword extends AbstractKeyword {
@@ -31,15 +33,24 @@ public class SetTextKeyword extends AbstractKeyword {
             setText(testObject, text, flowControl)
         }
 
-        public String setText(WindowsTestObject testObject, String text, FailureHandling flowControl) throws StepFailedException {
-            return (String) KeywordMain.runKeyword({
-                WindowsDriver windowsDriver = WindowsDriverFactory.getWindowsDriver()
-                if (windowsDriver == null) {
-                    KeywordMain.stepFailed("WindowsDriver has not started. Please try Windows.startApplication first.", flowControl)
-                }
+    public String setText(WindowsTestObject testObject, String text, FailureHandling flowControl) throws StepFailedException {
+        return (String) KeywordMain.runKeyword({
+            WindowsDriver windowsDriver = WindowsDriverFactory.getWindowsDriver()
+            if (windowsDriver == null) {
+                KeywordMain.stepFailed("WindowsDriver has not started. Please try Windows.startApplication first.", flowControl)
+            }
 
-                WindowsActionHelper.create(WindowsDriverFactory.getWindowsSession()).setText(testObject, text)
+            logger.logDebug(String.format(StringConstants.KW_LOG_INFO_CHECKING_TEST_OBJECT));
+            WindowsActionHelper windowsActionHelper = WindowsActionHelper.create(WindowsDriverFactory.getWindowsSession())
+
+            WebElement foundElement = WindowsActionHelper.create(WindowsDriverFactory.getWindowsSession()).findElement(testObject)
+            if (!foundElement != null) {
+                logger.logDebug(String.format("Clearing text of object '%s'", testObject.getObjectId()))
+                windowsActionHelper.clearText(testObject);
+
+                windowsActionHelper.setText(testObject, text)
                 logger.logPassed('Text ' + text + ' is set')
-            }, flowControl)
-        }
+            }
+        }, flowControl,(testObject != null) ? String.format("Unable to set text for object '%s''", testObject.getObjectId()) : "Unable to set text to object")
+    }
 }

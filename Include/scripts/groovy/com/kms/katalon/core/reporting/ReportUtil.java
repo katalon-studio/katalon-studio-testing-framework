@@ -45,6 +45,8 @@ import com.kms.katalon.core.util.internal.DateUtil;
 
 public class ReportUtil {
 
+    public static final String JUNIT_REPORT_FILE_NAME = "JUnit_Report.xml";
+    
     private static StringBuilder generateVars(List<String> strings, TestSuiteLogRecord suiteLogEntity,
             StringBuilder model) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -158,7 +160,8 @@ public class ReportUtil {
         String totalTests = suiteLogEntity.getTotalTestCases() + "";
         String totalError = suiteLogEntity.getTotalErrorTestCases() + "";
         String totalFailure = suiteLogEntity.getTotalFailedTestCases() + "";
-        String duration = ((float)(suiteLogEntity.getEndTime() - suiteLogEntity.getStartTime()) / 1000) + "";
+        String totalSkipped = suiteLogEntity.getTotalSkippedTestCases() + "";
+        String duration = ((float) (suiteLogEntity.getEndTime() - suiteLogEntity.getStartTime()) / 1000) + "";
 
         JUnitProperties properties = factory.createProperties();
         List<JUnitProperty> propertyList = properties.getProperty();
@@ -185,6 +188,8 @@ public class ReportUtil {
         ts.setErrors(totalError);
         // failures: The total number of tests in the suite that failed
         ts.setFailures(totalFailure);
+        // skipped: The total number of tests in the suite that is skipped by users
+        ts.setSkipped(totalSkipped);
 
         Arrays.asList(suiteLogEntity.getChildRecords()).stream().forEach(item -> {
             JUnitTestCase tc = factory.createTestCase();
@@ -231,10 +236,11 @@ public class ReportUtil {
             tsList.add(ts);
         }
 
-        String testSuiteCollectionName = suiteCollectionLogRecord.getTestSuiteCollectionId();
+        String testSuiteCollectionName = suiteCollectionLogRecord.getName();
         String testSuiteCollectionTotalTests = suiteCollectionLogRecord.getTotalTestCases();
         String testSuiteCollectiontotalError = suiteCollectionLogRecord.getTotalErrorTestCases();
         String testSuiteCollectionTotalFailure = suiteCollectionLogRecord.getTotalFailedTestCases();
+        String testSuiteCollectionTotalSkips = suiteCollectionLogRecord.getTotalSkippedTestCases();
         String testSuiteCollectionDuration = ((float) (suiteCollectionLogRecord.getEndTime()
                 - suiteCollectionLogRecord.getStartTime()) / 1000) + "";
 
@@ -243,6 +249,8 @@ public class ReportUtil {
         tss.setErrors(testSuiteCollectiontotalError);
         // failures: total number of failed tests from all test suite
         tss.setFailures(testSuiteCollectionTotalFailure);
+        // failures: total number of failed tests from all test suite
+        tss.setSkips(testSuiteCollectionTotalSkips);
         // tests: total number of tests from all test suite
         tss.setTests(testSuiteCollectionTotalTests);
         // time: in seconds to execute all test suites
@@ -257,7 +265,7 @@ public class ReportUtil {
                         JUnitProperty.class, JUnitTestCase.class, JUnitTestSuites.class, JUnitTestSuite.class });
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(tss, new File(logFolder, "JUnit_Report.xml"));
+        marshaller.marshal(tss, new File(logFolder, JUNIT_REPORT_FILE_NAME));
     }
 
     public static void writeJUnitReport(TestSuiteLogRecord suiteLogEntity, File logFolder)
@@ -272,6 +280,8 @@ public class ReportUtil {
         tss.setErrors(ts.getErrors());
         // failures: total number of failed tests from all test suite
         tss.setFailures(ts.getFailures());
+        // skips: total number of skipped tests from all test suite
+        tss.setSkips(ts.getSkipped());
         // tests: total number of tests from all test suite
         tss.setTests(ts.getTests());
         // time: in seconds to execute all test suites
@@ -362,6 +372,25 @@ public class ReportUtil {
         FileUtils.writeStringToFile(new File(logFolder, "execution.uuid"),
         		UUID, StringConstants.DF_CHARSET);
     }
+    
+    private static String getTestSuiteCollectionId(File logFolder) throws IOException {
+        File idFile = getOrCreateTestSuiteCollectionIdFile(logFolder);
+        return FileUtils.readFileToString(idFile, StringConstants.DF_CHARSET);
+    }
+    
+    public static void writeTestSuiteCollectionIdToFile(String testSuiteCollectionId, File logFolder)
+            throws IOException {
+        File idFile = getOrCreateTestSuiteCollectionIdFile(logFolder);
+        FileUtils.writeStringToFile(idFile, testSuiteCollectionId, StringConstants.DF_CHARSET);
+    }
+
+    private static File getOrCreateTestSuiteCollectionIdFile(File logFolder) throws IOException {
+        File idFile = new File(logFolder, "tsc_id.txt");
+        if (!idFile.exists()) {
+            idFile.createNewFile();
+        }
+        return idFile;
+    }
 
     public static void writeCSVReport(TestSuiteLogRecord suiteLogEntity, File logFolder) throws IOException {
         CsvWriter.writeCsvReport(suiteLogEntity, new File(logFolder, logFolder.getName() + ".csv"),
@@ -421,7 +450,12 @@ public class ReportUtil {
 
     public static TestSuiteLogRecord generate(String logFolder, IProgressMonitor progressMonitor)
             throws XMLParserException, IOException, XMLStreamException {
-        return new TestSuiteXMLLogParser().readTestSuiteLogFromXMLFiles(logFolder, progressMonitor);
+        TestSuiteLogRecord suiteLogRecord = new TestSuiteXMLLogParser().readTestSuiteLogFromXMLFiles(logFolder, progressMonitor);
+        String testSuiteCollectionId = getTestSuiteCollectionId(new File(logFolder));
+        if (StringUtils.isNotBlank(testSuiteCollectionId)) {
+            suiteLogRecord.setTestSuiteCollectionId(testSuiteCollectionId);
+        }
+        return suiteLogRecord;
     }
 
     public static TestSuiteLogRecord generate(String logFolder)

@@ -1,25 +1,33 @@
 package com.kms.katalon.core.mobile.helper;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.touch.WaitOptions;
-import io.appium.java_client.touch.offset.PointOption;
-
+import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import com.kms.katalon.core.exception.StepFailedException;
 import com.kms.katalon.core.logging.KeywordLogger;
+import com.kms.katalon.core.mobile.common.MobileXPathBuilder;
 import com.kms.katalon.core.mobile.constants.StringConstants;
+import com.kms.katalon.core.mobile.driver.AppiumDriverSession;
+import com.kms.katalon.core.mobile.driver.AppiumSessionCollector;
+import com.kms.katalon.core.mobile.exception.MobileException;
 import com.kms.katalon.core.mobile.keyword.internal.AndroidProperties;
 import com.kms.katalon.core.mobile.keyword.internal.GUIObject;
 import com.kms.katalon.core.mobile.keyword.internal.MobileDriverFactory;
+import com.kms.katalon.core.testobject.TestObject;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.TouchAction;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.touch.WaitOptions;
+import io.appium.java_client.touch.offset.PointOption;
 
 public class MobileCommonHelper {
     
@@ -28,6 +36,12 @@ public class MobileCommonHelper {
     private static final String ATTRIBUTE_NAME_FOR_ANDROID_RESOURCE_ID = "resourceId";
 
     private static final String ATTRIBUTE_NAME_FOR_ANDROID_CONTENT_DESC = "name";
+    
+    public static final String PROPERTY_NAME_DEVICE_PIXEL_RATIO = "devicePixelRatio";
+    
+    public static final String PROPERTY_NAME_OS_STATUS_BAR_HEIGHT = "osStatusBarHeight";
+    
+    public static final String PROPERTY_NAME_IOS_BUNDLEID = "iosBundleId";
 
     @SuppressWarnings("rawtypes")
     public static void swipe(AppiumDriver driver, int startX, int startY, int endX, int endY) {
@@ -99,6 +113,14 @@ public class MobileCommonHelper {
         airPlaneButtonCoords.put("iPad mini 2", "265;905");
         airPlaneButtonCoords.put("iPad mini 3", "265;905");
     }
+    
+    public static String getAttributeLocatorValue(TestObject testObject) {
+        if (testObject == null || testObject.getProperties().isEmpty()) {
+            return null;
+        }
+        MobileXPathBuilder xpathBuilder = new MobileXPathBuilder(testObject.getActiveProperties());                
+        return xpathBuilder.build(); 
+    }
 
     public static String getAttributeValue(WebElement element, String attributeName) {
         switch (attributeName.toString()) {
@@ -140,4 +162,59 @@ public class MobileCommonHelper {
                     MessageFormat.format(StringConstants.KW_MSG_FAILED_PARAM_X_CANNOT_BE_NULL, "y"));
         }
     }
+    
+    private static DevicePixelRatio caculateDevicePixelRatio(AppiumDriver<? extends WebElement> driver)
+            throws MobileException {
+        BufferedImage fullShot = MobileScreenCaptor.takeScreenshot(driver);
+        int actualWidth = fullShot.getWidth();
+        Dimension deviceSize = driver.manage().window().getSize();
+        int deviceWidth = deviceSize.getWidth();
+        double ratioX = (actualWidth * 1.0) / deviceWidth;
+        return new DevicePixelRatio(ratioX, ratioX);
+    }
+    
+    private static int getStatusBarHeight(AppiumDriver<? extends WebElement> driver, DevicePixelRatio pixelRatio) {
+        if (driver instanceof AndroidDriver) {
+            return AndroidHelper.getStatusBarHeightAndroid((AndroidDriver<? extends WebElement>)driver);
+        }
+        if (driver instanceof IOSDriver) {
+            return IOSHelper.getStatusBarHeight(driver, pixelRatio);
+        }
+        return 0;
+    }
+    
+    public static void setCommonAppiumSessionProperties(AppiumDriver<? extends WebElement> driver) {
+        AppiumDriverSession session = AppiumSessionCollector.getSession(driver);
+        DevicePixelRatio devicePixelRatio;
+        
+        try {
+            devicePixelRatio = caculateDevicePixelRatio(driver);
+        } catch (MobileException e) {
+            devicePixelRatio = null;
+        }
+        
+        if (driver instanceof IOSDriver) {
+            String bundleID = IOSHelper.getActiveAppInfo((IOSDriver<? extends WebElement>)driver);
+            session.getProperties().put(PROPERTY_NAME_IOS_BUNDLEID, bundleID);
+        }
+        int statusbarHeight = getStatusBarHeight(driver, devicePixelRatio);
+        session.getProperties().put(PROPERTY_NAME_DEVICE_PIXEL_RATIO, devicePixelRatio);
+        session.getProperties().put(PROPERTY_NAME_OS_STATUS_BAR_HEIGHT, statusbarHeight);
+    }
+    
+    public static int getStatusBarHeight(AppiumDriver<? extends WebElement> driver, boolean useDevicePixelRation) {
+        AppiumDriverSession session = AppiumSessionCollector.getSession(driver);
+        DevicePixelRatio ratio = useDevicePixelRation ? (DevicePixelRatio) session.getProperties()
+                .get(PROPERTY_NAME_DEVICE_PIXEL_RATIO) : new DevicePixelRatio(1.0, 1.0);
+        int statusBarHeight = (int)session.getProperties().get(PROPERTY_NAME_OS_STATUS_BAR_HEIGHT);
+        return (int)(statusBarHeight * ratio.ratioY);
+    }
+    
+    public static DevicePixelRatio getDevicePixelRatio(AppiumDriver<? extends WebElement> driver) {
+        AppiumDriverSession session = AppiumSessionCollector.getSession(driver);
+        DevicePixelRatio pixelRatio = (DevicePixelRatio)session.getProperties().get(PROPERTY_NAME_DEVICE_PIXEL_RATIO);
+        return pixelRatio != null ? pixelRatio : new DevicePixelRatio(1.0, 1.0);
+    }
+    
 }
+
