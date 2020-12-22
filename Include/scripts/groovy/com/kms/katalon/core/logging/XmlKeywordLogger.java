@@ -470,4 +470,8 @@ class XmlKeywordLogger {
         }
         return attributes;
     }
+
+    public void logSkipped(String message) {
+        logMessage(null, LogLevel.SKIPPED, message, new HashMap<>());
+    }
 }

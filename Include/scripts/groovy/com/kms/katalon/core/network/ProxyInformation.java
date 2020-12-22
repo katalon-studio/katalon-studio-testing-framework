@@ -14,6 +14,18 @@ public class ProxyInformation {
     private String proxyServerAddress;
     
     private int proxyServerPort;
+    
+    private String exceptionList;
+    
+    private boolean applyToDesiredCapabilities;
+    
+    public String getExceptionList() {
+        return exceptionList;
+    }
+
+    public void setExceptionList(String exceptionList) {
+        this.exceptionList = StringUtils.isNotEmpty(exceptionList) ? exceptionList : "";
+    }
 
     public String getProxyOption() {
         return proxyOption;
@@ -74,14 +86,25 @@ public class ProxyInformation {
         }
     }
 
+    public boolean isApplyToDesiredCapabilities() {
+        return applyToDesiredCapabilities;
+    }
+
+    public void setApplyToDesiredCapabilities(boolean applyToDesiredCapabilities) {
+        this.applyToDesiredCapabilities = applyToDesiredCapabilities;
+    }
+
     @Override
     public String toString() {
-        return "ProxyInformation{"
+        return "ProxyInformation { "
                 + "proxyOption=" + proxyOption + ", "
                 + "proxyServerType=" + proxyServerType + ", "
-                + "password=" + password + ", "
+                + "username=" + username + ", "
+                + "password=" + "********" + ", "
                 + "proxyServerAddress=" + proxyServerAddress + ", "
-                + "proxyServerPort=" + proxyServerPort
-                + "}";
+                + "proxyServerPort=" + proxyServerPort + ", "
+                + "executionList=\"" + exceptionList + "\", "
+                + "isApplyToDesiredCapabilities=" + applyToDesiredCapabilities
+                + " }";
     }
 }

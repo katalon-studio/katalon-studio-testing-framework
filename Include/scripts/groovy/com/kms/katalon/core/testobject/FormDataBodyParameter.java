@@ -11,12 +11,19 @@ public class FormDataBodyParameter {
 
     private String type = PARAM_TYPE_TEXT;
 
+    private String contentType;
+
     public FormDataBodyParameter(String name, String value, String type) {
+        this(name, value, type, null);
+    }
+
+    public FormDataBodyParameter(String name, String value, String type, String contentType) {
         this.name = name;
         this.value = value;
         this.type = type;
+        this.contentType = contentType;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -29,11 +36,11 @@ public class FormDataBodyParameter {
         return type;
     }
 
-//    public static FormDataBodyParameter create(String name, String value, String type) {
-//        FormDataBodyParameter formDataParameter = new FormDataBodyParameter();
-//        formDataParameter.name = name;
-//        formDataParameter.value = value;
-//        formDataParameter.type = type;
-//        return formDataParameter;
-//    }
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 }

@@ -3,10 +3,12 @@ package com.kms.katalon.core.logging.model;
 import java.util.List;
 
 public class TestSuiteCollectionLogRecord {
+    
+    private String id;
+    
+    private String name;
 
-    private String testSuiteCollectionId;
-
-    private String reportLocation;
+    private String reportFolder;
     
     private List<TestSuiteLogRecord> testSuiteRecords;
     
@@ -21,21 +23,31 @@ public class TestSuiteCollectionLogRecord {
     private String totalFailedTestCases;
     
     private String totalTestCases;
+    
+    private String totalSkippedTestCases;
 
-    public String getTestSuiteCollectionId() {
-        return testSuiteCollectionId;
+    public String getId() {
+        return id;
     }
 
-    public void setTestSuiteCollectionId(String testSuiteCollectionId) {
-        this.testSuiteCollectionId = testSuiteCollectionId;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getReportLocation() {
-        return reportLocation;
+    public String getName() {
+        return name;
     }
 
-    public void setReportLocation(String reportLocation) {
-        this.reportLocation = reportLocation;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getReportFolder() {
+        return reportFolder;
+    }
+
+    public void setReportFolder(String reportLocation) {
+        this.reportFolder = reportLocation;
     }
 
     public List<TestSuiteLogRecord> getTestSuiteRecords() {
@@ -76,6 +88,14 @@ public class TestSuiteCollectionLogRecord {
 
     public void setTotalErrorTestCases(String totalErrorTestCases) {
         this.totalErrorTestCases = totalErrorTestCases;
+    }
+    
+    public void setTotalSkippedTestCases(String totalSkippedTestCases) {
+        this.totalSkippedTestCases = totalSkippedTestCases;
+    }
+    
+    public String getTotalSkippedTestCases() {
+        return totalSkippedTestCases;
     }
 
     public String getTotalFailedTestCases() {

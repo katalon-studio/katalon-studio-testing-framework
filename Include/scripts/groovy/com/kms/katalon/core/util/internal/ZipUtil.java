@@ -13,6 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -24,7 +25,8 @@ public class ZipUtil {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                File entryDestination = new File(destFolder, entry.getName());
+                // Use FilenameUtils.separatorsToSystem to make cross platform compatible
+                File entryDestination = new File(destFolder, FilenameUtils.separatorsToSystem(entry.getName()));
                 if (entry.isDirectory()) {
                     entryDestination.mkdirs();
                 } else {

@@ -1,7 +1,14 @@
 package com.kms.katalon.core.util.internal;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.kms.katalon.core.configuration.RunConfiguration;
 import com.kms.katalon.core.util.ConsoleCommandExecutor;
@@ -61,14 +68,67 @@ public class ProcessUtil {
             }
         }
     }
-    
+
     public static void killProcessOnWindows(String processName) throws InterruptedException, IOException {
+        killProcessOnWindows(processName, null, null);
+    }
+    
+    public static void killProcessOnWindows(String processName, File logFile, File errorLogFile) throws InterruptedException, IOException {
         ProcessBuilder pb = new ProcessBuilder("taskkill", "/f", "/im", processName, "/t");
+        if (logFile != null) {
+            FileWriter writer = new FileWriter(logFile, true);
+            writer.write(String.format("\r\nTerminating process \"%s\"\r\n", processName));
+            writer.close();
+            pb.redirectOutput(Redirect.appendTo(logFile));
+        }
+        if (errorLogFile != null) {
+            pb.redirectError(Redirect.appendTo(errorLogFile));
+        }
         pb.start().waitFor();
     }
 
     public static void killProcessOnUnix(String processName) throws InterruptedException, IOException {
+        killProcessOnUnix(processName, null, null);
+    }
+
+    public static void killProcessOnUnix(String processName, File logFile, File errorLogFile) throws InterruptedException, IOException {
         ProcessBuilder pb = new ProcessBuilder("killall", processName);
+        if (logFile != null) {
+            FileWriter writer = new FileWriter(logFile, true);
+            writer.write(String.format("\r\nTerminating process \"%s\"\r\n", processName));
+            writer.close();
+            pb.redirectOutput(Redirect.appendTo(logFile));
+        }
+        if (errorLogFile != null) {
+            pb.redirectError(Redirect.appendTo(errorLogFile));
+        }
         pb.start().waitFor();
+    }
+
+    public static List<String> readSync(Process process) throws InterruptedException, IOException {
+        return read(process, true);
+    }
+
+    public static List<String> read(Process process) throws InterruptedException, IOException {
+        return read(process, false);
+    }
+
+    public static List<String> read(Process process, boolean waitForProcessEnd) throws InterruptedException, IOException {
+        List<String> output = new ArrayList<String>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.add(line);
+            }
+            if (waitForProcessEnd) {
+                process.waitFor();
+            }
+        } catch (IOException error) {
+            // Just skip
+        } finally {
+            reader.close();
+        }
+        return output;
     }
 }

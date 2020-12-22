@@ -11,6 +11,10 @@ public interface IVideoRecorder {
 
     public void stop() throws VideoRecorderException;
 
+    public void pause() throws VideoRecorderException;
+
+    public void resume() throws VideoRecorderException;
+
     /**
      * Reload the current instance which is based on previous parameters input
      * 
@@ -23,6 +27,8 @@ public interface IVideoRecorder {
     public boolean isInterrupted();
 
     public String getCurrentVideoLocation();
+
+    public long getStartTime();
     
     public void delete();
 }

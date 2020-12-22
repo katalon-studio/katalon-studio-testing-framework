@@ -45,6 +45,10 @@ public class VideoConfiguration {
         return recorder;
     }
 
+    public void setRecorder(Recorder recorder) {
+        this.recorder = recorder;
+    }
+
     public VideoFileFormat getVideoFormat() {
         return videoFormat;
     }

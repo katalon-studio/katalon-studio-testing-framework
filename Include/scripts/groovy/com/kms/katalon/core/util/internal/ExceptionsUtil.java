@@ -36,8 +36,14 @@ public class ExceptionsUtil {
     }
 
     public static String getStackTraceForThrowable(Throwable t) {
+        t.setStackTrace(getRawStackTraceForThrowable(t));
+        String stackTrace = Throwables.getStackTraceAsString(t);
+        return stackTrace;
+    }
+    
+    public static StackTraceElement[] getRawStackTraceForThrowable(Throwable t) {
         t = StackTraceUtils.deepSanitize(t);
-        StackTraceElement[] newStackTrace = Arrays.stream(t.getStackTrace())
+        return Arrays.stream(t.getStackTrace())
                 .map(stackTraceElement -> {
                     String declaringClass = stackTraceElement.getClassName();
                     if (CLASS_PATTERN.matcher(declaringClass).matches()) {
@@ -54,8 +60,6 @@ public class ExceptionsUtil {
                 })
                 .collect(Collectors.toList())
                 .toArray(new StackTraceElement[] {});
-        t.setStackTrace(newStackTrace);
-        String stackTrace = Throwables.getStackTraceAsString(t);
-        return stackTrace;
     }
+    
 }

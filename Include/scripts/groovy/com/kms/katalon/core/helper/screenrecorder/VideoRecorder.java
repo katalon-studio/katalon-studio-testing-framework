@@ -35,7 +35,8 @@ public class VideoRecorder implements IVideoRecorder {
         Recorder recorderConfig = videoConfig.getRecorder();
         if (Recorder.ATU == recorderConfig) {
             delegate = new ATUVideoRecorder(outputDirLocation, outputVideoName, videoConfig);
-            return;
+        } else if (Recorder.CDT == recorderConfig) {
+            delegate = new CDTVideoRecorder(outputDirLocation, outputVideoName, videoConfig);
         }
     }
 
@@ -60,6 +61,16 @@ public class VideoRecorder implements IVideoRecorder {
     }
 
     @Override
+    public void pause() throws VideoRecorderException {
+        delegate.pause();
+    }
+
+    @Override
+    public void resume() throws VideoRecorderException {
+        delegate.resume();
+    }
+
+    @Override
     public void reload() throws VideoRecorderException {
         delegate.reload();
     }
@@ -80,8 +91,16 @@ public class VideoRecorder implements IVideoRecorder {
     }
 
     @Override
+    public long getStartTime() {
+        return delegate.getStartTime();
+    }
+
+    @Override
     public void delete() {
         delegate.delete();
     }
 
+    public AbstractVideoRecorder getDelegate() {
+        return delegate;
+    }
 }

@@ -51,24 +51,4 @@ public class TestCaseLogRecord extends AbstractLogRecord {
         }
         return resultRecords.toArray(new ILogRecord[resultRecords.size()]);
     }
-
-    @Override
-    public TestStatus getStatus() {
-        TestStatus testStatus = super.getStatus();
-
-        if (isInterrupted()) {
-            testStatus.setStatusValue(TestStatusValue.INCOMPLETE);
-            return testStatus;
-        }
-
-        if (getChildRecords().length == 0) {
-            testStatus.setStatusValue(TestStatusValue.PASSED);
-            if (childRecords.size() > 0) {
-                ILogRecord logRecord = childRecords.get(childRecords.size() - 1);
-                setMessage(logRecord.getMessage());
-                return logRecord.getStatus();
-            }
-        }
-        return testStatus;
-    }
 }

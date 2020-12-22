@@ -7,15 +7,15 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.kms.katalon.core.configuration.RunConfiguration;
+import com.kms.katalon.core.constants.CoreConstants;
 import com.kms.katalon.core.constants.StringConstants;
+import com.kms.katalon.core.logging.testops.TestOpsLogHelper;
 import com.kms.katalon.core.main.ScriptEngine;
-import com.kms.katalon.core.util.internal.ExceptionsUtil;
 
 public class KeywordLogger {
     
@@ -75,7 +75,7 @@ public class KeywordLogger {
 		} else {
 			shouldLogTestSteps = (boolean) Optional
 	                .ofNullable(executionProperties.get(RunConfiguration.LOG_TEST_STEPS))
-	                .orElse(false);
+	                .orElse(CoreConstants.DEFAULT_LOG_TEST_STEPS);
 		}
 	}
     
@@ -174,7 +174,6 @@ public class KeywordLogger {
             String actionType, 
             Map<String, String> attributes,
             Stack<KeywordStackElement> keywordStack) {
-    	
     	if (shouldLogTestSteps()) {
     		logStartKeyword(name, attributes);
     		xmlKeywordLogger.startKeyword(name, actionType, attributes, keywordStack);
@@ -269,24 +268,29 @@ public class KeywordLogger {
         logFailed(message, null);
     }
 
-
     public void logFailed(String message, Map<String, String> attributes, Throwable throwable) {
         if (attributes == null) {
             attributes = new HashMap<>();
         } else {
             attributes = new HashMap<>(attributes);
         }
+        TestOpsLogHelper.handleFailedLogEntry(attributes, throwable);
         Map<String, String> exceptionAttributes = xmlKeywordLogger.getAttributesFrom(throwable);
         attributes.putAll(exceptionAttributes);
         logFailed(message, attributes);
     }
 
-
     public void logFailed(String message, Map<String, String> attributes) {
         logger.error("{} {}", FAILED, message);
+        if (attributes == null) {
+            attributes = new HashMap<>();
+        } else {
+            attributes = new HashMap<>(attributes);
+        }
+        TestOpsLogHelper.handleFailedLogEntry(attributes);
         xmlKeywordLogger.logFailed(message, attributes);
     }
-
+    
 
     public void logWarning(String message) {
         logWarning(message, null);
@@ -302,6 +306,13 @@ public class KeywordLogger {
         attributes.putAll(exceptionAttributes);
         logWarning(message, attributes);
     }
+    
+    public void logWarning(String message, Map<String, String> attributes, Throwable throwable, boolean isKeyword) {
+        if (isKeyword && !shouldLogTestSteps()) {
+            return;
+        }
+        logWarning(message, attributes, throwable);
+    }
 
     public void logWarning(String message, Map<String, String> attributes) {
         logger.warn(message);
@@ -316,12 +327,54 @@ public class KeywordLogger {
 
     public void logPassed(String message, Map<String, String> attributes) {
         logger.debug("{} {}", PASSED, message);
+        StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
+        if (attributes == null) {
+             attributes = TestOpsLogHelper.getTestOpsAttributes(LogLevel.PASSED, stackTraces);
+        } else {
+            attributes = new HashMap<>(attributes);
+            attributes.putAll(TestOpsLogHelper.getTestOpsAttributes(LogLevel.PASSED, stackTraces));
+        }
         xmlKeywordLogger.logPassed(message, attributes);
     }
 
+    public void logPassed(String message, Map<String, String> attributes, boolean isKeyword) {
+        if (isKeyword && !shouldLogTestSteps()) {
+            return;
+        }
+        logPassed(message, attributes);
+    }
+    
+    
 
     public void logInfo(String message) {
         logInfo(message, null);
+    }
+
+    public void logInfoHighlight(String message) {
+        int marginX = 1;
+        int paddingX = 3;
+        int innerLength = message.length() + (paddingX * 2);
+        int outerLength = innerLength + 2;
+        int fullLength = outerLength + (marginX * 2);
+        String paddingLine = "\u2502" + StringUtils.leftPad("", innerLength) + "\u2502";
+        String innerSpaces = StringUtils.leftPad("", innerLength, "\u2500");
+        String paddingSpaces = StringUtils.leftPad("", paddingX);
+        
+        logInfo("");
+        logInfoCenter("\u256D" + innerSpaces + "\u256e", fullLength);
+        logInfoCenter(paddingLine, fullLength);
+        logInfoCenter("\u2502" + paddingSpaces + message + paddingSpaces + "\u2502", fullLength);
+        logInfoCenter(paddingLine, fullLength);
+        logInfoCenter("\u2570" + innerSpaces + "\u256f", fullLength);
+        logInfo("");
+    }
+    
+    public void logInfoCenter(String message) {
+        logInfoCenter(message, 80);
+    }
+    
+    public void logInfoCenter(String message, int lineLength) {
+        logInfo(StringUtils.center(message, lineLength), null);
     }
 
 
@@ -347,6 +400,12 @@ public class KeywordLogger {
         logError(message, attributes);
     }
 
+    public void logError(String message, Map<String, String> attributes, Throwable throwable, boolean isKeyword) {
+        if (isKeyword && !shouldLogTestSteps()) {
+            return;
+        }
+        logError(message, attributes, throwable);
+    }
 
     public void logError(String message) {
         logError(message, null);
@@ -448,5 +507,10 @@ public class KeywordLogger {
         public void setNestedLevel(int nestedLevel) {
             this.nestedLevel = nestedLevel;
         }
+    }
+
+    public void logSkipped(String message) {
+        logger.warn("SKIPPED {}", message);
+        xmlKeywordLogger.logSkipped(message);
     }
 }

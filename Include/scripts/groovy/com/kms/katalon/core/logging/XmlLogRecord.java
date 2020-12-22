@@ -21,6 +21,7 @@ public class XmlLogRecord extends LogRecord implements Serializable {
     private String endTime;
     private List<XmlLogRecordException> exceptions;
     private Map<String, String> properties;
+    private boolean escapedJava = true;
 
     public XmlLogRecord(Level level, String message) {
         super(level, message);
@@ -113,5 +114,13 @@ public class XmlLogRecord extends LogRecord implements Serializable {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+    public boolean isEscapedJava() {
+        return escapedJava;
+    }
+
+    public void setEscapedJava(boolean escapedJava) {
+        this.escapedJava = escapedJava;
     }
 }

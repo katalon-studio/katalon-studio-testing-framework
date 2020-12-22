@@ -30,6 +30,7 @@ public class DBData extends AbstractTestData {
         this.databaseConnection = databaseConnection;
         this.rsHandler = new ListObjectResultSetHandler();
         this.fetchedData = fetchData();
+        this.columnNames = rsHandler.getColumnNames();
     }
 
     public List<List<Object>> getData() {

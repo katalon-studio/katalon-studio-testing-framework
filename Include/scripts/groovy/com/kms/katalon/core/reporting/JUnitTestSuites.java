@@ -27,6 +27,9 @@ public class JUnitTestSuites {
 
     @XmlAttribute(name = "failures")
     protected String failures;
+    
+    @XmlAttribute(name = "skips")
+    protected String skips;
 
     @XmlAttribute(name = "disabled")
     protected String disabled;
@@ -88,5 +91,12 @@ public class JUnitTestSuites {
     public void setErrors(String value) {
         this.errors = value;
     }
+    
+    public String getSkips() {
+        return skips;
+    }
 
+    public void setSkips(String value) {
+        this.skips = value;
+    }
 }

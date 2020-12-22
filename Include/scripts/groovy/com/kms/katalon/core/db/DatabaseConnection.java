@@ -112,86 +112,88 @@ public class DatabaseConnection {
 		return getConnection(properties);
 	}
 
-	/**
-	 * Obtain a Connection using the given properties.
-	 *
-	 * @param properties
-	 *            the connection properties
-	 * @return the obtained Connection
-	 * @throws SQLException
-	 *             in case of failure
-	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
-	 */
-	private Connection getConnection(Properties properties) throws SQLException {
-		if (isAlive()) {
-			return connection;
-		}
+    /**
+     * Obtain a Connection using the given properties.
+     *
+     * @param properties
+     * the connection properties
+     * @return the obtained Connection
+     * @throws SQLException
+     * in case of failure
+     * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
+     */
+    private Connection getConnection(Properties properties) throws SQLException {
+        if (isAlive()) {
+            return connection;
+        }
 
-		loadSuitableDatabaseDriver();
+        String loadedDriverClassName = loadSuitableDatabaseDriver();
 
-		if (StringUtils.isNotEmpty(driverClassName)) {
-			try {
-				connection = ((Driver) Class
-						.forName(driverClassName, true, Thread.currentThread().getContextClassLoader()).newInstance())
-								.connect(connectionUrl, properties);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				connection = DriverManager.getConnection(connectionUrl, properties);
-			}
-		} else {
-			connection = DriverManager.getConnection(connectionUrl, properties);
-		}
-		// Disable auto commit
-		connection.setAutoCommit(false);
-		// Enable read-only
-		connection.setReadOnly(true);
+        if (StringUtils.isNotEmpty(loadedDriverClassName)) {
+            try {
+                connection = ((Driver) Class
+                        .forName(loadedDriverClassName, true, Thread.currentThread().getContextClassLoader())
+                        .newInstance()).connect(connectionUrl, properties);
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                connection = DriverManager.getConnection(connectionUrl, properties);
+            }
+        } else {
+            connection = DriverManager.getConnection(connectionUrl, properties);
+        }
+        // Disable auto commit
+        connection.setAutoCommit(false);
+        // Enable read-only
+        connection.setReadOnly(true);
 
-		logNewConnection();
+        logNewConnection();
 
-		return connection;
-	}
+        return connection;
+    }
 
-	private void logNewConnection() {
-		dbDataInfo = newDBDataInfo(connection);
-		logger.logRunData(dbDataInfo.getKey(), dbDataInfo.getInfo());
-	}
+    private void logNewConnection() {
+        dbDataInfo = newDBDataInfo(connection);
+        logger.logRunData(dbDataInfo.getKey(), dbDataInfo.getInfo());
+    }
 
-	/**
-	 * This is a fallback function to load suitable supported database driver.
-	 * <br>
-	 * Since version 4.0, JDBC Drivers will be detected and loaded by connection
-	 * URL.
-	 */
-	private void loadSuitableDatabaseDriver() {
-		try {
-			if (StringUtils.isNotEmpty(driverClassName)) {
-				Class.forName(driverClassName, true, Thread.currentThread().getContextClassLoader());
-				return;
-			} else {
-				if (StringUtils.startsWith(connectionUrl, "jdbc:mysql")) {
-					Class.forName("com.mysql.cj.jdbc.Driver");
-					return;
-				}
+    /**
+     * This is a fallback function to load suitable supported database driver.
+     * <br>
+     * Since version 4.0, JDBC Drivers will be detected and loaded by connection
+     * URL.
+     */
+    private String loadSuitableDatabaseDriver() {
+        try {
+            if (StringUtils.isNotEmpty(driverClassName)) {
+                Class.forName(driverClassName, true, Thread.currentThread().getContextClassLoader());
+                return driverClassName;
+            } else {
+                if (StringUtils.startsWith(connectionUrl, "jdbc:mysql")) {
+                    return loadDriverIntoClassPath("com.mysql.cj.jdbc.Driver");
+                }
 
-				if (StringUtils.startsWith(connectionUrl, "jdbc:sqlserver")) {
-					Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-					return;
-				}
+                if (StringUtils.startsWith(connectionUrl, "jdbc:sqlserver")) {
+                    return loadDriverIntoClassPath("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+                }
 
-				if (StringUtils.startsWith(connectionUrl, "jdbc:oracle")) {
-					Class.forName("oracle.jdbc.OracleDriver");
-					return;
-				}
+                if (StringUtils.startsWith(connectionUrl, "jdbc:oracle")) {
+                    return loadDriverIntoClassPath("oracle.jdbc.OracleDriver");
+                }
 
-				if (StringUtils.startsWith(connectionUrl, "jdbc:postgresql")) {
-					Class.forName("org.postgresql.Driver");
-					return;
-				}
-			}
+                if (StringUtils.startsWith(connectionUrl, "jdbc:postgresql")) {
+                    return loadDriverIntoClassPath("org.postgresql.Driver");
+                }
+            }
 
-		} catch (ClassNotFoundException e) {
-			// do nothing
-		}
-	}
+        } catch (ClassNotFoundException e) {
+            // do nothing
+        }
+        return "";
+    }
+
+    private String loadDriverIntoClassPath(String driverName) throws ClassNotFoundException {
+        Class.forName(driverName, true, Thread.currentThread().getContextClassLoader());
+        return driverName;
+    }
 
 	public boolean isAlive() {
 		try {
